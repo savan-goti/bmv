@@ -21,14 +21,14 @@ class DashboardController extends Controller
         
         // Get counts for dashboard cards
         $adminCount = Admin::count();
-        $supplierCount = Seller::count();
+        $sellerCount = Seller::count();
         $staffCount = Staff::count();
         $customerCount = Customer::count();
         
         return view('owner.dashboard.index', compact(
             'owner_data',
             'adminCount',
-            'supplierCount',
+            'sellerCount',
             'staffCount',
             'customerCount'
         ));

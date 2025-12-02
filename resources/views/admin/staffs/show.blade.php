@@ -96,16 +96,6 @@
                                                 <th scope="row" style="width: 300px;">Assigned Role</th>
                                                 <td>{{ ucfirst($staff->assigned_role) }}</td>
                                             </tr>
-                                            @if ($staff->admin)
-                                                <tr>
-                                                    <th scope="row">Associated Admin</th>
-                                                    <td>
-                                                        <a href="{{ route('admin.admins.show', $staff->admin->id) }}">
-                                                            {{ $staff->admin->name }}
-                                                        </a>
-                                                    </td>
-                                                </tr>
-                                            @endif
                                             @if ($staff->jobPosition)
                                                 <tr>
                                                     <th scope="row">Position</th>

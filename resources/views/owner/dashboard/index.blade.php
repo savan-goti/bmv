@@ -38,7 +38,7 @@
                                         <h4 class="fs-22 fw-semibold ff-secondary mb-4">
                                             <span class="counter-value" data-target="{{ $adminCount }}">0</span>
                                         </h4>
-                                        <a href="#" class="text-decoration-underline">View All Admins</a>
+                                        <a href="{{ route('owner.admins.index') }}" class="text-decoration-underline">View All Admins</a>
                                     </div>
                                     <div class="avatar-sm flex-shrink-0">
                                         <span class="avatar-title bg-primary-subtle rounded fs-3">
@@ -60,16 +60,16 @@
                                 <div class="d-flex align-items-center">
                                     <div class="flex-grow-1 overflow-hidden">
                                         <p class="text-uppercase fw-medium text-muted text-truncate mb-0">
-                                            Total Suppliers
+                                            Total Sellers
                                         </p>
                                     </div>
                                 </div>
                                 <div class="d-flex align-items-end justify-content-between mt-4">
                                     <div>
                                         <h4 class="fs-22 fw-semibold ff-secondary mb-4">
-                                            <span class="counter-value" data-target="{{ $supplierCount }}">0</span>
+                                            <span class="counter-value" data-target="{{ $sellerCount }}">0</span>
                                         </h4>
-                                        <a href="#" class="text-decoration-underline">View All Suppliers</a>
+                                        <a href="{{ route('owner.sellers.index') }}" class="text-decoration-underline">View All Sellers</a>
                                     </div>
                                     <div class="avatar-sm flex-shrink-0">
                                         <span class="avatar-title bg-success-subtle rounded fs-3">
@@ -100,7 +100,7 @@
                                         <h4 class="fs-22 fw-semibold ff-secondary mb-4">
                                             <span class="counter-value" data-target="{{ $staffCount }}">0</span>
                                         </h4>
-                                        <a href="#" class="text-decoration-underline">View All Staff</a>
+                                        <a href="{{ route('owner.staffs.index') }}" class="text-decoration-underline">View All Staff</a>
                                     </div>
                                     <div class="avatar-sm flex-shrink-0">
                                         <span class="avatar-title bg-info-subtle rounded fs-3">
@@ -131,7 +131,7 @@
                                         <h4 class="fs-22 fw-semibold ff-secondary mb-4">
                                             <span class="counter-value" data-target="{{ $customerCount }}">0</span>
                                         </h4>
-                                        <a href="#" class="text-decoration-underline">View All Customers</a>
+                                        <a href="{{ route('owner.customers.index') }}" class="text-decoration-underline">View All Customers</a>
                                     </div>
                                     <div class="avatar-sm flex-shrink-0">
                                         <span class="avatar-title bg-warning-subtle rounded fs-3">

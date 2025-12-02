@@ -32,7 +32,9 @@ class SellerController extends Controller
         $admin = Auth::guard('admin')->user();
         
         // Filter sellers created by this admin
-        $result = Seller::whereHas('managementRecords', function($query) use ($admin) {
+        $result = Seller::with(['managementRecords' => function($query) {
+            $query->where('action', 'created')->with('createdBy');
+        }])->whereHas('managementRecords', function($query) use ($admin) {
             $query->where('created_by_type', get_class($admin))
                   ->where('created_by_id', $admin->id)
                   ->where('action', 'created');
@@ -40,6 +42,21 @@ class SellerController extends Controller
         
         return DataTables::eloquent($result)
             ->addIndexColumn()
+            ->addColumn('created_by', function($row){
+                $createdRecord = $row->managementRecords->where('action', 'created')->first();
+                if ($createdRecord && $createdRecord->createdBy) {
+                    $creator = $createdRecord->createdBy;
+                    // Get the name based on the creator type
+                    if (isset($creator->name)) {
+                        return $creator->name;
+                    } elseif (isset($creator->full_name)) {
+                        return $creator->full_name;
+                    } elseif (isset($creator->business_name)) {
+                        return $creator->business_name;
+                    }
+                }
+                return 'N/A';
+            })
             ->addColumn('action', function($row){
                 $viewUrl = route('admin.sellers.show', $row->id);
                 $editUrl = route('admin.sellers.edit', $row->id);

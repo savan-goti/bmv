@@ -1,4 +1,4 @@
-@extends('admin.master')
+@extends('staff.master')
 @section('title','Sellers')
 
 @section('main')
@@ -8,7 +8,7 @@
             <div class="page-title-box d-sm-flex align-items-center justify-content-between">
                 <h4 class="mb-sm-0">Sellers</h4>
                 <div class="page-title-right">
-                    <a href="{{ route('admin.sellers.create') }}" class="btn btn-primary">Create New Seller</a>
+                    <a href="{{ route('staff.sellers.create') }}" class="btn btn-primary">Create New Seller</a>
                 </div>
             </div>
         </div>
@@ -48,7 +48,7 @@
             processing: true,
             serverSide: true,
             ajax: {
-                url: "{{ route('admin.sellers.ajaxData') }}",
+                url: "{{ route('staff.sellers.ajaxData') }}",
                 data: function (d) {
                     d.status = $('#filter-status').val();
                 }
@@ -57,7 +57,6 @@
                 { data: 'id', name: 'id', title: 'ID' },
                 { data: 'business_name', name: 'business_name', title: 'Business Name' },
                 { data: 'owner_name', name: 'owner_name', title: 'Owner Name' },
-                { data: 'created_by', name: 'created_by', title: 'Created By', orderable: false, searchable: false },
                 { data: 'email', name: 'email', title: 'Email' },
                 { data: 'phone', name: 'phone', title: 'Phone' },
                 { data: 'status', name: 'status', title: 'Status' },

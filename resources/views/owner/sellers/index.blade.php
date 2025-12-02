@@ -32,18 +32,6 @@
 
                     <div class="table-responsive">
                         <table id="ajax-datatables" class="table table-bordered table-striped">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Business Name</th>
-                                    <th>Owner Name</th>
-                                    <th>Email</th>
-                                    <th>Phone</th>
-                                    <th>Status</th>
-                                    <th>Approved</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
                         </table>
                     </div>
                 </div>
@@ -69,6 +57,7 @@
                 { data: 'id', name: 'id', title: 'ID' },
                 { data: 'business_name', name: 'business_name', title: 'Business Name' },
                 { data: 'owner_name', name: 'owner_name', title: 'Owner Name' },
+                { data: 'created_by', name: 'created_by', title: 'Created By', orderable: false, searchable: false },
                 { data: 'email', name: 'email', title: 'Email' },
                 { data: 'phone', name: 'phone', title: 'Phone' },
                 { data: 'status', name: 'status', title: 'Status' },

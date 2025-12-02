@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
 use Exception;
 
 use Yajra\DataTables\Facades\DataTables;
@@ -26,7 +27,7 @@ class StaffController extends Controller
 
     public function ajaxData()
     {
-        $result = Staff::whereHas('admin');
+        $result = Staff::whereHas('admin')->where('admin_id', Auth::guard('admin')->user()->id);
         return DataTables::eloquent($result)
             ->addIndexColumn()
             ->addColumn('action', function($row){
@@ -59,6 +60,17 @@ class StaffController extends Controller
 
     public function show(Staff $staff)
     {
+        // ensure an admin is authenticated
+        $admin = Auth::guard('admin')->user();
+        if (!$admin) {
+            abort(403, 'Unauthorized. Only admins can view staff details.');
+        }
+
+        // Restrict to staff that belong to the same admin (remove the super admin check if you don't have it)
+        if ($admin->id !== $staff->admin_id && !($admin->is_super_admin ?? false)) {
+            abort(403, 'Unauthorized. You do not have permission to view this staff.');
+        }
+        
         $staff->load('admin', 'jobPosition', 'branchPositions.branch', 'branchPositions.jobPosition');
         return view('admin.staffs.show', compact('staff'));
     }
