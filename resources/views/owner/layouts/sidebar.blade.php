@@ -37,7 +37,7 @@
                     </a>
                 </li>
 
-                <!-- <li class="menu-title"><i class="ri-more-fill"></i> <span data-key="t-pages">Organization</span></li>
+                <li class="menu-title"><i class="ri-more-fill"></i> <span data-key="t-pages">Organization</span></li>
 
                 <li class="nav-item">
                     <a href="{{ route('owner.job-positions.index') }}" class="nav-link menu-link @if(request()->routeIs('owner.job-positions.*')) active @endif">
@@ -55,7 +55,7 @@
                     <a href="{{ route('owner.branch-positions.index') }}" class="nav-link menu-link @if(request()->routeIs('owner.branch-positions.*')) active @endif">
                         <i class="ri-user-location-line"></i> <span data-key="t-branch-positions">Branch Positions</span>
                     </a>
-                </li> -->
+                </li>
 
                 <li class="menu-title"><i class="ri-more-fill"></i> <span data-key="t-pages">Management</span></li>
 

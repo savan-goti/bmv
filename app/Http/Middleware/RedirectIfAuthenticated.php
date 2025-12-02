@@ -22,6 +22,8 @@ class RedirectIfAuthenticated
             if (Auth::guard($guard)->check()) {
                 if ($guard === 'owner') {
                     return redirect()->route('owner.dashboard');
+                }else if ($guard === 'admin') {
+                    return redirect()->route('admin.dashboard');
                 }
                 
                 return redirect()->route('owner.login');

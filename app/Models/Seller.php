@@ -56,6 +56,8 @@ class Seller extends Authenticatable
         'status',
         'is_approved',
         'approved_at',
+        'approved_by_type',
+        'approved_by_id',
         'last_login_at',
         'last_login_ip',
         'two_factor_enabled',
@@ -95,6 +97,22 @@ class Seller extends Authenticatable
     public function subCategory()
     {
         return $this->belongsTo(SubCategory::class);
+    }
+
+    /**
+     * Get the user who approved this seller (polymorphic).
+     */
+    public function approvedBy()
+    {
+        return $this->morphTo(__FUNCTION__, 'approved_by_type', 'approved_by_id');
+    }
+
+    /**
+     * Get all management records for this seller.
+     */
+    public function managementRecords()
+    {
+        return $this->hasMany(SellerManagement::class);
     }
 
     

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Owner;
+namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Seller;
@@ -15,7 +15,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Exception;
-// use Illuminate\Support\Facades\Mail; // For email notification
 
 use Yajra\DataTables\Facades\DataTables;
 
@@ -25,19 +24,27 @@ class SellerController extends Controller
 
     public function index()
     {
-        return view('owner.sellers.index');
+        return view('admin.sellers.index');
     }
 
     public function ajaxData()
     {
-        $result = Seller::query();
+        $admin = Auth::guard('admin')->user();
+        
+        // Filter sellers created by this admin
+        $result = Seller::whereHas('managementRecords', function($query) use ($admin) {
+            $query->where('created_by_type', get_class($admin))
+                  ->where('created_by_id', $admin->id)
+                  ->where('action', 'created');
+        });
+        
         return DataTables::eloquent($result)
             ->addIndexColumn()
             ->addColumn('action', function($row){
-                $viewUrl = route('owner.sellers.show', $row->id);
-                $editUrl = route('owner.sellers.edit', $row->id);
-                $deleteUrl = route('owner.sellers.destroy', $row->id);
-                $approveUrl = route('owner.sellers.approve', $row->id);
+                $viewUrl = route('admin.sellers.show', $row->id);
+                $editUrl = route('admin.sellers.edit', $row->id);
+                $deleteUrl = route('admin.sellers.destroy', $row->id);
+                $approveUrl = route('admin.sellers.approve', $row->id);
                 
                 $btn = '<a href="'.$viewUrl.'" class="btn btn-sm btn-primary me-1"><i class="bx bx-show"></i> View</a>';
                 $btn .= '<a href="'.$editUrl.'" class="btn btn-sm btn-info me-1"><i class="bx bx-edit"></i> Edit</a>';
@@ -78,15 +85,12 @@ class SellerController extends Controller
     public function create()
     {
         $categories = Category::where('status', 'active')->get();
-        return view('owner.sellers.create', compact('categories'));
+        return view('admin.sellers.create', compact('categories'));
     }
 
     public function show(Seller $seller)
     {
-        $seller->load(['managementRecords' => function($query) {
-            $query->where('action', 'created')->with('createdBy');
-        }]);
-        return view('owner.sellers.show', compact('seller'));
+        return view('admin.sellers.show', compact('seller'));
     }
 
     public function store(Request $request)
@@ -150,12 +154,13 @@ class SellerController extends Controller
 
             $seller = Seller::create($validatedData);
 
+            // Create seller management record to track who created this seller
             SellerManagement::create([
                 'seller_id' => $seller->id,
-                'created_by_type' => get_class(Auth::guard('owner')->user()),
-                'created_by_id' => Auth::guard('owner')->user()->id,
+                'created_by_type' => get_class(Auth::guard('admin')->user()),
+                'created_by_id' => Auth::guard('admin')->user()->id,
                 'action' => 'created',
-                'notes' => 'Owner created a new seller',
+                'notes' => 'Admin created a new seller',
                 'ip_address' => $request->ip(),
             ]);
 
@@ -171,7 +176,7 @@ class SellerController extends Controller
     public function edit(Seller $seller)
     {
         $categories = Category::where('status', 'active')->get();
-        return view('owner.sellers.edit', compact('seller', 'categories'));
+        return view('admin.sellers.edit', compact('seller', 'categories'));
     }
 
     public function update(Request $request, Seller $seller)
@@ -268,8 +273,8 @@ class SellerController extends Controller
         
         if ($action == 'approve') {
             $seller->update([
-                'approved_by_id' => Auth::guard('owner')->user()->id,
-                'approved_by_type' => get_class(Auth::guard('owner')->user()),
+                'approved_by_id' => Auth::guard('admin')->user()->id,
+                'approved_by_type' => get_class(Auth::guard('admin')->user()),
                 'is_approved' => true,
                 'approved_at' => now(),
                 'status' => 'active'
@@ -277,8 +282,8 @@ class SellerController extends Controller
             // Send email notification here
         } elseif ($action == 'reject') {
             $seller->update([
-                'approved_by_id' => Auth::guard('owner')->user()->id,
-                'approved_by_type' => get_class(Auth::guard('owner')->user()),
+                'approved_by_id' => Auth::guard('admin')->user()->id,
+                'approved_by_type' => get_class(Auth::guard('admin')->user()),
                 'is_approved' => false,
                 'status' => 'suspended' // or rejected
             ]);

@@ -1,4 +1,4 @@
-@extends('owner.master')
+@extends('admin.master')
 
 @section('title','Seller Details')
 
@@ -9,8 +9,8 @@
                 <h4 class="mb-sm-0 font-size-18">Seller Details</h4>
                 <div class="page-title-right">
                     <ol class="breadcrumb m-0">
-                        <li class="breadcrumb-item"><a href="{{ route('owner.dashboard') }}">Dashboard</a></li>
-                        <li class="breadcrumb-item"><a href="{{ route('owner.sellers.index') }}">Sellers</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('admin.sellers.index') }}">Sellers</a></li>
                         <li class="breadcrumb-item active">Details</li>
                     </ol>
                 </div>
@@ -73,14 +73,14 @@
                             <div class="mt-4">
                                 <div class="d-grid gap-2">
                                     @if (!$seller->is_approved)
-                                        <form action="{{ route('owner.sellers.approve', $seller->id) }}" method="POST" class="d-block">
+                                        <form action="{{ route('admin.sellers.approve', $seller->id) }}" method="POST" class="d-block">
                                             @csrf
                                             <input type="hidden" name="action" value="approve">
                                             <button type="submit" class="btn btn-success w-100 mb-2">
                                                 <i class="bx bx-check"></i> Approve Seller
                                             </button>
                                         </form>
-                                        <form action="{{ route('owner.sellers.approve', $seller->id) }}" method="POST" class="d-block">
+                                        <form action="{{ route('admin.sellers.approve', $seller->id) }}" method="POST" class="d-block">
                                             @csrf
                                             <input type="hidden" name="action" value="reject">
                                             <button type="submit" class="btn btn-warning w-100 mb-2">
@@ -88,10 +88,10 @@
                                             </button>
                                         </form>
                                     @endif
-                                    <a href="{{ route('owner.sellers.edit', $seller->id) }}" class="btn btn-primary w-100 mb-2">
+                                    <a href="{{ route('admin.sellers.edit', $seller->id) }}" class="btn btn-primary w-100 mb-2">
                                         <i class="bx bx-edit"></i> Edit Seller
                                     </a>
-                                    <a href="{{ route('owner.sellers.index') }}" class="btn btn-secondary w-100">
+                                    <a href="{{ route('admin.sellers.index') }}" class="btn btn-secondary w-100">
                                         <i class="bx bx-arrow-back"></i> Back to List
                                     </a>
                                 </div>
@@ -266,49 +266,6 @@
                                         </tbody>
                                     </table>
                                 </div>
-
-                                @php
-                                    $createdRecord = $seller->managementRecords->first();
-                                @endphp
-
-                                @if($createdRecord && $createdRecord->createdBy)
-                                    <h5 class="mb-3 mt-4 text-primary">Created By</h5>
-                                    <div class="table-responsive">
-                                        <table class="table mb-0 table-bordered">
-                                            <tbody>
-                                                <tr>
-                                                    <th scope="row" style="width: 200px;">Created By</th>
-                                                    <td>
-                                                        @php
-                                                            $creator = $createdRecord->createdBy;
-                                                            $creatorType = class_basename($createdRecord->created_by_type);
-                                                        @endphp
-                                                        {{ $creator->name ?? $creator->full_name ?? $creator->business_name ?? 'N/A' }}
-                                                        <span class="badge bg-info ms-2">{{ $creatorType }}</span>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <th scope="row">Creator Email</th>
-                                                    <td>{{ $creator->email ?? 'N/A' }}</td>
-                                                </tr>
-                                                <tr>
-                                                    <th scope="row">Created At</th>
-                                                    <td>{{ $createdRecord->created_at->format('d M, Y h:i A') }}</td>
-                                                </tr>
-                                                <tr>
-                                                    <th scope="row">IP Address</th>
-                                                    <td>{{ $createdRecord->ip_address ?? 'N/A' }}</td>
-                                                </tr>
-                                                @if($createdRecord->notes)
-                                                    <tr>
-                                                        <th scope="row">Notes</th>
-                                                        <td>{{ $createdRecord->notes }}</td>
-                                                    </tr>
-                                                @endif
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                @endif
 
                             </div>
                         </div>

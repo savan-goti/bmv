@@ -16,8 +16,11 @@ class Authenticate extends Middleware
             return null;
         }
 
-        if ($request->is('owner/*')) {
+        if ($request->is('owner')) {
             return route('owner.login');
+        } 
+        if ($request->is('admin')) {
+            return route('admin.login');
         }
 
         return route('owner.login');

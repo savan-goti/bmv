@@ -15,10 +15,18 @@ use App\Http\Controllers\Owner\ProductController;
 use App\Http\Controllers\Owner\JobPositionController;
 use App\Http\Controllers\Owner\BranchController;
 use App\Http\Controllers\Owner\BranchPositionController;
+use App\Http\Controllers\Owner\ForgotPasswordController;
     
+
 Route::middleware(['guest:owner'])->group(function () {
     Route::get('/login', [AuthController::class, 'login'])->name('login');
     Route::post('/login', [AuthController::class, 'authenticate'])->name('authenticate');
+    
+    // Forgot Password Routes
+    Route::get('/forgot-password', [ForgotPasswordController::class, 'showForgotPasswordForm'])->name('forgot-password');
+    Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('forgot-password.send');
+    Route::get('/reset-password/{token}', [ForgotPasswordController::class, 'showResetPasswordForm'])->name('reset-password.form');
+    Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword'])->name('reset-password.update');
 });
 
 Route::middleware(['auth:owner'])->group(function () {

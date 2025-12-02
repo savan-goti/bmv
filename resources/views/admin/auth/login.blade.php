@@ -3,29 +3,11 @@
 
 <head>
     <meta charset="utf-8" />
-    <title>Sign In | Owner</title>
+    <title>Sign In | Admin</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <!-- App favicon -->
-    <link rel="shortcut icon" href="{{ \App\Models\Setting::first()->favicon ?? asset('favicon.ico') }}" type="image/x-icon" />
-
-    <!-- jquery JS -->
-    <script src="{{asset('assets/js/jquery-3.6.0.js')}}"></script>
-    <script src="{{asset('assets/js/jquery.validate.js')}}"></script>
-
-    <!-- Layout config Js -->
-    <script src="{{asset('assets/admin/js/layout.js')}}"></script>
-    <!-- Bootstrap Css -->
-    <link href="{{asset('assets/admin/css/bootstrap.min.css')}}" rel="stylesheet" type="text/css"/>
-    <!-- Icons Css -->
-    <link href="{{asset('assets/admin/css/icons.min.css')}}" rel="stylesheet" type="text/css"/>
-    <!-- App Css-->
-    <link href="{{asset('assets/admin/css/app.min.css')}}" rel="stylesheet" type="text/css"/>
-    <!-- custom Css-->
-    <link href="{{asset('assets/admin/css/custom.min.css')}}" rel="stylesheet" type="text/css"/>
-
-    <link href="{{asset('assets/admin/libs/sweetalert2/sweetalert2.min.css')}}" rel="stylesheet" type="text/css" />
+    @include('admin.layouts.header-links')
 
 </head>
 
@@ -51,7 +33,7 @@
                     <div class="card mt-4">
                         <div class="card-body p-4">
                             <div class="text-center mt-2">
-                                <h5 class="text-primary">Welcome Back!</h5>
+                                <h5 class="text-primary">Welcome Admin!</h5>
                                 <p class="text-muted">Sign in to continue to {{env('APP_NAME')}}.</p>
                             </div>
                             <div class="p-2 mt-4">
@@ -81,7 +63,7 @@
                                     </div>
 
                                     <div class="float-end mt-2">
-                                        <a href="{{route('owner.forgot-password')}}" class="text-muted">Forgot password?</a>
+                                        <a href="{{route('admin.forgot-password')}}" class="text-muted">Forgot password?</a>
                                     </div>
                                     <div class="mt-4">
                                         <button type="submit" class="btn btn-primary w-100" id="loginButton">
@@ -121,60 +103,10 @@
 </div>
 <!-- end auth-page-wrapper -->
 
-<!-- JAVASCRIPT -->
-<script src="{{asset('assets/admin/libs/bootstrap/js/bootstrap.bundle.min.js')}}"></script>
-<script src="{{asset('assets/admin/libs/simplebar/simplebar.min.js')}}"></script>
-<script src="{{asset('assets/admin/libs/node-waves/waves.min.js')}}"></script>
-<script src="{{asset('assets/admin/libs/feather-icons/feather.min.js')}}"></script>
-<script src="{{asset('assets/admin/js/pages/plugins/lord-icon-2.1.0.js')}}"></script>
-<script src="{{asset('assets/admin/js/plugins.js')}}"></script>
-
-<script src="{{asset('assets/admin/libs/sweetalert2/sweetalert2.min.js')}}"></script>
-
-<!-- password-addon init -->
-<script src="{{asset('assets/admin/js/pages/password-addon.init.js')}}"></script>
+@include('admin.layouts.footer-links')
+@include('admin.layouts.common-js')
 
 <script>
-    // Success Swal
-    function sendSuccess(message) {
-        Swal.fire({
-            title: "Success",
-            text: message,
-            icon: "success",
-            confirmButtonClass: "btn btn-primary w-md mt-3",
-            showCancelButton: false,
-            showConfirmButton: true,
-            timer: 3000,
-        });
-    }
-
-    // Error Swal
-    function sendError(message) {
-        Swal.fire({
-            title: "Error",
-            text: message,
-            icon: "error",
-            showCancelButton: false,
-            showConfirmButton: true,
-            timer: 4000,
-        });
-    }
-
-    // Handle Ajax error
-    function actionError(xhr, message = "Bad Request") {
-        if (xhr.status == 400) {
-            sendError(message);
-        } else if (xhr.status === 401) {
-            sendError("Unauthorized");
-            setTimeout(function () {
-                window.location.href = "{{route('owner.login')}}"
-            }, 1500);
-        } else if (xhr.status === 403) {
-            sendError("Forbidden");
-        } else if (xhr.status === 500) {
-            sendError("Internal Server Error");
-        }
-    }
 
     $(document).ready(function(){
         $("#loginForm").validate({
@@ -203,7 +135,7 @@
             submitHandler: function (form, e) {
                 e.preventDefault();
                 $.ajax({
-                    url: "{{route('owner.authenticate')}}",
+                    url: "{{route('admin.authenticate')}}",
                     method: "post",
                     dataType: "json",
                     data: new FormData(form),
@@ -217,7 +149,7 @@
                     success: function (result) {
                         sendSuccess(result.message);
                         setTimeout(function () {
-                            window.location.href = "{{route('owner.dashboard')}}";
+                            window.location.href = "{{route('admin.dashboard')}}";
                         }, 1000);
                     },
                     error: function (xhr) {

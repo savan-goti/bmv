@@ -29,6 +29,10 @@ class Admin extends Authenticatable
         'status',
         'resignation_date',
         'purpose',
+        'last_login_at',
+        'last_login_ip',
+        'two_factor_enabled',
+        'email_verified_at',
     ];
 
     protected $hidden = [
@@ -40,6 +44,8 @@ class Admin extends Authenticatable
     {
         return [
             'password' => 'hashed',
+            'last_login_at' => 'datetime',
+            'email_verified_at' => 'datetime',
         ];
     }
 
