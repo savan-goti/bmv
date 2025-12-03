@@ -34,6 +34,8 @@ class Staff extends Authenticatable
         'purpose',
         'last_login_at',
         'last_login_ip',
+        'two_factor_enabled',
+        'email_verified_at',
     ];
 
     protected $hidden = [
@@ -46,6 +48,9 @@ class Staff extends Authenticatable
         return [
             'password' => 'hashed',
             'permissions' => 'array',
+            'two_factor_enabled' => 'boolean',
+            'email_verified_at' => 'datetime',
+            'last_login_at' => 'datetime',
         ];
     }
 

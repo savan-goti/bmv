@@ -25,7 +25,7 @@
                                     <div class="form-check form-switch form-switch-lg">
                                         <input class="form-check-input" type="checkbox" role="switch" 
                                                id="two_factor_enabled" name="two_factor_enabled" value="1"
-                                               @if($Staff->two_factor_enabled) checked @endif>
+                                               @if($staff->two_factor_enabled) checked @endif>
                                     </div>
                                 </div>
                             </div>
@@ -38,10 +38,10 @@
                                 <div class="row align-items-center">
                                     <div class="col-md-8">
                                         <label class="form-label mb-1">Email Verification Status</label>
-                                        @if($Staff->email_verified_at)
+                                        @if($staff->email_verified_at)
                                             <p class="text-success mb-0">
                                                 <i class="ri-checkbox-circle-fill"></i> 
-                                                Email verified on {{ $Staff->email_verified_at->format('d M Y, h:i A') }}
+                                                Email verified on {{ $staff->email_verified_at->format('d M Y, h:i A') }}
                                             </p>
                                         @else
                                             <p class="text-warning mb-0">
@@ -51,7 +51,7 @@
                                         @endif
                                     </div>
                                     <div class="col-md-4 text-end">
-                                        @if($Staff->email_verified_at)
+                                        @if($staff->email_verified_at)
                                             <button type="button" class="btn btn-sm btn-outline-danger" id="unverifyEmailBtn">
                                                 <i class="ri-close-circle-line"></i> Mark as Unverified
                                             </button>
@@ -85,13 +85,13 @@
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label text-muted small">Email Address</label>
-                                <p class="mb-0">{{ $Staff->email }}</p>
+                                <p class="mb-0">{{ $staff->email }}</p>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label text-muted small">Last Login</label>
                                 <p class="mb-0">
-                                    @if($Staff->last_login_at)
-                                        {{ $Staff->last_login_at->format('d M Y, h:i A') }}
+                                    @if($staff->last_login_at)
+                                        {{ $staff->last_login_at->format('d M Y, h:i A') }}
                                     @else
                                         Never
                                     @endif
@@ -99,13 +99,13 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label text-muted small">Last Login IP</label>
-                                <p class="mb-0">{{ $Staff->last_login_ip ?? 'N/A' }}</p>
+                                <p class="mb-0">{{ $staff->last_login_ip ?? 'N/A' }}</p>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label text-muted small">Account Status</label>
                                 <p class="mb-0">
-                                    <span class="badge bg-{{ $Staff->status === 'active' ? 'success' : 'danger' }}">
-                                        {{ ucfirst($Staff->status) }}
+                                    <span class="badge bg-{{ $staff->status === 'active' ? 'success' : 'danger' }}">
+                                        {{ ucfirst($staff->status) }}
                                     </span>
                                 </p>
                             </div>
