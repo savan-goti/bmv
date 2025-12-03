@@ -31,13 +31,25 @@ class SellerController extends Controller
     {
         $admin = Auth::guard('admin')->user();
         
-        // Filter sellers created by this admin
+        // Get IDs of staff members belonging to this admin
+        $staffIds = \App\Models\Staff::where('admin_id', $admin->id)->pluck('id')->toArray();
+        
+        // Filter sellers created by this admin OR by their staff members
         $result = Seller::with(['managementRecords' => function($query) {
             $query->where('action', 'created')->with('createdBy');
-        }])->whereHas('managementRecords', function($query) use ($admin) {
-            $query->where('created_by_type', get_class($admin))
-                  ->where('created_by_id', $admin->id)
-                  ->where('action', 'created');
+        }])->whereHas('managementRecords', function($query) use ($admin, $staffIds) {
+            $query->where(function($q) use ($admin, $staffIds) {
+                // Sellers created by this admin
+                $q->where(function($subQ) use ($admin) {
+                    $subQ->where('created_by_type', get_class($admin))
+                         ->where('created_by_id', $admin->id);
+                })
+                // OR sellers created by this admin's staff members
+                ->orWhere(function($subQ) use ($staffIds) {
+                    $subQ->where('created_by_type', 'App\\Models\\Staff')
+                         ->whereIn('created_by_id', $staffIds);
+                });
+            })->where('action', 'created');
         });
         
         return DataTables::eloquent($result)

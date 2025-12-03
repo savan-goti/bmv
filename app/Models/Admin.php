@@ -65,6 +65,14 @@ class Admin extends Authenticatable
         return $this->morphMany(BranchPosition::class, 'positionable');
     }
 
+    /**
+     * Get all staff members belonging to this admin.
+     */
+    public function staffs()
+    {
+        return $this->hasMany(Staff::class, 'admin_id');
+    }
+
     function getProfileImageAttribute($image)
     {
         $outputImage = asset('assets/img/no_img.jpg');

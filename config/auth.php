@@ -52,6 +52,10 @@ return [
             'driver' => 'session',
             'provider' => 'staffs',
         ],
+        'seller' => [
+            'driver' => 'session',
+            'provider' => 'sellers',
+        ],
     ],
 
     /*
@@ -87,6 +91,10 @@ return [
         'staffs' => [
             'driver' => 'eloquent',
             'model' => App\Models\Staff::class,
+        ],
+        'sellers' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Seller::class,
         ],
     ],
 
@@ -131,6 +139,12 @@ return [
         'staffs' => [
             'provider' => 'staffs',
             'table' => 'staff_password_reset_tokens',
+            'expire' => 60,
+            'throttle' => 60,
+        ],
+        'sellers' => [
+            'provider' => 'sellers',
+            'table' => 'seller_password_reset_tokens',
             'expire' => 60,
             'throttle' => 60,
         ],
