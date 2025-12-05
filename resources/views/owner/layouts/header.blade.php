@@ -88,7 +88,8 @@
                         <!-- item-->
                         <h6 class="dropdown-header">Welcome {{Auth::guard('owner')->user()->full_name}}!</h6>
                         <a class="dropdown-item" href="{{route('owner.profile')}}"><i class="mdi mdi-account-circle text-muted fs-16 align-middle me-1"></i> <span class="align-middle">Profile</span></a>
-                        <a class="dropdown-item" href="{{route('owner.settings')}}"><i class="ri-settings-3-fill text-muted fs-16 align-middle me-1"></i> <span class="align-middle">Settings</span></a>
+                        <a class="dropdown-item" href="{{route('owner.owner-settings')}}"><i class="ri-user-settings-line text-muted fs-16 align-middle me-1"></i> <span class="align-middle">Owner Settings</span></a>
+                        <a class="dropdown-item" href="{{route('owner.settings')}}"><i class="ri-settings-3-fill text-muted fs-16 align-middle me-1"></i> <span class="align-middle">Application Settings</span></a>
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="{{route('owner.logout')}}"><i
                                 class="mdi mdi-logout text-muted fs-16 align-middle me-1"></i> <span

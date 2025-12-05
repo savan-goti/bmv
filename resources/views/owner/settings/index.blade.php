@@ -1,6 +1,6 @@
 @extends('owner.master')
 
-@section('title', 'Settings')
+@section('title', 'Application Settings')
 
 @section('main')
 <div class="container-fluid">
@@ -9,7 +9,7 @@
     <div class="row">
         <div class="col-sm-12">
             <div class="page-title-box">
-                <h4 class="page-title">Settings</h4>
+                <h4 class="page-title">Application Settings</h4>
             </div>
         </div>
     </div>

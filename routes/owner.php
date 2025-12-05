@@ -5,6 +5,7 @@ use App\Http\Controllers\Owner\AuthController;
 use App\Http\Controllers\Owner\DashboardController;
 use App\Http\Controllers\Owner\ProfileController;
 use App\Http\Controllers\Owner\SettingController;
+use App\Http\Controllers\Owner\OwnerSettingsController;
 use App\Http\Controllers\Owner\AdminController;
 use App\Http\Controllers\Owner\SellerController;
 use App\Http\Controllers\Owner\StaffController;
@@ -41,10 +42,19 @@ Route::middleware(['auth:owner', 'session.guard:owner'])->group(function () {
         Route::get('/profile/login-history', 'loginHistory')->name('profile.login-history');
     });
 
-    // Settings routes
+    // Application Settings routes
     Route::controller(SettingController::class)->group(function () {
         Route::get('/settings', 'index')->name('settings');
         Route::post('/settings/update', 'update')->name('settings.update');
+    });
+
+    // Owner Settings routes (personal settings)
+    Route::controller(OwnerSettingsController::class)->group(function () {
+        Route::get('/owner-settings', 'index')->name('owner-settings');
+        Route::post('/owner-settings', 'update')->name('owner-settings.update');
+        Route::get('/owner-settings/sessions', 'getSessions')->name('owner-settings.sessions');
+        Route::post('/owner-settings/sessions/logout', 'logoutSession')->name('owner-settings.sessions.logout');
+        Route::post('/owner-settings/sessions/logout-others', 'logoutOtherSessions')->name('owner-settings.sessions.logout-others');
     });
 
     // Admin Management
