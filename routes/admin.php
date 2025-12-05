@@ -20,7 +20,7 @@ Route::middleware(['guest:admin'])->group(function () {
     Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword'])->name('reset-password.update');
 });
 
-Route::middleware(['auth:admin'])->group(function () {
+Route::middleware(['auth:admin', 'session.guard:admin'])->group(function () {
     Route::any('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
     
@@ -36,6 +36,9 @@ Route::middleware(['auth:admin'])->group(function () {
     Route::controller(SettingsController::class)->group(function () {
         Route::get('/settings', 'index')->name('settings');
         Route::post('/settings', 'update')->name('settings.update');
+        Route::get('/settings/sessions', 'getSessions')->name('settings.sessions');
+        Route::post('/settings/sessions/logout', 'logoutSession')->name('settings.sessions.logout');
+        Route::post('/settings/sessions/logout-others', 'logoutOtherSessions')->name('settings.sessions.logout-others');
     });
 
     // Staff Management

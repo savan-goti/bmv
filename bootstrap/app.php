@@ -37,6 +37,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'auth' => \App\Http\Middleware\Authenticate::class,
             'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
             'detect.bad.clients' => \App\Http\Middleware\DetectBadClients::class,
+            'session.guard' => \App\Http\Middleware\SetSessionGuard::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

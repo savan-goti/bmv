@@ -112,6 +112,26 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Active Sessions Card -->
+                <div class="card mt-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Active Sessions</h5>
+                        <button type="button" class="btn btn-sm btn-danger" id="logoutAllOthersBtn">
+                            <i class="ri-logout-box-line"></i> Logout All Other Sessions
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted small mb-3">Manage your active sessions on other browsers and devices.</p>
+                        <div id="sessionsContainer">
+                            <div class="text-center py-3">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -236,6 +256,186 @@
                 },
             });
         });
+
+        // Load active sessions
+        function loadSessions() {
+            $.ajax({
+                url: "{{ route('admin.settings.sessions') }}",
+                method: "GET",
+                dataType: "json",
+                success: function (result) {
+                    displaySessions(result.data);
+                },
+                error: function (xhr) {
+                    $('#sessionsContainer').html(
+                        '<div class="alert alert-danger">Failed to load sessions. Please refresh the page.</div>'
+                    );
+                },
+            });
+        }
+
+        // Display sessions
+        function displaySessions(sessions) {
+            if (sessions.length === 0) {
+                $('#sessionsContainer').html(
+                    '<p class="text-muted text-center">No active sessions found.</p>'
+                );
+                return;
+            }
+
+            let html = '';
+            sessions.forEach(function(session) {
+                const lastActivity = new Date(session.last_activity * 1000);
+                const deviceInfo = parseUserAgent(session.user_agent);
+                const isCurrent = session.is_current;
+
+                html += `
+                    <div class="border rounded p-3 mb-3 ${isCurrent ? 'border-primary bg-light' : ''}">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="${deviceInfo.icon} fs-4 me-2"></i>
+                                    <div>
+                                        <h6 class="mb-0">${deviceInfo.device}</h6>
+                                        <small class="text-muted">${deviceInfo.browser} on ${deviceInfo.os}</small>
+                                    </div>
+                                    ${isCurrent ? '<span class="badge bg-primary ms-2">Current Session</span>' : ''}
+                                </div>
+                                <div class="small text-muted">
+                                    <i class="ri-map-pin-line"></i> IP: ${session.ip_address}
+                                    <span class="ms-3"><i class="ri-time-line"></i> Last active: ${lastActivity.toLocaleString()}</span>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                ${!isCurrent ? `
+                                    <button type="button" class="btn btn-sm btn-outline-danger logout-session-btn" 
+                                            data-session-id="${session.id}">
+                                        <i class="ri-logout-box-line"></i> Logout
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            $('#sessionsContainer').html(html);
+        }
+
+        // Parse user agent to get device info
+        function parseUserAgent(userAgent) {
+            let device = 'Unknown Device';
+            let browser = 'Unknown Browser';
+            let os = 'Unknown OS';
+            let icon = 'ri-computer-line';
+
+            // Detect OS
+            if (userAgent.includes('Windows')) os = 'Windows';
+            else if (userAgent.includes('Mac')) os = 'macOS';
+            else if (userAgent.includes('Linux')) os = 'Linux';
+            else if (userAgent.includes('Android')) os = 'Android';
+            else if (userAgent.includes('iOS') || userAgent.includes('iPhone') || userAgent.includes('iPad')) os = 'iOS';
+
+            // Detect Browser
+            if (userAgent.includes('Chrome') && !userAgent.includes('Edg')) browser = 'Chrome';
+            else if (userAgent.includes('Firefox')) browser = 'Firefox';
+            else if (userAgent.includes('Safari') && !userAgent.includes('Chrome')) browser = 'Safari';
+            else if (userAgent.includes('Edg')) browser = 'Edge';
+            else if (userAgent.includes('Opera') || userAgent.includes('OPR')) browser = 'Opera';
+
+            // Detect Device Type
+            if (userAgent.includes('Mobile') || userAgent.includes('Android') || userAgent.includes('iPhone')) {
+                device = 'Mobile Device';
+                icon = 'ri-smartphone-line';
+            } else if (userAgent.includes('Tablet') || userAgent.includes('iPad')) {
+                device = 'Tablet';
+                icon = 'ri-tablet-line';
+            } else {
+                device = 'Desktop Computer';
+                icon = 'ri-computer-line';
+            }
+
+            return { device, browser, os, icon };
+        }
+
+        // Handle logout from specific session
+        $(document).on('click', '.logout-session-btn', function() {
+            const sessionId = $(this).data('session-id');
+            const btn = $(this);
+
+            if (!confirm('Are you sure you want to logout from this session?')) {
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('_token', '{{ csrf_token() }}');
+            formData.append('session_id', sessionId);
+
+            $.ajax({
+                url: "{{ route('admin.settings.sessions.logout') }}",
+                method: "POST",
+                dataType: "json",
+                data: formData,
+                processData: false,
+                contentType: false,
+                beforeSend: function () {
+                    btn.attr('disabled', true);
+                },
+                success: function (result) {
+                    sendSuccess(result.message);
+                    loadSessions();
+                },
+                error: function (xhr) {
+                    let data = xhr.responseJSON;
+                    if (data.hasOwnProperty('message')) {
+                        actionError(xhr, data.message);
+                    } else {
+                        actionError(xhr);
+                    }
+                    btn.attr('disabled', false);
+                },
+            });
+        });
+
+        // Handle logout from all other sessions
+        $('#logoutAllOthersBtn').on('click', function() {
+            if (!confirm('Are you sure you want to logout from all other sessions?')) {
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('_token', '{{ csrf_token() }}');
+
+            $.ajax({
+                url: "{{ route('admin.settings.sessions.logout-others') }}",
+                method: "POST",
+                dataType: "json",
+                data: formData,
+                processData: false,
+                contentType: false,
+                beforeSend: function () {
+                    $('#logoutAllOthersBtn').attr('disabled', true);
+                },
+                success: function (result) {
+                    sendSuccess(result.message);
+                    loadSessions();
+                },
+                error: function (xhr) {
+                    let data = xhr.responseJSON;
+                    if (data.hasOwnProperty('message')) {
+                        actionError(xhr, data.message);
+                    } else {
+                        actionError(xhr);
+                    }
+                },
+                complete: function () {
+                    $('#logoutAllOthersBtn').attr('disabled', false);
+                },
+            });
+        });
+
+        // Load sessions on page load
+        loadSessions();
     });
 </script>
 @endsection

@@ -16,16 +16,16 @@ class Authenticate extends Middleware
             return null;
         }
 
-        if ($request->is('owner')) {
+        if ($request->is('owner*')) {
             return route('owner.login');
         } 
-        if ($request->is('admin')) {
+        if ($request->is('admin*')) {
             return route('admin.login');
         }
-        if ($request->is('staff')) {
+        if ($request->is('staff*')) {
             return route('staff.login');
         }
-        if ($request->is('seller')) {
+        if ($request->is('seller*')) {
             return route('seller.login');
         }
 

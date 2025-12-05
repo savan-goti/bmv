@@ -8,6 +8,7 @@ use App\Http\Traits\ResponseTrait;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Setting;
+use App\Models\Session;
 
 class AuthController extends Controller
 {
@@ -33,6 +34,9 @@ class AuthController extends Controller
         if (Auth::guard('admin')->attempt($request->only('email', 'password'), $request->boolean('remember'))) {
             $request->session()->regenerate();
 
+            // Set guard in session
+            Session::setGuard($request->session()->getId(), 'admin');
+
             // Update last login information
             $admin = Auth::guard('admin')->user();
             $admin->update([
@@ -46,9 +50,11 @@ class AuthController extends Controller
         return $this->sendError('Invalid email or password');
     }
 
-    public function logout()
+    public function logout(Request $request)
     {
         Auth::guard('admin')->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
         return redirect()->route('admin.login');
     }

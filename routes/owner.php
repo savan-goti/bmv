@@ -29,7 +29,7 @@ Route::middleware(['guest:owner'])->group(function () {
     Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword'])->name('reset-password.update');
 });
 
-Route::middleware(['auth:owner'])->group(function () {
+Route::middleware(['auth:owner', 'session.guard:owner'])->group(function () {
     Route::any('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
     
