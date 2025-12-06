@@ -201,6 +201,29 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Danger Zone Card -->
+                <div class="card mt-4 border-danger">
+                    <div class="card-header bg-danger text-white">
+                        <h5 class="mb-0"><i class="ri-alert-line"></i> Danger Zone</h5>
+                    </div>
+                    <div class="card-body">
+                        <h6 class="text-danger mb-3">Delete Account</h6>
+                        <p class="text-muted mb-3">
+                            Once you delete your account, there is no going back. Please be certain. This action will:
+                        </p>
+                        <ul class="text-muted mb-3">
+                            <li>Permanently delete your owner account</li>
+                            <li>Remove all your personal information</li>
+                            <li>Terminate all active sessions</li>
+                            <li>This action cannot be undone</li>
+                        </ul>
+                        
+                        <button type="button" class="btn btn-danger" id="deleteAccountBtn">
+                            <i class="ri-delete-bin-line"></i> Delete My Account
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -665,6 +688,119 @@
 
         // Load sessions on page load
         loadSessions();
+
+        // ========== Account Deletion Handler ==========
+        
+        $('#deleteAccountBtn').on('click', function() {
+            const modalHtml = `
+                <div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header bg-danger text-white">
+                                <h5 class="modal-title"><i class="ri-alert-line"></i> Confirm Account Deletion</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="alert alert-danger">
+                                    <strong>Warning!</strong> This action is permanent and cannot be undone.
+                                </div>
+                                
+                                <p class="mb-3">To confirm deletion, please:</p>
+                                <ol class="mb-3">
+                                    <li>Enter your password</li>
+                                    <li>Type <strong>DELETE</strong> in the confirmation field</li>
+                                </ol>
+                                
+                                <form id="deleteAccountForm">
+                                    <div class="mb-3">
+                                        <label for="delete_password" class="form-label">Password</label>
+                                        <input type="password" class="form-control" id="delete_password" name="password" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="delete_confirmation" class="form-label">Type DELETE to confirm</label>
+                                        <input type="text" class="form-control" id="delete_confirmation" name="confirmation" 
+                                               placeholder="DELETE" required>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <button type="button" class="btn btn-danger" id="confirmDeleteBtn" disabled>
+                                    <i class="bx bx-loader spinner me-2" style="display: none" id="deleteAccountSpinner"></i>
+                                    Delete My Account
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            $('#deleteAccountModal').remove();
+            $('body').append(modalHtml);
+            
+            const modal = new bootstrap.Modal(document.getElementById('deleteAccountModal'));
+            modal.show();
+            
+            $('#delete_confirmation').on('input', function() {
+                const confirmText = $(this).val();
+                if (confirmText === 'DELETE') {
+                    $('#confirmDeleteBtn').prop('disabled', false);
+                } else {
+                    $('#confirmDeleteBtn').prop('disabled', true);
+                }
+            });
+            
+            $('#confirmDeleteBtn').on('click', function() {
+                const password = $('#delete_password').val();
+                const confirmation = $('#delete_confirmation').val();
+                
+                if (!password) {
+                    alert('Please enter your password');
+                    return;
+                }
+                
+                if (confirmation !== 'DELETE') {
+                    alert('Please type DELETE to confirm');
+                    return;
+                }
+                
+                const formData = new FormData();
+                formData.append('_token', '{{ csrf_token() }}');
+                formData.append('password', password);
+                formData.append('confirmation', confirmation);
+                
+                $.ajax({
+                    url: "{{ route('owner.owner-settings.delete-account') }}",
+                    method: "POST",
+                    dataType: "json",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    beforeSend: function () {
+                        $('#confirmDeleteBtn').attr('disabled', true);
+                        $('#deleteAccountSpinner').show();
+                    },
+                    success: function (result) {
+                        sendSuccess(result.message);
+                        modal.hide();
+                        
+                        setTimeout(function() {
+                            window.location.href = "{{ route('owner.login') }}";
+                        }, 2000);
+                    },
+                    error: function (xhr) {
+                        let data = xhr.responseJSON;
+                        if (data.hasOwnProperty('message')) {
+                            actionError(xhr, data.message);
+                        } else {
+                            actionError(xhr);
+                        }
+                        $('#confirmDeleteBtn').attr('disabled', false);
+                        $('#deleteAccountSpinner').hide();
+                    },
+                });
+            });
+        });
     });
 </script>
 @endsection

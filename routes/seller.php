@@ -45,6 +45,9 @@ Route::middleware(['auth:seller', 'session.guard:seller'])->group(function () {
         Route::get('/settings/sessions', 'getSessions')->name('settings.sessions');
         Route::post('/settings/sessions/logout', 'logoutSession')->name('settings.sessions.logout');
         Route::post('/settings/sessions/logout-others', 'logoutOtherSessions')->name('settings.sessions.logout-others');
+        
+        // Account deletion route
+        Route::post('/settings/delete-account', 'deleteAccount')->name('settings.delete-account');
     });
     
 });

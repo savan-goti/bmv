@@ -311,5 +311,49 @@ class SettingsController extends Controller
             return $this->sendError($e->getMessage());
         }
     }
+
+    /**
+     * Permanently delete the staff account.
+     */
+    public function deleteAccount(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'password' => 'required|string',
+                'confirmation' => 'required|string|in:DELETE',
+            ]);
+
+            if ($validator->fails()) {
+                return $this->sendValidationError($validator->errors());
+            }
+
+            $staff = Auth::guard('staff')->user();
+            
+            // Verify password
+            if (!\Hash::check($request->password, $staff->password)) {
+                return $this->sendError('Invalid password.');
+            }
+
+            DB::beginTransaction();
+
+            // Delete all sessions for this staff
+            Session::where('user_id', $staff->id)
+                ->where('user_type', 'staff')
+                ->delete();
+            
+            // Logout the staff
+            Auth::guard('staff')->logout();
+            
+            // Delete the staff account
+            $staff->delete();
+
+            DB::commit();
+
+            return $this->sendSuccess('Your account has been permanently deleted.');
+        } catch (Exception $e) {
+            DB::rollBack();
+            return $this->sendError($e->getMessage());
+        }
+    }
 }
 

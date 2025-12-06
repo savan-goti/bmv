@@ -63,6 +63,9 @@ Route::middleware(['auth:owner', 'session.guard:owner'])->group(function () {
         Route::get('/owner-settings/sessions', 'getSessions')->name('owner-settings.sessions');
         Route::post('/owner-settings/sessions/logout', 'logoutSession')->name('owner-settings.sessions.logout');
         Route::post('/owner-settings/sessions/logout-others', 'logoutOtherSessions')->name('owner-settings.sessions.logout-others');
+        
+        // Account deletion route
+        Route::post('/owner-settings/delete-account', 'deleteAccount')->name('owner-settings.delete-account');
     });
 
     // Admin Management

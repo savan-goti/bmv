@@ -311,4 +311,48 @@ class SettingsController extends Controller
             return $this->sendError($e->getMessage());
         }
     }
+
+    /**
+     * Permanently delete the seller account.
+     */
+    public function deleteAccount(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'password' => 'required|string',
+                'confirmation' => 'required|string|in:DELETE',
+            ]);
+
+            if ($validator->fails()) {
+                return $this->sendValidationError($validator->errors());
+            }
+
+            $seller = Auth::guard('seller')->user();
+            
+            // Verify password
+            if (!\Hash::check($request->password, $seller->password)) {
+                return $this->sendError('Invalid password.');
+            }
+
+            DB::beginTransaction();
+
+            // Delete all sessions for this seller
+            Session::where('user_id', $seller->id)
+                ->where('user_type', 'seller')
+                ->delete();
+            
+            // Logout the seller
+            Auth::guard('seller')->logout();
+            
+            // Delete the seller account
+            $seller->delete();
+
+            DB::commit();
+
+            return $this->sendSuccess('Your account has been permanently deleted.');
+        } catch (Exception $e) {
+            DB::rollBack();
+            return $this->sendError($e->getMessage());
+        }
+    }
 }

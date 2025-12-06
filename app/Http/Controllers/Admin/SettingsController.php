@@ -311,4 +311,52 @@ class SettingsController extends Controller
             return $this->sendError($e->getMessage());
         }
     }
+
+    /**
+     * Permanently delete the admin account.
+     */
+    public function deleteAccount(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'password' => 'required|string',
+                'confirmation' => 'required|string|in:DELETE',
+            ]);
+
+            if ($validator->fails()) {
+                return $this->sendValidationError($validator->errors());
+            }
+
+            $admin = Auth::guard('admin')->user();
+            
+            // Verify password
+            if (!\Hash::check($request->password, $admin->password)) {
+                return $this->sendError('Invalid password.');
+            }
+
+            DB::beginTransaction();
+
+            // Delete all sessions for this admin
+            Session::where('user_id', $admin->id)
+                ->where('user_type', 'admin')
+                ->delete();
+
+            // You may want to handle related data here
+            // For example, reassign or delete staff and sellers created by this admin
+            // This depends on your business logic
+            
+            // Logout the admin
+            Auth::guard('admin')->logout();
+            
+            // Delete the admin account
+            $admin->delete();
+
+            DB::commit();
+
+            return $this->sendSuccess('Your account has been permanently deleted.');
+        } catch (Exception $e) {
+            DB::rollBack();
+            return $this->sendError($e->getMessage());
+        }
+    }
 }

@@ -311,4 +311,48 @@ class OwnerSettingsController extends Controller
             return $this->sendError($e->getMessage());
         }
     }
+
+    /**
+     * Permanently delete the owner account.
+     */
+    public function deleteAccount(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'password' => 'required|string',
+                'confirmation' => 'required|string|in:DELETE',
+            ]);
+
+            if ($validator->fails()) {
+                return $this->sendValidationError($validator->errors());
+            }
+
+            $owner = Auth::guard('owner')->user();
+            
+            // Verify password
+            if (!\Hash::check($request->password, $owner->password)) {
+                return $this->sendError('Invalid password.');
+            }
+
+            DB::beginTransaction();
+
+            // Delete all sessions for this owner
+            Session::where('user_id', $owner->id)
+                ->where('user_type', 'owner')
+                ->delete();
+            
+            // Logout the owner
+            Auth::guard('owner')->logout();
+            
+            // Delete the owner account
+            $owner->delete();
+
+            DB::commit();
+
+            return $this->sendSuccess('Your account has been permanently deleted.');
+        } catch (Exception $e) {
+            DB::rollBack();
+            return $this->sendError($e->getMessage());
+        }
+    }
 }
