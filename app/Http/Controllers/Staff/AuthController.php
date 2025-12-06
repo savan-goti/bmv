@@ -25,7 +25,7 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'email' => 'required|email',
             'password' => 'required',
-            'two_factor_code' => 'nullable|string|size:6',
+            'two_factor_code' => 'nullable|string|min:6|max:10',
         ]);
 
         if ($validator->fails()) {
@@ -103,13 +103,21 @@ class AuthController extends Controller
 
         $recoveryCodes = json_decode(decrypt($staff->two_factor_recovery_codes), true);
         
-        $key = array_search(strtoupper($code), $recoveryCodes);
+        if (!is_array($recoveryCodes)) {
+            return false;
+        }
+        
+        // Convert input code to uppercase for comparison
+        $inputCode = strtoupper(trim($code));
+        
+        // Find the recovery code (case-insensitive)
+        $key = array_search($inputCode, array_map('strtoupper', $recoveryCodes));
         
         if ($key !== false) {
             // Remove the used recovery code
             unset($recoveryCodes[$key]);
             
-            // Update the admin's recovery codes
+            // Update the staff's recovery codes
             $staff->update([
                 'two_factor_recovery_codes' => encrypt(json_encode(array_values($recoveryCodes))),
             ]);

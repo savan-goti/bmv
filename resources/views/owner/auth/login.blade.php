@@ -85,7 +85,7 @@
                                         <label for="two_factor_code" class="form-label">Authentication Code</label>
                                         <input type="text" class="form-control" id="two_factor_code" 
                                                placeholder="Enter 6-digit code or recovery code" name="two_factor_code" maxlength="10" autocomplete="off">
-                                        <small class="text-muted d-block mt-1">Enter the code from your authenticator app or use a recovery code.</small>
+                                        <small class="text-muted d-block mt-1">Enter the 6-digit code from your authenticator app or use a recovery code (up to 10 characters).</small>
                                         <label id="two_factor_code-error" class="text-danger error" for="two_factor_code" style="display: none"></label>
                                     </div>
                                     
