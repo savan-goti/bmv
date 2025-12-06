@@ -61,6 +61,9 @@ class Seller extends Authenticatable
         'last_login_at',
         'last_login_ip',
         'two_factor_enabled',
+        'two_factor_secret',
+        'two_factor_recovery_codes',
+        'two_factor_confirmed_at',
         'email_verified_at',
         'gst_vat', // Keeping existing column
     ];
@@ -84,6 +87,7 @@ class Seller extends Authenticatable
             'social_links' => 'array',
             'last_login_at' => 'datetime',
             'two_factor_enabled' => 'boolean',
+            'two_factor_confirmed_at' => 'datetime',
             'email_verified_at' => 'datetime',
             'date_of_birth' => 'date',
         ];
