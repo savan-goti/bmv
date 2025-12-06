@@ -24,30 +24,96 @@ class AuthController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'email' => 'required|email',
-            'password' => 'required'
+            'password' => 'required',
+            'two_factor_code' => 'nullable|string|size:6',
         ]);
 
         if ($validator->fails()) {
             return $this->sendValidationError($validator->errors());
         }
 
-        if (Auth::guard('staff')->attempt($request->only('email', 'password'), $request->boolean('remember'))) {
+        // Find the staff by email
+        $staff = \App\Models\Staff::where('email', $request->email)->first();
+
+        if (!$staff) {
+            return $this->sendError('Invalid email or password');
+        }
+
+        // Check if password is correct
+        if (!\Hash::check($request->password, $staff->password)) {
+            return $this->sendError('Invalid email or password');
+        }
+
+        // Check if 2FA is enabled
+        if ($staff->two_factor_enabled && $staff->two_factor_confirmed_at) {
+            // 2FA is enabled, verify the code
+            if (!$request->has('two_factor_code')) {
+                return $this->sendResponse('Two-factor authentication required', [
+                    'requires_2fa' => true,
+                ], 200);
+            }
+
+            // Verify the 2FA code
+            $google2fa = new \PragmaRX\Google2FA\Google2FA();
+            $secret = decrypt($staff->two_factor_secret);
+            
+            $valid = $google2fa->verifyKey($secret, $request->two_factor_code);
+            
+            // If code is invalid, check recovery codes
+            if (!$valid) {
+                $valid = $this->verifyRecoveryCode($staff, $request->two_factor_code);
+            }
+
+            if (!$valid) {
+                return $this->sendError('Invalid two-factor authentication code');
+            }
+        }
+
+        // Attempt login
+        if (Auth::guard('staff')->loginUsingId($staff->id, $request->boolean('remember'))) {
             $request->session()->regenerate();
 
-            // Set guard in session
-            Session::setGuard($request->session()->getId(), 'staff');
-
-            // Update last login information
-            $staff = Auth::guard('staff')->user();
+            // Update last login info
             $staff->update([
                 'last_login_at' => now(),
                 'last_login_ip' => $request->ip(),
             ]);
 
-            return $this->sendSuccess('login successful', 201);
+            // Set guard in session
+            Session::setGuard($request->session()->getId(), 'staff');
+
+            return $this->sendSuccess('Login successful', 201);
         }
 
         return $this->sendError('Invalid email or password');
+    }
+
+    /**
+     * Verify recovery code and mark it as used
+     */
+    private function verifyRecoveryCode($staff, $code)
+    {
+        if (!$staff->two_factor_recovery_codes) {
+            return false;
+        }
+
+        $recoveryCodes = json_decode(decrypt($staff->two_factor_recovery_codes), true);
+        
+        $key = array_search(strtoupper($code), $recoveryCodes);
+        
+        if ($key !== false) {
+            // Remove the used recovery code
+            unset($recoveryCodes[$key]);
+            
+            // Update the admin's recovery codes
+            $staff->update([
+                'two_factor_recovery_codes' => encrypt(json_encode(array_values($recoveryCodes))),
+            ]);
+            
+            return true;
+        }
+        
+        return false;
     }
 
     public function logout(Request $request)
@@ -59,3 +125,4 @@ class AuthController extends Controller
         return redirect()->route('staff.login');
     }
 }
+

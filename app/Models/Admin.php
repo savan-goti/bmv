@@ -32,6 +32,9 @@ class Admin extends Authenticatable
         'last_login_at',
         'last_login_ip',
         'two_factor_enabled',
+        'two_factor_secret',
+        'two_factor_recovery_codes',
+        'two_factor_confirmed_at',
         'email_verified_at',
     ];
 
@@ -46,6 +49,8 @@ class Admin extends Authenticatable
             'password' => 'hashed',
             'last_login_at' => 'datetime',
             'email_verified_at' => 'datetime',
+            'two_factor_enabled' => 'boolean',
+            'two_factor_confirmed_at' => 'datetime',
         ];
     }
 

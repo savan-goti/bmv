@@ -11,26 +11,105 @@
                     </div>
 
                     <div class="card-body">
-                        <form method="POST" id="settingsForm">
-                            @csrf
+                        <!-- Two-Factor Authentication -->
+                        <div class="mb-4">
+                            <h6 class="mb-3">Two-Factor Authentication</h6>
+                            
+                            @if($admin->two_factor_enabled && $admin->two_factor_confirmed_at)
+                                <!-- 2FA is enabled -->
+                                <div class="alert alert-success">
+                                    <i class="ri-shield-check-line"></i> 
+                                    Two-factor authentication is <strong>enabled</strong> and protecting your account.
+                                    <br>
+                                    <small class="text-muted">Enabled on {{ $admin->two_factor_confirmed_at->format('d M Y, h:i A') }}</small>
+                                </div>
 
-                            <!-- Two-Factor Authentication -->
-                            <div class="mb-4">
-                                <h6 class="mb-3">Two-Factor Authentication</h6>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <label class="form-label mb-1">Enable Two-Factor Authentication</label>
-                                        <p class="text-muted small mb-0">Add an extra layer of security to your account</p>
-                                    </div>
-                                    <div class="form-check form-switch form-switch-lg">
-                                        <input class="form-check-input" type="checkbox" role="switch" 
-                                               id="two_factor_enabled" name="two_factor_enabled" value="1"
-                                               @if($admin->two_factor_enabled) checked @endif>
+                                <div class="d-flex gap-2 mb-3">
+                                    <button type="button" class="btn btn-sm btn-primary" id="showRecoveryCodesBtn">
+                                        <i class="ri-key-line"></i> View Recovery Codes
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-warning" id="regenerateRecoveryCodesBtn">
+                                        <i class="ri-refresh-line"></i> Regenerate Recovery Codes
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-danger" id="disableTwoFactorBtn">
+                                        <i class="ri-shield-off-line"></i> Disable 2FA
+                                    </button>
+                                </div>
+
+                                <!-- Recovery Codes Display (Hidden by default) -->
+                                <div id="recoveryCodesContainer" style="display: none;">
+                                    <div class="alert alert-warning">
+                                        <h6 class="alert-heading">Recovery Codes</h6>
+                                        <p class="small mb-2">Store these recovery codes in a secure location. They can be used to access your account if you lose your 2FA device.</p>
+                                        <div id="recoveryCodesList" class="font-monospace"></div>
+                                        <button type="button" class="btn btn-sm btn-outline-dark mt-2" id="copyRecoveryCodesBtn">
+                                            <i class="ri-file-copy-line"></i> Copy Codes
+                                        </button>
                                     </div>
                                 </div>
-                            </div>
+                            @else
+                                <!-- 2FA is not enabled -->
+                                <div class="alert alert-warning">
+                                    <i class="ri-error-warning-line"></i> 
+                                    Two-factor authentication is <strong>not enabled</strong>. Enable it to add an extra layer of security to your account.
+                                </div>
 
-                            <hr>
+                                <button type="button" class="btn btn-primary" id="enableTwoFactorBtn">
+                                    <i class="ri-shield-check-line"></i> Enable Two-Factor Authentication
+                                </button>
+
+                                <!-- 2FA Setup Container (Hidden by default) -->
+                                <div id="twoFactorSetupContainer" style="display: none;" class="mt-3">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h6 class="card-title">Set Up Two-Factor Authentication</h6>
+                                            
+                                            <ol class="mb-3">
+                                                <li class="mb-2">Download an authenticator app like <strong>Google Authenticator</strong>, <strong>Authy</strong>, or <strong>Microsoft Authenticator</strong>.</li>
+                                                <li class="mb-2">Scan the QR code below with your authenticator app:</li>
+                                            </ol>
+
+                                            <div class="text-center mb-3">
+                                                <div id="qrCodeContainer" class="d-inline-block p-3 bg-white border rounded">
+                                                    <div class="spinner-border text-primary" role="status">
+                                                        <span class="visually-hidden">Loading...</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="alert alert-info">
+                                                <strong>Manual Entry:</strong> If you can't scan the QR code, enter this secret key manually:
+                                                <div class="font-monospace mt-2" id="secretKeyDisplay"></div>
+                                            </div>
+
+                                            <form id="verifyTwoFactorForm">
+                                                @csrf
+                                                <div class="mb-3">
+                                                    <label for="verification_code" class="form-label">Enter the 6-digit code from your authenticator app:</label>
+                                                    <input type="text" class="form-control" id="verification_code" name="code" 
+                                                           placeholder="000000" maxlength="6" pattern="[0-9]{6}" required>
+                                                </div>
+                                                <div class="d-flex gap-2">
+                                                    <button type="submit" class="btn btn-success" id="verifyTwoFactorBtn">
+                                                        <i class="bx bx-loader spinner me-2" style="display: none" id="verifyTwoFactorSpinner"></i>
+                                                        <i class="ri-checkbox-circle-line"></i> Verify and Enable
+                                                    </button>
+                                                    <button type="button" class="btn btn-secondary" id="cancelTwoFactorSetupBtn">
+                                                        Cancel
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+                        </div>
+
+                        <hr>
+
+                        <!-- Email Verification -->
+                        <form method="POST" id="settingsForm">
+                            @csrf
 
                             <!-- Email Verification -->
                             <div class="mb-4">
@@ -433,6 +512,209 @@
                 },
             });
         });
+
+        // ========== Two-Factor Authentication Handlers ==========
+        
+        // Enable Two-Factor Authentication
+        $('#enableTwoFactorBtn').on('click', function() {
+            const btn = $(this);
+            
+            $.ajax({
+                url: "{{ route('admin.settings.two-factor.enable') }}",
+                method: "POST",
+                dataType: "json",
+                data: {
+                    _token: '{{ csrf_token() }}'
+                },
+                beforeSend: function () {
+                    btn.attr('disabled', true);
+                },
+                success: function (result) {
+                    // Show setup container
+                    $('#twoFactorSetupContainer').slideDown();
+                    btn.hide();
+                    
+                    // Display QR code
+                    $('#qrCodeContainer').html('<img src="data:image/svg+xml;base64,' + result.data.qr_code + '" alt="QR Code" style="width: 200px; height: 200px;">');
+                    
+                    // Display secret key
+                    $('#secretKeyDisplay').text(result.data.secret);
+                    
+                    sendSuccess(result.message);
+                },
+                error: function (xhr) {
+                    let data = xhr.responseJSON;
+                    if (data.hasOwnProperty('message')) {
+                        actionError(xhr, data.message);
+                    } else {
+                        actionError(xhr);
+                    }
+                    btn.attr('disabled', false);
+                },
+            });
+        });
+
+        // Cancel Two-Factor Setup
+        $('#cancelTwoFactorSetupBtn').on('click', function() {
+            $('#twoFactorSetupContainer').slideUp();
+            $('#enableTwoFactorBtn').show().attr('disabled', false);
+            $('#verification_code').val('');
+        });
+
+        // Verify and Confirm Two-Factor Authentication
+        $('#verifyTwoFactorForm').on('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            
+            $.ajax({
+                url: "{{ route('admin.settings.two-factor.confirm') }}",
+                method: "POST",
+                dataType: "json",
+                data: formData,
+                processData: false,
+                contentType: false,
+                beforeSend: function () {
+                    $('#verifyTwoFactorBtn').attr('disabled', true);
+                    $('#verifyTwoFactorSpinner').show();
+                },
+                success: function (result) {
+                    sendSuccess(result.message);
+                    
+                    // Show recovery codes
+                    displayRecoveryCodes(result.data.recovery_codes);
+                    
+                    // Reload page after showing codes
+                    setTimeout(function() {
+                        location.reload();
+                    }, 5000);
+                },
+                error: function (xhr) {
+                    let data = xhr.responseJSON;
+                    if (data.hasOwnProperty('message')) {
+                        actionError(xhr, data.message);
+                    } else {
+                        actionError(xhr);
+                    }
+                },
+                complete: function () {
+                    $('#verifyTwoFactorBtn').attr('disabled', false);
+                    $('#verifyTwoFactorSpinner').hide();
+                },
+            });
+        });
+
+        // Disable Two-Factor Authentication
+        $('#disableTwoFactorBtn').on('click', function() {
+            const password = prompt('Please enter your password to disable two-factor authentication:');
+            
+            if (!password) {
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('_token', '{{ csrf_token() }}');
+            formData.append('password', password);
+            
+            $.ajax({
+                url: "{{ route('admin.settings.two-factor.disable') }}",
+                method: "POST",
+                dataType: "json",
+                data: formData,
+                processData: false,
+                contentType: false,
+                beforeSend: function () {
+                    $('#disableTwoFactorBtn').attr('disabled', true);
+                },
+                success: function (result) {
+                    sendSuccess(result.message);
+                    setTimeout(function() {
+                        location.reload();
+                    }, 1000);
+                },
+                error: function (xhr) {
+                    let data = xhr.responseJSON;
+                    if (data.hasOwnProperty('message')) {
+                        actionError(xhr, data.message);
+                    } else {
+                        actionError(xhr);
+                    }
+                    $('#disableTwoFactorBtn').attr('disabled', false);
+                },
+            });
+        });
+
+        // Show Recovery Codes
+        $('#showRecoveryCodesBtn').on('click', function() {
+            const password = prompt('Please enter your password to view recovery codes:');
+            
+            if (!password) {
+                return;
+            }
+            
+            // For security, we'll just toggle the display
+            $('#recoveryCodesContainer').slideToggle();
+            
+            // Load current recovery codes from server
+            if ($('#recoveryCodesList').is(':empty')) {
+                $('#recoveryCodesList').html('<p class="text-muted">Recovery codes are encrypted and cannot be displayed. Please regenerate new codes if needed.</p>');
+            }
+        });
+
+        // Regenerate Recovery Codes
+        $('#regenerateRecoveryCodesBtn').on('click', function() {
+            if (!confirm('Are you sure you want to regenerate recovery codes? Your old codes will no longer work.')) {
+                return;
+            }
+            
+            $.ajax({
+                url: "{{ route('admin.settings.two-factor.recovery-codes') }}",
+                method: "POST",
+                dataType: "json",
+                data: {
+                    _token: '{{ csrf_token() }}'
+                },
+                beforeSend: function () {
+                    $('#regenerateRecoveryCodesBtn').attr('disabled', true);
+                },
+                success: function (result) {
+                    sendSuccess(result.message);
+                    displayRecoveryCodes(result.data.recovery_codes);
+                    $('#recoveryCodesContainer').slideDown();
+                },
+                error: function (xhr) {
+                    let data = xhr.responseJSON;
+                    if (data.hasOwnProperty('message')) {
+                        actionError(xhr, data.message);
+                    } else {
+                        actionError(xhr);
+                    }
+                },
+                complete: function () {
+                    $('#regenerateRecoveryCodesBtn').attr('disabled', false);
+                },
+            });
+        });
+
+        // Copy Recovery Codes
+        $('#copyRecoveryCodesBtn').on('click', function() {
+            const codes = $('#recoveryCodesList').text();
+            navigator.clipboard.writeText(codes).then(function() {
+                sendSuccess('Recovery codes copied to clipboard');
+            }, function() {
+                alert('Failed to copy recovery codes');
+            });
+        });
+
+        // Display Recovery Codes
+        function displayRecoveryCodes(codes) {
+            let html = '<div class="row">';
+            codes.forEach(function(code, index) {
+                html += '<div class="col-md-6 mb-2">' + (index + 1) + '. ' + code + '</div>';
+            });
+            html += '</div>';
+            $('#recoveryCodesList').html(html);
+        }
 
         // Load sessions on page load
         loadSessions();

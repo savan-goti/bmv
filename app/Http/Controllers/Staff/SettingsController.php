@@ -35,7 +35,6 @@ class SettingsController extends Controller
             $staff = Auth::guard('staff')->user();
 
             $validator = Validator::make($request->all(), [
-                'two_factor_enabled' => 'nullable|boolean',
                 'email_verified' => 'nullable|boolean',
             ]);
 
@@ -44,11 +43,6 @@ class SettingsController extends Controller
             }
 
             $saveData = [];
-
-            // Handle two-factor authentication toggle
-            if ($request->has('two_factor_enabled')) {
-                $saveData['two_factor_enabled'] = $request->two_factor_enabled ? true : false;
-            }
 
             // Handle email verification
             if ($request->has('email_verified')) {
@@ -67,6 +61,170 @@ class SettingsController extends Controller
             DB::rollBack();
             return $this->sendError($e->getMessage());
         }
+    }
+
+    /**
+     * Enable two-factor authentication and generate QR code.
+     */
+    public function enableTwoFactor()
+    {
+        try {
+            $staff = Auth::guard('staff')->user();
+            
+            // Generate a new secret key
+            $google2fa = new \PragmaRX\Google2FA\Google2FA();
+            $secret = $google2fa->generateSecretKey();
+            
+            // Store the secret temporarily (not confirmed yet)
+            $staff->update([
+                'two_factor_secret' => encrypt($secret),
+                'two_factor_enabled' => false, // Not enabled until confirmed
+                'two_factor_confirmed_at' => null,
+            ]);
+            
+            // Generate QR code URL
+            $qrCodeUrl = $google2fa->getQRCodeUrl(
+                config('app.name'),
+                $staff->email,
+                $secret
+            );
+            
+            // Generate QR code inline using the QRCode package
+            $qrcode = new \PragmaRX\Google2FAQRCode\Google2FA();
+            $qrCodeInline = $qrcode->getQRCodeInline(
+                config('app.name'),
+                $staff->email,
+                $secret,
+                200
+            );
+            
+            return $this->sendResponse('Two-factor authentication setup initiated', [
+                'secret' => $secret,
+                'qr_code' => base64_encode($qrCodeInline),
+            ]);
+        } catch (Exception $e) {
+            return $this->sendError($e->getMessage());
+        }
+    }
+
+    /**
+     * Confirm two-factor authentication with OTP verification.
+     */
+    public function confirmTwoFactor(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'code' => 'required|string|size:6',
+            ]);
+
+            if ($validator->fails()) {
+                return $this->sendValidationError($validator->errors());
+            }
+
+            $staff = Auth::guard('staff')->user();
+            
+            if (!$staff->two_factor_secret) {
+                return $this->sendError('Two-factor authentication is not set up.');
+            }
+
+            $google2fa = new \PragmaRX\Google2FA\Google2FA();
+            $secret = decrypt($staff->two_factor_secret);
+            
+            $valid = $google2fa->verifyKey($secret, $request->code);
+            
+            if (!$valid) {
+                return $this->sendError('Invalid verification code. Please try again.');
+            }
+
+            // Generate recovery codes
+            $recoveryCodes = $this->generateRecoveryCodes();
+            
+            // Enable 2FA
+            $staff->update([
+                'two_factor_enabled' => true,
+                'two_factor_confirmed_at' => now(),
+                'two_factor_recovery_codes' => encrypt(json_encode($recoveryCodes)),
+            ]);
+
+            return $this->sendResponse('Two-factor authentication enabled successfully', [
+                'recovery_codes' => $recoveryCodes,
+            ]);
+        } catch (Exception $e) {
+            return $this->sendError($e->getMessage());
+        }
+    }
+
+    /**
+     * Disable two-factor authentication.
+     */
+    public function disableTwoFactor(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'password' => 'required|string',
+            ]);
+
+            if ($validator->fails()) {
+                return $this->sendValidationError($validator->errors());
+            }
+
+            $staff = Auth::guard('staff')->user();
+            
+            // Verify password
+            if (!\Hash::check($request->password, $staff->password)) {
+                return $this->sendError('Invalid password.');
+            }
+
+            // Disable 2FA
+            $staff->update([
+                'two_factor_enabled' => false,
+                'two_factor_secret' => null,
+                'two_factor_recovery_codes' => null,
+                'two_factor_confirmed_at' => null,
+            ]);
+
+            return $this->sendSuccess('Two-factor authentication disabled successfully');
+        } catch (Exception $e) {
+            return $this->sendError($e->getMessage());
+        }
+    }
+
+    /**
+     * Regenerate recovery codes.
+     */
+    public function regenerateRecoveryCodes()
+    {
+        try {
+            $staff = Auth::guard('staff')->user();
+            
+            if (!$staff->two_factor_enabled) {
+                return $this->sendError('Two-factor authentication is not enabled.');
+            }
+
+            $recoveryCodes = $this->generateRecoveryCodes();
+            
+            $staff->update([
+                'two_factor_recovery_codes' => encrypt(json_encode($recoveryCodes)),
+            ]);
+
+            return $this->sendResponse('Recovery codes regenerated successfully', [
+                'recovery_codes' => $recoveryCodes,
+            ]);
+        } catch (Exception $e) {
+            return $this->sendError($e->getMessage());
+        }
+    }
+
+    /**
+     * Generate recovery codes.
+     */
+    private function generateRecoveryCodes()
+    {
+        $codes = [];
+        for ($i = 0; $i < 8; $i++) {
+            $codes[] = strtoupper(substr(str_replace(['+', '/', '='], '', base64_encode(random_bytes(6))), 0, 10));
+        }
+        return $codes;
     }
 
     /**
@@ -118,7 +276,7 @@ class SettingsController extends Controller
                 return $this->sendError('Cannot logout from current session. Use logout button instead.');
             }
 
-            // Verify the session belongs to this staff
+            // Verify the session belongs to this admin
             $session = Session::forUser($staff->id, 'staff')
                 ->where('id', $sessionId)
                 ->first();
@@ -154,3 +312,4 @@ class SettingsController extends Controller
         }
     }
 }
+

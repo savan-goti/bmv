@@ -35,6 +35,14 @@ Route::middleware(['auth:staff', 'session.guard:staff'])->group(function () {
     Route::controller(SettingsController::class)->group(function () {
         Route::get('/settings', 'index')->name('settings');
         Route::post('/settings', 'update')->name('settings.update');
+        
+        // Two-Factor Authentication routes
+        Route::post('/settings/two-factor/enable', 'enableTwoFactor')->name('settings.two-factor.enable');
+        Route::post('/settings/two-factor/confirm', 'confirmTwoFactor')->name('settings.two-factor.confirm');
+        Route::post('/settings/two-factor/disable', 'disableTwoFactor')->name('settings.two-factor.disable');
+        Route::post('/settings/two-factor/recovery-codes', 'regenerateRecoveryCodes')->name('settings.two-factor.recovery-codes');
+        
+        // Session management routes
         Route::get('/settings/sessions', 'getSessions')->name('settings.sessions');
         Route::post('/settings/sessions/logout', 'logoutSession')->name('settings.sessions.logout');
         Route::post('/settings/sessions/logout-others', 'logoutOtherSessions')->name('settings.sessions.logout-others');

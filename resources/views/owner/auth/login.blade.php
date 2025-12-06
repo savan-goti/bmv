@@ -74,6 +74,16 @@
                                                 type="button" id="password-addon"><i class="ri-eye-fill align-middle"></i></button>
                                         </div>
                                     </div>
+                                    
+                                    <!-- Two-Factor Authentication Code (Hidden by default) -->
+                                    <div class="mb-3" id="twoFactorCodeContainer" style="display: none;">
+                                        <label for="two_factor_code" class="form-label">Two-Factor Authentication Code</label>
+                                        <input type="text" class="form-control" id="two_factor_code" 
+                                               placeholder="Enter 6-digit code" name="two_factor_code" maxlength="10">
+                                        <small class="text-muted">Enter the code from your authenticator app or use a recovery code.</small>
+                                        <label id="two_factor_code-error" class="text-danger error" for="two_factor_code" style="display: none"></label>
+                                    </div>
+                                    
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" value="" name="remember_me"
                                                id="auth-remember-check">
@@ -215,10 +225,19 @@
                         $("#loginBtnSpinner").show();
                     },
                     success: function (result) {
-                        sendSuccess(result.message);
-                        setTimeout(function () {
-                            window.location.href = "{{route('owner.dashboard')}}";
-                        }, 1000);
+                        // Check if 2FA is required
+                        if (result.data && result.data.requires_2fa) {
+                            // Show 2FA input field
+                            $('#twoFactorCodeContainer').slideDown();
+                            $('#two_factor_code').focus();
+                            sendSuccess('Please enter your two-factor authentication code');
+                        } else {
+                            // Login successful
+                            sendSuccess(result.message);
+                            setTimeout(function () {
+                                window.location.href = "{{route('owner.dashboard')}}";
+                            }, 1000);
+                        }
                     },
                     error: function (xhr) {
                         let data = xhr.responseJSON;
@@ -228,6 +247,9 @@
                             }
                             if (data.error.hasOwnProperty('password')) {
                                 $("#password-error").html(data.error.password).show();
+                            }
+                            if (data.error.hasOwnProperty('two_factor_code')) {
+                                $("#two_factor_code-error").html(data.error.two_factor_code).show();
                             }
                         } else if (data.hasOwnProperty('message')) {
                             actionError(xhr, data.message)

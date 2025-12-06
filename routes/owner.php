@@ -52,6 +52,14 @@ Route::middleware(['auth:owner', 'session.guard:owner'])->group(function () {
     Route::controller(OwnerSettingsController::class)->group(function () {
         Route::get('/owner-settings', 'index')->name('owner-settings');
         Route::post('/owner-settings', 'update')->name('owner-settings.update');
+        
+        // Two-Factor Authentication routes
+        Route::post('/owner-settings/two-factor/enable', 'enableTwoFactor')->name('owner-settings.two-factor.enable');
+        Route::post('/owner-settings/two-factor/confirm', 'confirmTwoFactor')->name('owner-settings.two-factor.confirm');
+        Route::post('/owner-settings/two-factor/disable', 'disableTwoFactor')->name('owner-settings.two-factor.disable');
+        Route::post('/owner-settings/two-factor/recovery-codes', 'regenerateRecoveryCodes')->name('owner-settings.two-factor.recovery-codes');
+        
+        // Session management routes
         Route::get('/owner-settings/sessions', 'getSessions')->name('owner-settings.sessions');
         Route::post('/owner-settings/sessions/logout', 'logoutSession')->name('owner-settings.sessions.logout');
         Route::post('/owner-settings/sessions/logout-others', 'logoutOtherSessions')->name('owner-settings.sessions.logout-others');
