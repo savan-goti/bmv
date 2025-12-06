@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Traits\ResponseTrait;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Setting;
 use App\Models\Session;
+use App\Models\Seller;
 
 class AuthController extends Controller
 {
@@ -33,32 +35,35 @@ class AuthController extends Controller
         }
 
         // Find the seller by email
-        $seller = \App\Models\Seller::where('email', $request->email)->first();
+        $seller = Seller::where('email', $request->email)->first();
 
         if (!$seller) {
             return $this->sendError('Invalid email or password');
         }
 
         // Check if password is correct
-        if (!\Hash::check($request->password, $seller->password)) {
+        if (!Hash::check($request->password, $seller->password)) {
             return $this->sendError('Invalid email or password');
         }
 
         // Check if 2FA is enabled
-        if ($seller->two_factor_enabled && $seller->two_factor_confirmed_at) {
+        if (
+            (int) $seller->two_factor_enabled === 1 &&           // explicitly enabled
+            !empty($seller->two_factor_secret) &&               // secret exists
+            !is_null($seller->two_factor_confirmed_at)          // actually confirmed
+        ) {
             // 2FA is enabled, verify the code
-            if (!$request->has('two_factor_code')) {
+            if (!$request->filled('two_factor_code')) {
                 return $this->sendResponse('Two-factor authentication required', [
                     'requires_2fa' => true,
                 ], 200);
             }
 
-            // Verify the 2FA code
             $google2fa = new \PragmaRX\Google2FA\Google2FA();
-            $secret = decrypt($seller->two_factor_secret);
-            
+            $secret    = decrypt($seller->two_factor_secret);
+
             $valid = $google2fa->verifyKey($secret, $request->two_factor_code);
-            
+
             // If code is invalid, check recovery codes
             if (!$valid) {
                 $valid = $this->verifyRecoveryCode($seller, $request->two_factor_code);
@@ -68,6 +73,7 @@ class AuthController extends Controller
                 return $this->sendError('Invalid two-factor authentication code');
             }
         }
+
 
         // Attempt login
         if (Auth::guard('seller')->loginUsingId($seller->id, $request->boolean('remember'))) {

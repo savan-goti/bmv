@@ -56,6 +56,21 @@
                                                 type="button" id="password-addon"><i class="ri-eye-fill align-middle"></i></button>
                                         </div>
                                     </div>
+                                    
+                                    <!-- Two-Factor Authentication Code (Hidden by default) -->
+                                    <div class="mb-3" id="twoFactorCodeContainer" style="display: none;">
+                                        <div class="alert alert-info mb-3">
+                                            <i class="ri-shield-check-line me-2"></i>
+                                            <strong>Two-Factor Authentication Required</strong>
+                                            <p class="mb-0 small mt-1">Please enter the 6-digit code from your authenticator app or use one of your recovery codes.</p>
+                                        </div>
+                                        <label for="two_factor_code" class="form-label">Authentication Code</label>
+                                        <input type="text" class="form-control" id="two_factor_code" 
+                                               placeholder="Enter 6-digit code or recovery code" name="two_factor_code" maxlength="10" autocomplete="off">
+                                        <small class="text-muted d-block mt-1">Enter the code from your authenticator app or use a recovery code.</small>
+                                        <label id="two_factor_code-error" class="text-danger error" for="two_factor_code" style="display: none"></label>
+                                    </div>
+                                    
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" value="" name="remember_me"
                                                id="auth-remember-check">
@@ -147,10 +162,25 @@
                         $("#loginBtnSpinner").show();
                     },
                     success: function (result) {
-                        sendSuccess(result.message);
-                        setTimeout(function () {
-                            window.location.href = "{{route('seller.dashboard')}}";
-                        }, 1000);
+                        // Check if 2FA is required
+                        if (result.data && result.data.requires_2fa) {
+                            // Show 2FA input field
+                            $('#twoFactorCodeContainer').show();
+                            $('#two_factor_code').val('').focus();
+                            
+                            // Scroll to the 2FA field
+                            $('html, body').animate({
+                                scrollTop: $('#twoFactorCodeContainer').offset().top - 100
+                            }, 300);
+                            
+                            sendSuccess('Please enter your two-factor authentication code');
+                        } else {
+                            // Login successful
+                            sendSuccess(result.message);
+                            setTimeout(function () {
+                                window.location.href = "{{route('seller.dashboard')}}";
+                            }, 1000);
+                        }
                     },
                     error: function (xhr) {
                         let data = xhr.responseJSON;
@@ -160,6 +190,9 @@
                             }
                             if (data.error.hasOwnProperty('password')) {
                                 $("#password-error").html(data.error.password).show();
+                            }
+                            if (data.error.hasOwnProperty('two_factor_code')) {
+                                $("#two_factor_code-error").html(data.error.two_factor_code).show();
                             }
                         } else if (data.hasOwnProperty('message')) {
                             actionError(xhr, data.message)

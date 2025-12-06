@@ -43,9 +43,13 @@ class AuthController extends Controller
         }
 
         // Check if 2FA is enabled
-        if ($owner->two_factor_enabled && $owner->two_factor_confirmed_at) {
+        if (
+            (int) $owner->two_factor_enabled === 1 &&     // explicitly enabled
+            !empty($owner->two_factor_secret) &&          // secret exists
+            !is_null($owner->two_factor_confirmed_at)     // confirmed
+        ) {
             // 2FA is enabled, verify the code
-            if (!$request->has('two_factor_code')) {
+            if (!$request->filled('two_factor_code')) {
                 return $this->sendResponse('Two-factor authentication required', [
                     'requires_2fa' => true,
                 ], 200);
@@ -54,9 +58,9 @@ class AuthController extends Controller
             // Verify the 2FA code
             $google2fa = new \PragmaRX\Google2FA\Google2FA();
             $secret = decrypt($owner->two_factor_secret);
-            
+
             $valid = $google2fa->verifyKey($secret, $request->two_factor_code);
-            
+
             // If code is invalid, check recovery codes
             if (!$valid) {
                 $valid = $this->verifyRecoveryCode($owner, $request->two_factor_code);
