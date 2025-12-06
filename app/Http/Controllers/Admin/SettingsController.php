@@ -9,6 +9,9 @@ use Illuminate\Support\Facades\Validator;
 use App\Http\Traits\ResponseTrait;
 use Illuminate\Support\Facades\DB;
 use App\Models\Session;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\AdminEmailVerificationMail;
 use Exception;
 
 class SettingsController extends Controller
@@ -60,6 +63,75 @@ class SettingsController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             return $this->sendError($e->getMessage());
+        }
+    }
+
+    /**
+     * Send email verification link to admin.
+     */
+    public function sendVerificationEmail()
+    {
+        try {
+            $admin = Auth::guard('admin')->user();
+
+            // Check if email is already verified
+            if ($admin->email_verified_at) {
+                return $this->sendError('Email is already verified.');
+            }
+
+            // Generate a signed URL that expires in 60 minutes
+            $verificationUrl = URL::temporarySignedRoute(
+                'admin.email.verify',
+                now()->addMinutes(60),
+                ['id' => $admin->id, 'hash' => sha1($admin->email)]
+            );
+
+            // Send the verification email
+            Mail::to($admin->email)->send(new AdminEmailVerificationMail($admin, $verificationUrl));
+
+            return $this->sendSuccess('Verification email sent successfully. Please check your inbox.');
+        } catch (Exception $e) {
+            return $this->sendError('Failed to send verification email: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Verify admin email address.
+     */
+    public function verifyEmail(Request $request, $id, $hash)
+    {
+        try {
+            // Verify the signature
+            if (!$request->hasValidSignature()) {
+                return redirect()->route('admin.settings')
+                    ->with('error', 'Invalid or expired verification link.');
+            }
+
+            // Find the admin
+            $admin = \App\Models\Admin::findOrFail($id);
+
+            // Verify the hash matches
+            if (!hash_equals($hash, sha1($admin->email))) {
+                return redirect()->route('admin.settings')
+                    ->with('error', 'Invalid verification link.');
+            }
+
+            // Check if already verified
+            if ($admin->email_verified_at) {
+                return redirect()->route('admin.settings')
+                    ->with('info', 'Email is already verified.');
+            }
+
+            // Mark email as verified
+            $admin->update([
+                'email_verified_at' => now(),
+            ]);
+
+            return redirect()->route('admin.settings')
+                ->with('success', 'Email verified successfully!');
+        } catch (Exception $e) {
+            return redirect()->route('admin.settings')
+                ->with('error', 'Verification failed: ' . $e->getMessage());
         }
     }
 
