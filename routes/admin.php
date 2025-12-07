@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\StaffController;
 use App\Http\Controllers\Admin\SellerController;
 use App\Http\Controllers\Admin\SettingsController;
+use App\Http\Controllers\Admin\SupportTeamController;
 use App\Http\Controllers\Admin\ForgotPasswordController;
     
 Route::middleware(['guest:admin'])->group(function () {
@@ -72,5 +73,14 @@ Route::middleware(['auth:admin', 'session.guard:admin'])->group(function () {
         Route::post('sellers/{seller}/approve', 'approve')->name('sellers.approve');
     });
     Route::resource('sellers', SellerController::class);
+
+    // Support Team Management
+    Route::controller(SupportTeamController::class)->group(function () {
+        Route::get('support-team/ajax-data', 'ajaxData')->name('support-team.ajaxData');
+        Route::post('support-team/{support_team}/status', 'status')->name('support-team.status');
+    });
+    Route::resource('support-team', SupportTeamController::class)->parameters([
+        'support-team' => 'supportTeamMember'
+    ]);
     
 });

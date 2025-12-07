@@ -51,6 +51,12 @@
                     </a>
                 </li>
 
+                <li class="nav-item">
+                    <a href="{{ route('admin.support-team.index') }}" class="nav-link menu-link @if(request()->routeIs('admin.support-team*')) active @endif">
+                        <i class="ri-customer-service-2-line"></i> <span data-key="t-support-team">Support Team</span>
+                    </a>
+                </li>
+
             </ul>
         </div>
         <!-- Sidebar -->

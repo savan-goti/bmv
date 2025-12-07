@@ -16,6 +16,7 @@ use App\Http\Controllers\Owner\ProductController;
 use App\Http\Controllers\Owner\JobPositionController;
 use App\Http\Controllers\Owner\BranchController;
 use App\Http\Controllers\Owner\BranchPositionController;
+use App\Http\Controllers\Owner\SupportTeamController;
 use App\Http\Controllers\Owner\ForgotPasswordController;
     
 
@@ -149,6 +150,15 @@ Route::middleware(['auth:owner', 'session.guard:owner'])->group(function () {
         Route::post('branch-positions/{branchPosition}/status', 'status')->name('branch-positions.status');
     });
     Route::resource('branch-positions', BranchPositionController::class);
+
+    // Support Team Management
+    Route::controller(SupportTeamController::class)->group(function () {
+        Route::get('support-team/ajax-data', 'ajaxData')->name('support-team.ajaxData');
+        Route::post('support-team/{support_team}/status', 'status')->name('support-team.status');
+    });
+    Route::resource('support-team', SupportTeamController::class)->parameters([
+        'support-team' => 'supportTeamMember'
+    ]);
     
 });
 
