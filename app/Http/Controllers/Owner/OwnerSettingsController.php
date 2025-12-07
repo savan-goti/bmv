@@ -9,6 +9,9 @@ use Illuminate\Support\Facades\Validator;
 use App\Http\Traits\ResponseTrait;
 use Illuminate\Support\Facades\DB;
 use App\Models\Session;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\OwnerEmailVerificationMail;
 use Exception;
 
 class OwnerSettingsController extends Controller
@@ -60,6 +63,75 @@ class OwnerSettingsController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             return $this->sendError($e->getMessage());
+        }
+    }
+
+    /**
+     * Send email verification link to owner.
+     */
+    public function sendVerificationEmail()
+    {
+        try {
+            $owner = Auth::guard('owner')->user();
+
+            // Check if email is already verified
+            if ($owner->email_verified_at) {
+                return $this->sendError('Email is already verified.');
+            }
+
+            // Generate a signed URL that expires in 60 minutes
+            $verificationUrl = URL::temporarySignedRoute(
+                'owner.email.verify',
+                now()->addMinutes(60),
+                ['id' => $owner->id, 'hash' => sha1($owner->email)]
+            );
+
+            // Send the verification email
+            Mail::to($owner->email)->send(new OwnerEmailVerificationMail($owner, $verificationUrl));
+
+            return $this->sendSuccess('Verification email sent successfully. Please check your inbox.');
+        } catch (Exception $e) {
+            return $this->sendError('Failed to send verification email: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Verify owner email address.
+     */
+    public function verifyEmail(Request $request, $id, $hash)
+    {
+        try {
+            // Verify the signature
+            if (!$request->hasValidSignature()) {
+                return redirect()->route('owner.owner-settings')
+                    ->with('error', 'Invalid or expired verification link.');
+            }
+
+            // Find the owner
+            $owner = \App\Models\Owner::findOrFail($id);
+
+            // Verify the hash matches
+            if (!hash_equals($hash, sha1($owner->email))) {
+                return redirect()->route('owner.owner-settings')
+                    ->with('error', 'Invalid verification link.');
+            }
+
+            // Check if already verified
+            if ($owner->email_verified_at) {
+                return redirect()->route('owner.owner-settings')
+                    ->with('info', 'Email is already verified.');
+            }
+
+            // Mark email as verified
+            $owner->update([
+                'email_verified_at' => now(),
+            ]);
+
+            return redirect()->route('owner.owner-settings')
+                ->with('success', 'Email verified successfully!');
+        } catch (Exception $e) {
+            return redirect()->route('owner.owner-settings')
+                ->with('error', 'Verification failed: ' . $e->getMessage());
         }
     }
 

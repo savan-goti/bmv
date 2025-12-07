@@ -9,6 +9,9 @@ use Illuminate\Support\Facades\Validator;
 use App\Http\Traits\ResponseTrait;
 use Illuminate\Support\Facades\DB;
 use App\Models\Session;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\SellerEmailVerificationMail;
 use Exception;
 
 class SettingsController extends Controller
@@ -60,6 +63,75 @@ class SettingsController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             return $this->sendError($e->getMessage());
+        }
+    }
+
+    /**
+     * Send email verification link to seller.
+     */
+    public function sendVerificationEmail()
+    {
+        try {
+            $seller = Auth::guard('seller')->user();
+
+            // Check if email is already verified
+            if ($seller->email_verified_at) {
+                return $this->sendError('Email is already verified.');
+            }
+
+            // Generate a signed URL that expires in 60 minutes
+            $verificationUrl = URL::temporarySignedRoute(
+                'seller.email.verify',
+                now()->addMinutes(60),
+                ['id' => $seller->id, 'hash' => sha1($seller->email)]
+            );
+
+            // Send the verification email
+            Mail::to($seller->email)->send(new SellerEmailVerificationMail($seller, $verificationUrl));
+
+            return $this->sendSuccess('Verification email sent successfully. Please check your inbox.');
+        } catch (Exception $e) {
+            return $this->sendError('Failed to send verification email: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Verify seller email address.
+     */
+    public function verifyEmail(Request $request, $id, $hash)
+    {
+        try {
+            // Verify the signature
+            if (!$request->hasValidSignature()) {
+                return redirect()->route('seller.settings')
+                    ->with('error', 'Invalid or expired verification link.');
+            }
+
+            // Find the seller
+            $seller = \App\Models\Seller::findOrFail($id);
+
+            // Verify the hash matches
+            if (!hash_equals($hash, sha1($seller->email))) {
+                return redirect()->route('seller.settings')
+                    ->with('error', 'Invalid verification link.');
+            }
+
+            // Check if already verified
+            if ($seller->email_verified_at) {
+                return redirect()->route('seller.settings')
+                    ->with('info', 'Email is already verified.');
+            }
+
+            // Mark email as verified
+            $seller->update([
+                'email_verified_at' => now(),
+            ]);
+
+            return redirect()->route('seller.settings')
+                ->with('success', 'Email verified successfully!');
+        } catch (Exception $e) {
+            return redirect()->route('seller.settings')
+                ->with('error', 'Verification failed: ' . $e->getMessage());
         }
     }
 

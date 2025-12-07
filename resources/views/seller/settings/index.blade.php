@@ -11,6 +11,28 @@
                     </div>
 
                     <div class="card-body">
+                        <!-- Flash Messages -->
+                        @if(session('success'))
+                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                <i class="ri-checkbox-circle-line"></i> {{ session('success') }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        @endif
+
+                        @if(session('error'))
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <i class="ri-error-warning-line"></i> {{ session('error') }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        @endif
+
+                        @if(session('info'))
+                            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                                <i class="ri-information-line"></i> {{ session('info') }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        @endif
+
                         <!-- Two-Factor Authentication -->
                         <div class="mb-4">
                             <h6 class="mb-3">Two-Factor Authentication</h6>
@@ -135,21 +157,14 @@
                                                 <i class="ri-close-circle-line"></i> Mark as Unverified
                                             </button>
                                         @else
-                                            <button type="button" class="btn btn-sm btn-success" id="verifyEmailBtn">
-                                                <i class="ri-checkbox-circle-line"></i> Mark as Verified
-                                            </button>
+                                            <div class="d-flex gap-2 justify-content-end">
+                                                <button type="button" class="btn btn-sm btn-primary" id="sendVerificationEmailBtn">
+                                                    <i class="ri-mail-send-line"></i> Send Verification Email
+                                                </button>
+                                            </div>
                                         @endif
                                     </div>
                                 </div>
-                            </div>
-
-                            <hr>
-
-                            <div class="mt-4">
-                                <button type="submit" class="btn btn-primary" id="settingsUpdateButton">
-                                    <i class="bx bx-loader spinner me-2" style="display: none" id="settingsUpdateBtnSpinner"></i>
-                                    Save Settings
-                                </button>
                             </div>
                         </form>
                     </div>
@@ -350,6 +365,38 @@
                 },
                 complete: function () {
                     $('#unverifyEmailBtn').attr('disabled', false);
+                },
+            });
+        });
+
+        // Handle send verification email button
+        $('#sendVerificationEmailBtn').on('click', function() {
+            const formData = new FormData();
+            formData.append('_token', '{{ csrf_token() }}');
+
+            $.ajax({
+                url: "{{ route('seller.settings.email.send-verification') }}",
+                method: "POST",
+                dataType: "json",
+                data: formData,
+                processData: false,
+                contentType: false,
+                beforeSend: function () {
+                    $('#sendVerificationEmailBtn').attr('disabled', true);
+                },
+                success: function (result) {
+                    sendSuccess(result.message);
+                },
+                error: function (xhr) {
+                    let data = xhr.responseJSON;
+                    if (data.hasOwnProperty('message')) {
+                        actionError(xhr, data.message);
+                    } else {
+                        actionError(xhr);
+                    }
+                },
+                complete: function () {
+                    $('#sendVerificationEmailBtn').attr('disabled', false);
                 },
             });
         });

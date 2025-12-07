@@ -9,6 +9,9 @@ use Illuminate\Support\Facades\Validator;
 use App\Http\Traits\ResponseTrait;
 use Illuminate\Support\Facades\DB;
 use App\Models\Session;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\StaffEmailVerificationMail;
 use Exception;
 
 class SettingsController extends Controller
@@ -60,6 +63,75 @@ class SettingsController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             return $this->sendError($e->getMessage());
+        }
+    }
+
+    /**
+     * Send email verification link to staff.
+     */
+    public function sendVerificationEmail()
+    {
+        try {
+            $staff = Auth::guard('staff')->user();
+
+            // Check if email is already verified
+            if ($staff->email_verified_at) {
+                return $this->sendError('Email is already verified.');
+            }
+
+            // Generate a signed URL that expires in 60 minutes
+            $verificationUrl = URL::temporarySignedRoute(
+                'staff.email.verify',
+                now()->addMinutes(60),
+                ['id' => $staff->id, 'hash' => sha1($staff->email)]
+            );
+
+            // Send the verification email
+            Mail::to($staff->email)->send(new StaffEmailVerificationMail($staff, $verificationUrl));
+
+            return $this->sendSuccess('Verification email sent successfully. Please check your inbox.');
+        } catch (Exception $e) {
+            return $this->sendError('Failed to send verification email: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Verify staff email address.
+     */
+    public function verifyEmail(Request $request, $id, $hash)
+    {
+        try {
+            // Verify the signature
+            if (!$request->hasValidSignature()) {
+                return redirect()->route('staff.settings')
+                    ->with('error', 'Invalid or expired verification link.');
+            }
+
+            // Find the staff
+            $staff = \App\Models\Staff::findOrFail($id);
+
+            // Verify the hash matches
+            if (!hash_equals($hash, sha1($staff->email))) {
+                return redirect()->route('staff.settings')
+                    ->with('error', 'Invalid verification link.');
+            }
+
+            // Check if already verified
+            if ($staff->email_verified_at) {
+                return redirect()->route('staff.settings')
+                    ->with('info', 'Email is already verified.');
+            }
+
+            // Mark email as verified
+            $staff->update([
+                'email_verified_at' => now(),
+            ]);
+
+            return redirect()->route('staff.settings')
+                ->with('success', 'Email verified successfully!');
+        } catch (Exception $e) {
+            return redirect()->route('staff.settings')
+                ->with('error', 'Verification failed: ' . $e->getMessage());
         }
     }
 

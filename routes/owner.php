@@ -30,6 +30,9 @@ Route::middleware(['guest:owner'])->group(function () {
     Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword'])->name('reset-password.update');
 });
 
+// Email Verification Route (accessible without authentication via signed URL)
+Route::get('/email/verify/{id}/{hash}', [OwnerSettingsController::class, 'verifyEmail'])->name('email.verify');
+
 Route::middleware(['auth:owner', 'session.guard:owner'])->group(function () {
     Route::any('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
@@ -52,6 +55,9 @@ Route::middleware(['auth:owner', 'session.guard:owner'])->group(function () {
     Route::controller(OwnerSettingsController::class)->group(function () {
         Route::get('/owner-settings', 'index')->name('owner-settings');
         Route::post('/owner-settings', 'update')->name('owner-settings.update');
+        
+        // Email Verification routes
+        Route::post('/owner-settings/email/send-verification', 'sendVerificationEmail')->name('owner-settings.email.send-verification');
         
         // Two-Factor Authentication routes
         Route::post('/owner-settings/two-factor/enable', 'enableTwoFactor')->name('owner-settings.two-factor.enable');
