@@ -26,6 +26,7 @@ class AuthController extends Controller
             'email' => 'required|email',
             'password' => 'required',
             'two_factor_code' => 'nullable|string|min:6|max:10',
+            'login_verification_code' => 'nullable|string|max:10',
         ]);
 
         if ($validator->fails()) {
@@ -44,8 +45,55 @@ class AuthController extends Controller
             return $this->sendError('Invalid email or password');
         }
 
-        // Check if 2FA is enabled
+        // Check user's preferred authentication method
+        $authMethod = $admin->login_auth_method ?? 'email_verification';
+
+        // Apply Email Verification if selected and email is verified
+        if ($authMethod === 'email_verification' && $admin->email_verified_at) {
+            // If no verification code provided, generate and send one
+            if (!$request->filled('login_verification_code')) {
+                // Generate a 6-digit verification code
+                $verificationCode = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+                
+                // Store the code and expiration time (10 minutes)
+                $admin->update([
+                    'login_verification_code' => $verificationCode,
+                    'login_verification_code_expires_at' => now()->addMinutes(10),
+                ]);
+
+                // Send the verification code via email
+                try {
+                    \Mail::to($admin->email)->send(new \App\Mail\AdminLoginVerificationMail($admin, $verificationCode));
+                } catch (\Exception $e) {
+                    return $this->sendError('Failed to send verification code. Please try again.');
+                }
+
+                return $this->sendResponse('Verification code sent to your email', [
+                    'requires_login_verification' => true,
+                    'auth_method' => 'email_verification',
+                ], 200);
+            }
+
+            // Verify the login verification code
+            if ($admin->login_verification_code !== $request->login_verification_code) {
+                return $this->sendError('Invalid verification code');
+            }
+
+            // Check if the code has expired
+            if ($admin->login_verification_code_expires_at < now()) {
+                return $this->sendError('Verification code has expired. Please request a new one.');
+            }
+
+            // Clear the verification code after successful verification
+            $admin->update([
+                'login_verification_code' => null,
+                'login_verification_code_expires_at' => null,
+            ]);
+        }
+
+        // Check if 2FA is enabled and selected as auth method
         if (
+            $authMethod === 'two_factor' &&
             (int) $admin->two_factor_enabled === 1 &&     // explicitly enabled
             !empty($admin->two_factor_secret) &&          // secret exists
             !is_null($admin->two_factor_confirmed_at)     // confirmed
@@ -54,6 +102,7 @@ class AuthController extends Controller
             if (!$request->filled('two_factor_code')) {
                 return $this->sendResponse('Two-factor authentication required', [
                     'requires_2fa' => true,
+                    'auth_method' => 'two_factor',
                 ], 200);
             }
 

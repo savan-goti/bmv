@@ -57,6 +57,18 @@
                                         </div>
                                     </div>
                                     
+                                    <!-- Authentication Method Tabs (Hidden by default, shown when needed) -->
+                                    <div class="mb-3" id="authMethodTabs" style="display: none;">
+                                        <div class="btn-group w-100" role="group" aria-label="Authentication Method">
+                                            <button type="button" class="btn btn-outline-primary auth-method-btn active" data-method="email_verification" id="emailVerificationTab">
+                                                Email Verification
+                                            </button>
+                                            <button type="button" class="btn btn-outline-primary auth-method-btn" data-method="two_factor" id="twoFactorTab">
+                                                2FA
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
                                     <!-- Two-Factor Authentication Code (Hidden by default) -->
                                     <div class="mb-3" id="twoFactorCodeContainer" style="display: none;">
                                         <div class="alert alert-info mb-3">
@@ -69,6 +81,20 @@
                                                placeholder="Enter 6-digit code or recovery code" name="two_factor_code" maxlength="10" autocomplete="off">
                                         <small class="text-muted d-block mt-1">Enter the 6-digit code from your authenticator app or use a recovery code (up to 10 characters).</small>
                                         <label id="two_factor_code-error" class="text-danger error" for="two_factor_code" style="display: none"></label>
+                                    </div>
+                                    
+                                    <!-- Login Email Verification Code (Hidden by default) -->
+                                    <div class="mb-3" id="loginVerificationCodeContainer" style="display: none;">
+                                        <div class="alert alert-success mb-3">
+                                            <i class="ri-mail-check-line me-2"></i>
+                                            <strong>Email Verification Required</strong>
+                                            <p class="mb-0 small mt-1">A verification code has been sent to your email. Please check your inbox and enter the code below.</p>
+                                        </div>
+                                        <label for="login_verification_code" class="form-label">Verification Code</label>
+                                        <input type="text" class="form-control" id="login_verification_code" 
+                                               placeholder="Enter 6-digit code" name="login_verification_code" maxlength="6" autocomplete="off">
+                                        <small class="text-muted d-block mt-1">The code will expire in 10 minutes.</small>
+                                        <label id="login_verification_code-error" class="text-danger error" for="login_verification_code" style="display: none"></label>
                                     </div>
                                     
                                     <div class="form-check">
@@ -162,15 +188,40 @@
                         $("#loginBtnSpinner").show();
                     },
                     success: function (result) {
+                        // Check if login email verification is required
+                        if (result.data && result.data.requires_login_verification) {
+                            // Show tabs and email verification by default
+                            $('#authMethodTabs').show();
+                            $('#loginVerificationCodeContainer').show();
+                            $('#twoFactorCodeContainer').hide();
+                            $('#login_verification_code').val('').focus();
+                            
+                            // Set active tab
+                            $('.auth-method-btn').removeClass('active');
+                            $('#emailVerificationTab').addClass('active');
+                            
+                            // Scroll to the verification field
+                            $('html, body').animate({
+                                scrollTop: $('#authMethodTabs').offset().top - 100
+                            }, 300);
+                            
+                            sendSuccess('Verification code sent to your email. Please check your inbox.');
+                        }
                         // Check if 2FA is required
-                        if (result.data && result.data.requires_2fa) {
-                            // Show 2FA input field
+                        else if (result.data && result.data.requires_2fa) {
+                            // Show tabs and 2FA by default
+                            $('#authMethodTabs').show();
                             $('#twoFactorCodeContainer').show();
+                            $('#loginVerificationCodeContainer').hide();
                             $('#two_factor_code').val('').focus();
+                            
+                            // Set active tab
+                            $('.auth-method-btn').removeClass('active');
+                            $('#twoFactorTab').addClass('active');
                             
                             // Scroll to the 2FA field
                             $('html, body').animate({
-                                scrollTop: $('#twoFactorCodeContainer').offset().top - 100
+                                scrollTop: $('#authMethodTabs').offset().top - 100
                             }, 300);
                             
                             sendSuccess('Please enter your two-factor authentication code');
@@ -191,6 +242,9 @@
                             if (data.error.hasOwnProperty('password')) {
                                 $("#password-error").html(data.error.password).show();
                             }
+                            if (data.error.hasOwnProperty('login_verification_code')) {
+                                $("#login_verification_code-error").html(data.error.login_verification_code).show();
+                            }
                             if (data.error.hasOwnProperty('two_factor_code')) {
                                 $("#two_factor_code-error").html(data.error.two_factor_code).show();
                             }
@@ -205,6 +259,26 @@
                         $("#loginBtnSpinner").hide();
                     },
                 });
+            }
+        });
+
+        // Handle authentication method tab switching
+        $('.auth-method-btn').on('click', function() {
+            const method = $(this).data('method');
+            
+            // Update active tab
+            $('.auth-method-btn').removeClass('active');
+            $(this).addClass('active');
+            
+            // Show/hide appropriate containers
+            if (method === 'email_verification') {
+                $('#loginVerificationCodeContainer').show();
+                $('#twoFactorCodeContainer').hide();
+                $('#login_verification_code').focus();
+            } else if (method === 'two_factor') {
+                $('#twoFactorCodeContainer').show();
+                $('#loginVerificationCodeContainer').hide();
+                $('#two_factor_code').focus();
             }
         });
     });

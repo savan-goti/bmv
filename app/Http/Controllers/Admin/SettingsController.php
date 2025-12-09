@@ -39,6 +39,7 @@ class SettingsController extends Controller
 
             $validator = Validator::make($request->all(), [
                 'email_verified' => 'nullable|boolean',
+                'login_auth_method' => 'nullable|in:email_verification,two_factor',
             ]);
 
             if ($validator->fails()) {
@@ -54,6 +55,11 @@ class SettingsController extends Controller
                 } else {
                     $saveData['email_verified_at'] = null;
                 }
+            }
+
+            // Handle login authentication method preference
+            if ($request->has('login_auth_method')) {
+                $saveData['login_auth_method'] = $request->login_auth_method;
             }
 
             $admin->update($saveData);

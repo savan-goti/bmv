@@ -165,6 +165,40 @@
                                         @endif
                                     </div>
                                 </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr>
+
+                            <!-- Login Authentication Method Preference -->
+                            <div class="mb-4">
+                                <h6 class="mb-3">Login Authentication Method</h6>
+                                <div class="row align-items-center">
+                                    <div class="col-md-8">
+                                        <label class="form-label mb-1">Preferred Authentication Method</label>
+                                        <p class="text-muted small mb-0">
+                                            Choose your preferred method for login authentication. Email Verification sends a code to your email, while 2FA uses an authenticator app.
+                                        </p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <select class="form-select" id="loginAuthMethodSelect" name="login_auth_method">
+                                            <option value="email_verification" {{ ($admin->login_auth_method ?? 'email_verification') == 'email_verification' ? 'selected' : '' }}>
+                                                Email Verification
+                                            </option>
+                                            <option value="two_factor" {{ ($admin->login_auth_method ?? 'email_verification') == 'two_factor' ? 'selected' : '' }}>
+                                                Two-Factor Authentication
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                @if(!$admin->email_verified_at && !$admin->two_factor_enabled)
+                                    <div class="alert alert-warning mt-3">
+                                        <i class="ri-alert-line me-2"></i>
+                                        <strong>Note:</strong> Please enable Email Verification or Two-Factor Authentication in the sections above before selecting your preferred method.
+                                    </div>
+                                @endif
                             </div>
                         </form>
                     </div>
@@ -402,6 +436,40 @@
                 },
                 complete: function () {
                     $('#sendVerificationEmailBtn').attr('disabled', false);
+                },
+            });
+        });
+
+        // Handle login authentication method change
+        $('#loginAuthMethodSelect').on('change', function() {
+            const method = $(this).val();
+            const formData = new FormData();
+            formData.append('_token', '{{ csrf_token() }}');
+            formData.append('login_auth_method', method);
+
+            $.ajax({
+                url: "{{ route('admin.settings.update') }}",
+                method: "POST",
+                dataType: "json",
+                data: formData,
+                processData: false,
+                contentType: false,
+                beforeSend: function () {
+                    $('#loginAuthMethodSelect').attr('disabled', true);
+                },
+                success: function (result) {
+                    sendSuccess('Authentication method updated successfully');
+                },
+                error: function (xhr) {
+                    let data = xhr.responseJSON;
+                    if (data.hasOwnProperty('message')) {
+                        actionError(xhr, data.message);
+                    } else {
+                        actionError(xhr);
+                    }
+                },
+                complete: function () {
+                    $('#loginAuthMethodSelect').attr('disabled', false);
                 },
             });
         });
