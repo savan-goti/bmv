@@ -1,0 +1,30 @@
+# Fallback configuration when mod_rewrite is not available
+# All requests will be handled by the root index.php
+
+DirectoryIndex index.php
+
+# Disable directory browsing
+Options -Indexes
+
+# Protect sensitive files
+<FilesMatch "^\.">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# If mod_rewrite is available, use it for better performance
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /bmv/
+    
+    # Handle Authorization Header
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+    
+    # Don't rewrite existing files or directories
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    
+    # Rewrite everything to index.php
+    RewriteRule ^(.*)$ index.php [L,QSA]
+</IfModule>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Loading...</title>
+    <script>
+        // Get the current path
+        var path = window.location.pathname;
+        var search = window.location.search;
+        var hash = window.location.hash;
+
+        // Remove /bmv from the path
+        path = path.replace('/bmv', '');
+
+        // Remove /index.html from the path if present
+        path = path.replace('/index.html', '');
+
+        // If we're at the root, redirect to index.php
+        if (path === '/' || path === '' || path === '/index.html') {
+            window.location.href = 'index.php' + search + hash;
+        } else {
+            // Otherwise, redirect to index.php with the path as a query parameter
+            window.location.href = 'index.php?_route=' + encodeURIComponent(path) + search.replace('?', '&') + hash;
+        }
+    </script>
+    <noscript>
+        <meta http-equiv="refresh" content="0;url=index.php">
+    </noscript>
+</head>
+
+<body>
+    <p>Loading...</p>
+</body>
+
+</html>
