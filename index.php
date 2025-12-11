@@ -7,8 +7,9 @@
  * while maintaining proper paths for Laravel routing.
  */
 
-// Get the request URI
-$request_uri = $_SERVER['REQUEST_URI'];
+// Auto-detect the base path from the script name
+$script_dir = dirname($_SERVER['SCRIPT_NAME']);
+$base_path = ($script_dir === '/' || $script_dir === '\\') ? '' : $script_dir;
 
 // Check if we have a _route parameter (from index.html fallback)
 if (isset($_GET['_route'])) {
@@ -19,12 +20,14 @@ if (isset($_GET['_route'])) {
     if (!empty($_GET)) {
         $request_uri .= '?' . http_build_query($_GET);
     }
-}
-
-// Remove the base path (/bmv) from the URI
-$base_path = '/bmv';
-if (strpos($request_uri, $base_path) === 0) {
-    $request_uri = substr($request_uri, strlen($base_path));
+} else {
+    // Get the request URI
+    $request_uri = $_SERVER['REQUEST_URI'];
+    
+    // Remove the base path from the URI if present
+    if ($base_path && strpos($request_uri, $base_path) === 0) {
+        $request_uri = substr($request_uri, strlen($base_path));
+    }
 }
 
 // Remove query string
