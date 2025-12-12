@@ -190,8 +190,13 @@
                     success: function (result) {
                         // Check if login email verification is required
                         if (result.data && result.data.requires_login_verification) {
-                            // Show tabs and email verification by default
-                            $('#authMethodTabs').show();
+                            // Show tabs only if both methods are available
+                            if (result.data.has_both_methods) {
+                                $('#authMethodTabs').show();
+                            } else {
+                                $('#authMethodTabs').hide();
+                            }
+                            
                             $('#loginVerificationCodeContainer').show();
                             $('#twoFactorCodeContainer').hide();
                             $('#login_verification_code').val('').focus();
@@ -201,16 +206,22 @@
                             $('#emailVerificationTab').addClass('active');
                             
                             // Scroll to the verification field
+                            var scrollTarget = result.data.has_both_methods ? $('#authMethodTabs') : $('#loginVerificationCodeContainer');
                             $('html, body').animate({
-                                scrollTop: $('#authMethodTabs').offset().top - 100
+                                scrollTop: scrollTarget.offset().top - 100
                             }, 300);
                             
                             sendSuccess('Verification code sent to your email. Please check your inbox.');
                         }
                         // Check if 2FA is required
                         else if (result.data && result.data.requires_2fa) {
-                            // Show tabs and 2FA by default
-                            $('#authMethodTabs').show();
+                            // Show tabs only if both methods are available
+                            if (result.data.has_both_methods) {
+                                $('#authMethodTabs').show();
+                            } else {
+                                $('#authMethodTabs').hide();
+                            }
+                            
                             $('#twoFactorCodeContainer').show();
                             $('#loginVerificationCodeContainer').hide();
                             $('#two_factor_code').val('').focus();
@@ -220,8 +231,9 @@
                             $('#twoFactorTab').addClass('active');
                             
                             // Scroll to the 2FA field
+                            var scrollTarget = result.data.has_both_methods ? $('#authMethodTabs') : $('#twoFactorCodeContainer');
                             $('html, body').animate({
-                                scrollTop: $('#authMethodTabs').offset().top - 100
+                                scrollTop: scrollTarget.offset().top - 100
                             }, 300);
                             
                             sendSuccess('Please enter your two-factor authentication code');
