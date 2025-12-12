@@ -37,6 +37,10 @@ class Owner extends Authenticatable
         'two_factor_recovery_codes',
         'two_factor_confirmed_at',
         'email_verified_at',
+        'login_auth_method',
+        'login_email_verification_enabled',
+        'login_verification_code',
+        'login_verification_code_expires_at',
         'created_by',
         'creator_id',
     ];
@@ -55,6 +59,8 @@ class Owner extends Authenticatable
         'email_verified_at' => 'datetime',
         'two_factor_enabled' => 'boolean',
         'two_factor_confirmed_at' => 'datetime',
+        'login_email_verification_enabled' => 'boolean',
+        'login_verification_code_expires_at' => 'datetime',
     ];
 
     /**

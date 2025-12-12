@@ -45,80 +45,100 @@ class AuthController extends Controller
             return $this->sendError('Invalid email or password');
         }
 
-        // Check user's preferred authentication method
-        $authMethod = $admin->login_auth_method ?? 'email_verification';
+        // Check if both authentication methods are available
+        $hasEmailVerification = $admin->email_verified_at !== null;
+        $has2FA = (int) $admin->two_factor_enabled === 1 && 
+                  !empty($admin->two_factor_secret) && 
+                  !is_null($admin->two_factor_confirmed_at);
+        $hasBothMethods = $hasEmailVerification && $has2FA;
 
-        // Apply Email Verification if selected and email is verified
-        if ($authMethod === 'email_verification' && $admin->email_verified_at) {
-            // If no verification code provided, generate and send one
-            if (!$request->filled('login_verification_code')) {
-                // Generate a 6-digit verification code
-                $verificationCode = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        // Determine which verification is required
+        $requiresVerification = $hasEmailVerification || $has2FA;
+
+        if ($requiresVerification) {
+            // If no verification code provided, send the appropriate one based on user's preference
+            if (!$request->filled('login_verification_code') && !$request->filled('two_factor_code')) {
+                $authMethod = $admin->login_auth_method ?? 'email_verification';
                 
-                // Store the code and expiration time (10 minutes)
-                $admin->update([
-                    'login_verification_code' => $verificationCode,
-                    'login_verification_code_expires_at' => now()->addMinutes(10),
-                ]);
+                // If user prefers email verification and it's available
+                if ($authMethod === 'email_verification' && $hasEmailVerification) {
+                    // Generate a 6-digit verification code
+                    $verificationCode = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+                    
+                    // Store the code and expiration time (10 minutes)
+                    $admin->update([
+                        'login_verification_code' => $verificationCode,
+                        'login_verification_code_expires_at' => now()->addMinutes(10),
+                    ]);
 
-                // Send the verification code via email
-                try {
-                    \Mail::to($admin->email)->send(new \App\Mail\AdminLoginVerificationMail($admin, $verificationCode));
-                } catch (\Exception $e) {
-                    return $this->sendError('Failed to send verification code. Please try again.');
+                    // Send the verification code via email
+                    try {
+                        \Mail::to($admin->email)->send(new \App\Mail\AdminLoginVerificationMail($admin, $verificationCode));
+                    } catch (\Exception $e) {
+                        return $this->sendError('Failed to send verification code. Please try again.');
+                    }
+
+                    return $this->sendResponse('Verification code sent to your email', [
+                        'requires_login_verification' => true,
+                        'auth_method' => 'email_verification',
+                        'has_both_methods' => $hasBothMethods,
+                    ], 200);
+                }
+                // If user prefers 2FA or email verification is not available
+                elseif ($has2FA) {
+                    return $this->sendResponse('Two-factor authentication required', [
+                        'requires_2fa' => true,
+                        'auth_method' => 'two_factor',
+                        'has_both_methods' => $hasBothMethods,
+                    ], 200);
+                }
+            }
+
+            // Verify the provided code (email verification or 2FA)
+            $verified = false;
+
+            // Check email verification code if provided
+            if ($request->filled('login_verification_code') && $hasEmailVerification) {
+                if ($admin->login_verification_code === $request->login_verification_code) {
+                    // Check if the code has expired
+                    if ($admin->login_verification_code_expires_at >= now()) {
+                        $verified = true;
+                        // Clear the verification code after successful verification
+                        $admin->update([
+                            'login_verification_code' => null,
+                            'login_verification_code_expires_at' => null,
+                        ]);
+                    } else {
+                        return $this->sendError('Verification code has expired. Please request a new one.');
+                    }
+                } else {
+                    return $this->sendError('Invalid verification code');
+                }
+            }
+
+            // Check 2FA code if provided and not yet verified
+            if (!$verified && $request->filled('two_factor_code') && $has2FA) {
+                // Verify the 2FA code
+                $google2fa = new \PragmaRX\Google2FA\Google2FA();
+                $secret = decrypt($admin->two_factor_secret);
+
+                $valid = $google2fa->verifyKey($secret, $request->two_factor_code);
+
+                // If code is invalid, check recovery codes
+                if (!$valid) {
+                    $valid = $this->verifyRecoveryCode($admin, $request->two_factor_code);
                 }
 
-                return $this->sendResponse('Verification code sent to your email', [
-                    'requires_login_verification' => true,
-                    'auth_method' => 'email_verification',
-                ], 200);
+                if ($valid) {
+                    $verified = true;
+                } else {
+                    return $this->sendError('Invalid two-factor authentication code');
+                }
             }
 
-            // Verify the login verification code
-            if ($admin->login_verification_code !== $request->login_verification_code) {
-                return $this->sendError('Invalid verification code');
-            }
-
-            // Check if the code has expired
-            if ($admin->login_verification_code_expires_at < now()) {
-                return $this->sendError('Verification code has expired. Please request a new one.');
-            }
-
-            // Clear the verification code after successful verification
-            $admin->update([
-                'login_verification_code' => null,
-                'login_verification_code_expires_at' => null,
-            ]);
-        }
-
-        // Check if 2FA is enabled and selected as auth method
-        if (
-            $authMethod === 'two_factor' &&
-            (int) $admin->two_factor_enabled === 1 &&     // explicitly enabled
-            !empty($admin->two_factor_secret) &&          // secret exists
-            !is_null($admin->two_factor_confirmed_at)     // confirmed
-        ) {
-            // 2FA is enabled, verify the code
-            if (!$request->filled('two_factor_code')) {
-                return $this->sendResponse('Two-factor authentication required', [
-                    'requires_2fa' => true,
-                    'auth_method' => 'two_factor',
-                ], 200);
-            }
-
-            // Verify the 2FA code
-            $google2fa = new \PragmaRX\Google2FA\Google2FA();
-            $secret = decrypt($admin->two_factor_secret);
-
-            $valid = $google2fa->verifyKey($secret, $request->two_factor_code);
-
-            // If code is invalid, check recovery codes
-            if (!$valid) {
-                $valid = $this->verifyRecoveryCode($admin, $request->two_factor_code);
-            }
-
-            if (!$valid) {
-                return $this->sendError('Invalid two-factor authentication code');
+            // If verification is required but not verified, return error
+            if (!$verified) {
+                return $this->sendError('Verification required. Please provide a valid code.');
             }
         }
 
