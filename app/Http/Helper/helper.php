@@ -124,7 +124,13 @@ function slug($name){
 
 function uploadFilepondFile($file, $path, $prefix = "img_")
 {
-    $extension = $file->getExtension() != "" ? $file->getExtension() : $file->getClientOriginalExtension();
+    // $extension = $file->getExtension() != "" ? $file->getExtension() : $file->getClientOriginalExtension();
+    $extension = pathinfo($file->getFilename(), PATHINFO_EXTENSION);
+
+    if (!$extension) {
+        $extension = $file->getClientOriginalExtension();
+    }
+
     $fileName = fileName($extension, $prefix);
     $file->move(public_path($path), $fileName);
     return $fileName;
@@ -160,7 +166,13 @@ function uploadFilepondEncodedFile($json, $path, $prefix = 'img_')
 
 function uploadImgFilepondFile($file, $path, $prefix = "img_")
 {
-    $extension = $file->getExtension() != "" ? $file->getExtension() : $file->getClientOriginalExtension();
+    // $extension = $file->getExtension() != "" ? $file->getExtension() : $file->getClientOriginalExtension();
+    $extension = pathinfo($file->getFilename(), PATHINFO_EXTENSION);
+
+    if (!$extension) {
+        $extension = $file->getClientOriginalExtension();
+    }
+
     $fileName = fileName($extension, $prefix);
     $destination = public_path($path);
     if (!file_exists($destination)) {
