@@ -7,14 +7,16 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Enums\Status;
 
-class Category extends Model
+class Brand extends Model
 {
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'name',
         'slug',
-        'image',
+        'logo',
+        'description',
+        'website',
         'status',
     ];
 
@@ -22,18 +24,21 @@ class Category extends Model
         'status' => Status::class,
     ];
 
-    public function subCategories()
-    {
-        return $this->hasMany(SubCategory::class);
-    }
-
     public function products()
     {
         return $this->hasMany(Product::class);
     }
 
-    public function childCategories()
+    public function getLogoAttribute($logo)
     {
-        return $this->hasMany(ChildCategory::class);
+        $outputImage = asset('assets/img/no_img.jpg');
+
+        if ($logo && $logo != null && $logo != '') {
+            if (file_exists(public_path('uploads/brands/') . $logo)) {
+                $outputImage = asset('uploads/brands/' . $logo);
+            }
+        }
+
+        return $outputImage;
     }
 }

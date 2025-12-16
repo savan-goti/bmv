@@ -7,11 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Enums\Status;
 
-class Category extends Model
+class ChildCategory extends Model
 {
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
+        'category_id',
+        'sub_category_id',
         'name',
         'slug',
         'image',
@@ -22,18 +24,18 @@ class Category extends Model
         'status' => Status::class,
     ];
 
-    public function subCategories()
+    public function category()
     {
-        return $this->hasMany(SubCategory::class);
+        return $this->belongsTo(Category::class);
+    }
+
+    public function subCategory()
+    {
+        return $this->belongsTo(SubCategory::class);
     }
 
     public function products()
     {
         return $this->hasMany(Product::class);
-    }
-
-    public function childCategories()
-    {
-        return $this->hasMany(ChildCategory::class);
     }
 }
