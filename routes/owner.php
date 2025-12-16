@@ -122,6 +122,28 @@ Route::middleware(['auth:owner', 'session.guard:owner'])->group(function () {
     });
     Route::resource('sub-categories', SubCategoryController::class);
 
+    // Child Category Management
+    Route::controller(\App\Http\Controllers\Owner\ChildCategoryController::class)->group(function () {
+        Route::get('child-categories/ajax-data', 'ajaxData')->name('child-categories.ajaxData');
+        Route::post('child-categories/{childCategory}/status', 'status')->name('child-categories.status');
+        Route::get('child-categories/get-by-sub-category', 'getBySubCategory')->name('child-categories.get-by-sub-category');
+    });
+    Route::resource('child-categories', \App\Http\Controllers\Owner\ChildCategoryController::class);
+
+    // Brand Management
+    Route::controller(\App\Http\Controllers\Owner\BrandController::class)->group(function () {
+        Route::get('brands/ajax-data', 'ajaxData')->name('brands.ajaxData');
+        Route::post('brands/{brand}/status', 'status')->name('brands.status');
+    });
+    Route::resource('brands', \App\Http\Controllers\Owner\BrandController::class);
+
+    // Collection Management
+    Route::controller(\App\Http\Controllers\Owner\CollectionController::class)->group(function () {
+        Route::get('collections/ajax-data', 'ajaxData')->name('collections.ajaxData');
+        Route::post('collections/{collection}/status', 'status')->name('collections.status');
+    });
+    Route::resource('collections', \App\Http\Controllers\Owner\CollectionController::class);
+
     // Product Management
     Route::controller(ProductController::class)->group(function () {
         Route::get('products/ajax-data', 'ajaxData')->name('products.ajaxData');

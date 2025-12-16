@@ -23,5 +23,10 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $this->call(OwnerSeeder::class);
+        $this->call(CategorySeeder::class);
+        $this->call(SubCategorySeeder::class);
+        $this->call(ChildCategorySeeder::class);
+        $this->call(BrandSeeder::class);
+        $this->call(CollectionSeeder::class);
     }
 }

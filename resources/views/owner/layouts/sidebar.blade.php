@@ -89,7 +89,7 @@
                     </a>
                 </li>
 
-                <!-- <li class="menu-title"><i class="ri-more-fill"></i> <span data-key="t-pages">Product Management</span></li>
+                <li class="menu-title"><i class="ri-more-fill"></i> <span data-key="t-pages">Product Management</span></li>
 
                 <li class="nav-item">
                     <a href="{{ route('owner.categories.index') }}" class="nav-link menu-link @if(request()->routeIs('owner.categories.*')) active @endif">
@@ -104,10 +104,28 @@
                 </li>
 
                 <li class="nav-item">
+                    <a href="{{ route('owner.child-categories.index') }}" class="nav-link menu-link @if(request()->routeIs('owner.child-categories.*')) active @endif">
+                        <i class="ri-folder-2-line"></i> <span data-key="t-child-categories">Child Categories</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="{{ route('owner.brands.index') }}" class="nav-link menu-link @if(request()->routeIs('owner.brands.*')) active @endif">
+                        <i class="ri-award-line"></i> <span data-key="t-brands">Brands</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="{{ route('owner.collections.index') }}" class="nav-link menu-link @if(request()->routeIs('owner.collections.*')) active @endif">
+                        <i class="ri-stack-line"></i> <span data-key="t-collections">Collections</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
                     <a href="{{ route('owner.products.index') }}" class="nav-link menu-link @if(request()->routeIs('owner.products.*')) active @endif">
                         <i class="ri-shopping-bag-3-line"></i> <span data-key="t-products">Products</span>
                     </a>
-                </li> -->
+                </li>
 
             </ul>
         </div>
