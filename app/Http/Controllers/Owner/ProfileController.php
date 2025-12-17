@@ -59,7 +59,9 @@ class ProfileController extends Controller
             ];
 
             if ($request->hasFile('profile_image')) {
-                deleteImage($owner->profile_image, OWNER_PROFILE_IMAGE_PATH);
+                if ($owner->profile_image) {
+                    deleteImage($owner->profile_image, OWNER_PROFILE_IMAGE_PATH);
+                }
                 $saveData['profile_image'] = uploadImgFile($request->profile_image, OWNER_PROFILE_IMAGE_PATH);
             }
 
