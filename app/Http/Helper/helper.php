@@ -44,7 +44,7 @@ if (!function_exists('uploadImgFile')) {
         $image->save($fullPath);
 
         // Optional: Optimize with Spatie
-        if (class_exists(\Spatie\ImageOptimizer\OptimizerChainFactory::class)) {
+        if (class_exists(OptimizerChainFactory::class)) {
             OptimizerChainFactory::create()->optimize($fullPath);
         }
 
