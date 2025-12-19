@@ -121,11 +121,11 @@
                     </a>
                 </li>
 
-                <!-- <li class="nav-item">
+                <li class="nav-item">
                     <a href="{{ route('owner.products.index') }}" class="nav-link menu-link @if(request()->routeIs('owner.products.*')) active @endif">
                         <i class="ri-shopping-bag-3-line"></i> <span data-key="t-products">Products</span>
                     </a>
-                </li> -->
+                </li>
 
             </ul>
         </div>

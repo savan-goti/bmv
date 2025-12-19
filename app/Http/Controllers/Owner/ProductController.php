@@ -27,9 +27,23 @@ class ProductController extends Controller
         return view('owner.products.index');
     }
 
-    public function ajaxData()
+    public function ajaxData(Request $request)
     {
-        $result = Product::with(['category', 'subCategory']);
+        $result = Product::with(['category', 'subCategory', 'brand', 'collection']);
+        
+        // Apply filters
+        if ($request->has('is_active') && $request->is_active != '') {
+            $result->where('is_active', $request->is_active);
+        }
+        
+        if ($request->has('product_status') && $request->product_status != '') {
+            $result->where('product_status', $request->product_status);
+        }
+        
+        if ($request->has('product_type') && $request->product_type != '') {
+            $result->where('product_type', $request->product_type);
+        }
+        
         return DataTables::eloquent($result)
             ->addIndexColumn()
             ->addColumn('action', function($row){
@@ -41,95 +55,194 @@ class ProductController extends Controller
                 $btn .= '<button type="button" class="btn btn-sm btn-danger delete-item" data-url="'.$deleteUrl.'"><i class="bx bx-trash"></i> Delete</button>';
                 return $btn;
             })
-            ->editColumn('status', function($row){
-                $status = $row->status->label();
-                $badgeClass = $row->status->color();
+            ->editColumn('is_active', function($row){
+                $status = $row->is_active->label();
+                $badgeClass = $row->is_active->color();
                 return '<div class="form-check form-switch form-switch-md mb-3" dir="ltr">
-                            <input type="checkbox" class="form-check-input status-toggle" id="customSwitch'.$row->id.'" data-id="'.$row->id.'" data-url="'.route('owner.products.status', $row->id).'" '.($row->status === Status::Active ? 'checked' : '').'>
+                            <input type="checkbox" class="form-check-input status-toggle" id="customSwitch'.$row->id.'" data-id="'.$row->id.'" data-url="'.route('owner.products.status', $row->id).'" '.($row->is_active === Status::Active ? 'checked' : '').'>
                             <label class="form-check-label" for="customSwitch'.$row->id.'">'.$status.'</label>
                         </div>';
             })
-            ->editColumn('image', function($row){
-                if($row->image){
-                    return '<img src="'.asset(self::IMAGE_PATH.$row->image).'" alt="'.$row->name.'" class="img-thumbnail" width="50">';
+            ->editColumn('thumbnail_image', function($row){
+                if($row->thumbnail_image){
+                    return '<img src="'.asset(self::IMAGE_PATH.$row->thumbnail_image).'" alt="'.$row->product_name.'" class="img-thumbnail" width="50">';
                 }
                 return 'N/A';
             })
             ->addColumn('category_name', function($row){
                 return $row->category ? $row->category->name : 'N/A';
             })
-            ->editColumn('price', function($row){
-                return currency($row->price);
+            ->editColumn('sell_price', function($row){
+                return currency($row->sell_price);
             })
-            ->rawColumns(['action', 'status', 'image'])
+            ->editColumn('product_status', function($row){
+                $badges = [
+                    'draft' => 'secondary',
+                    'pending' => 'warning',
+                    'approved' => 'success',
+                    'rejected' => 'danger'
+                ];
+                $badgeClass = $badges[$row->product_status] ?? 'secondary';
+                return '<span class="badge bg-'.$badgeClass.'">'.ucfirst($row->product_status).'</span>';
+            })
+            ->rawColumns(['action', 'is_active', 'thumbnail_image', 'product_status'])
             ->make(true);
     }
 
     public function create()
     {
         $categories = Category::where('status', Status::Active)->get();
-        return view('owner.products.create', compact('categories'));
+        $brands = \App\Models\Brand::where('status', Status::Active)->get();
+        $collections = \App\Models\Collection::where('status', Status::Active)->get();
+        return view('owner.products.create', compact('categories', 'brands', 'collections'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            // Basic Info
+            'product_type' => 'required|in:simple,variable,digital,service',
+            'product_name' => 'required|string|max:255',
+            'sku' => 'nullable|string|max:100|unique:products,sku',
+            'barcode' => 'nullable|string|max:100',
+            'short_description' => 'nullable|string',
+            'full_description' => 'nullable|string',
+            
+            // Category & Brand
             'category_id' => 'required|exists:categories,id',
             'sub_category_id' => 'nullable|exists:sub_categories,id',
-            'price' => 'required|numeric|min:0',
-            'discount' => 'nullable|numeric|min:0',
-            'quantity' => 'required|integer|min:0',
-            'status' => 'required|in:active,inactive',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-            'short_description' => 'nullable|string',
-            'long_description' => 'nullable|string',
-            'manufacturer_name' => 'nullable|string',
-            'manufacturer_brand' => 'nullable|string',
-            'manufacturer_part_number' => 'nullable|string',
-            'specifications' => 'nullable|array',
-            'meta_title' => 'nullable|string',
+            'child_category_id' => 'nullable|exists:child_categories,id',
+            'brand_id' => 'nullable|exists:brands,id',
+            'collection_id' => 'nullable|exists:collections,id',
+            
+            // Pricing
+            'purchase_price' => 'nullable|numeric|min:0',
+            'original_price' => 'nullable|numeric|min:0',
+            'sell_price' => 'required|numeric|min:0',
+            'discount_type' => 'required|in:flat,percentage',
+            'discount_value' => 'nullable|numeric|min:0',
+            'gst_rate' => 'nullable|numeric|min:0|max:100',
+            'tax_included' => 'nullable|boolean',
+            'commission_type' => 'required|in:flat,percentage',
+            'commission_value' => 'nullable|numeric|min:0',
+            
+            // Inventory
+            'stock_type' => 'required|in:limited,unlimited',
+            'total_stock' => 'required|integer|min:0',
+            'low_stock_alert' => 'nullable|integer|min:0',
+            'warehouse_location' => 'nullable|string|max:100',
+            
+            // Variations
+            'has_variation' => 'nullable|boolean',
+            
+            // Media
+            'thumbnail_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'video_url' => 'nullable|url',
+            'image_alt_text' => 'nullable|string|max:255',
+            'gallery_images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            
+            // Shipping
+            'weight' => 'nullable|numeric|min:0',
+            'length' => 'nullable|numeric|min:0',
+            'width' => 'nullable|numeric|min:0',
+            'height' => 'nullable|numeric|min:0',
+            'shipping_class' => 'required|in:normal,heavy',
+            'free_shipping' => 'nullable|boolean',
+            'cod_available' => 'nullable|boolean',
+            
+            // Status & Workflow
+            'product_status' => 'required|in:draft,pending,approved,rejected',
+            'is_active' => 'required|in:active,inactive',
+            'is_featured' => 'nullable|boolean',
+            'is_returnable' => 'nullable|boolean',
+            'return_days' => 'nullable|integer|min:0',
+            
+            // SEO
+            'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string',
             'meta_keywords' => 'nullable|string',
-            'gallery_images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-            'published_at' => 'nullable|date',
+            'search_tags' => 'nullable|string',
         ]);
 
         try {
             DB::beginTransaction();
 
             $productData = [
-                'name' => $request->name,
-                'slug' => Str::slug($request->name),
+                // Basic Info
+                'product_type' => $request->product_type,
+                'product_name' => $request->product_name,
+                'slug' => Str::slug($request->product_name),
+                'sku' => $request->sku,
+                'barcode' => $request->barcode,
+                'short_description' => $request->short_description,
+                'full_description' => $request->full_description,
+                
+                // Ownership & Audit
+                'owner_id' => Auth::guard('owner')->id(),
+                'added_by_role' => 'owner',
+                'added_by_user_id' => Auth::guard('owner')->id(),
+                
+                // Category & Brand
                 'category_id' => $request->category_id,
                 'sub_category_id' => $request->sub_category_id,
-                'price' => $request->price,
-                'discount' => $request->discount ?? 0,
-                'quantity' => $request->quantity,
-                'status' => $request->status,
-                'published_at' => $request->published_at,
-                'added_by_id' => Auth::guard('owner')->id(),
-                'added_by_type' => get_class(Auth::guard('owner')->user()),
-            ];
-
-            if ($request->hasFile('image')) {
-                $productData['image'] = uploadImgFile($request->image, self::IMAGE_PATH);
-            }
-
-            $product = Product::create($productData);
-
-            // Product Information
-            $product->productInformation()->create([
-                'short_description' => $request->short_description,
-                'long_description' => $request->long_description,
-                'manufacturer_name' => $request->manufacturer_name,
-                'manufacturer_brand' => $request->manufacturer_brand,
-                'manufacturer_part_number' => $request->manufacturer_part_number,
-                'specifications' => $request->specifications,
+                'child_category_id' => $request->child_category_id,
+                'brand_id' => $request->brand_id,
+                'collection_id' => $request->collection_id,
+                
+                // Pricing
+                'purchase_price' => $request->purchase_price,
+                'original_price' => $request->original_price,
+                'sell_price' => $request->sell_price,
+                'discount_type' => $request->discount_type ?? 'flat',
+                'discount_value' => $request->discount_value ?? 0,
+                'gst_rate' => $request->gst_rate ?? 0,
+                'tax_included' => $request->tax_included ?? false,
+                'commission_type' => $request->commission_type ?? 'percentage',
+                'commission_value' => $request->commission_value ?? 0,
+                
+                // Inventory
+                'stock_type' => $request->stock_type,
+                'total_stock' => $request->total_stock,
+                'reserved_stock' => 0,
+                'available_stock' => $request->total_stock,
+                'low_stock_alert' => $request->low_stock_alert ?? 10,
+                'warehouse_location' => $request->warehouse_location,
+                
+                // Variations
+                'has_variation' => $request->has_variation ?? false,
+                
+                // Media
+                'video_url' => $request->video_url,
+                'image_alt_text' => $request->image_alt_text,
+                
+                // Shipping
+                'weight' => $request->weight,
+                'length' => $request->length,
+                'width' => $request->width,
+                'height' => $request->height,
+                'shipping_class' => $request->shipping_class ?? 'normal',
+                'free_shipping' => $request->free_shipping ?? false,
+                'cod_available' => $request->cod_available ?? true,
+                
+                // Status & Workflow
+                'product_status' => $request->product_status,
+                'is_active' => $request->is_active,
+                'is_featured' => $request->is_featured ?? false,
+                'is_returnable' => $request->is_returnable ?? true,
+                'return_days' => $request->return_days ?? 7,
+                
+                // SEO
                 'meta_title' => $request->meta_title,
                 'meta_description' => $request->meta_description,
                 'meta_keywords' => $request->meta_keywords,
-            ]);
+                'search_tags' => $request->search_tags,
+            ];
+
+            if ($request->hasFile('thumbnail_image')) {
+                $productData['thumbnail_image'] = uploadImgFile($request->thumbnail_image, self::IMAGE_PATH);
+            }
+
+            $product = Product::create($productData);
 
             // Gallery Images
             if ($request->hasFile('gallery_images')) {
@@ -155,73 +268,156 @@ class ProductController extends Controller
     {
         $categories = Category::where('status', Status::Active)->get();
         $subCategories = SubCategory::where('category_id', $product->category_id)->where('status', Status::Active)->get();
-        $product->load(['productInformation', 'productImages']);
-        return view('owner.products.edit', compact('product', 'categories', 'subCategories'));
+        $childCategories = \App\Models\ChildCategory::where('sub_category_id', $product->sub_category_id)->where('status', Status::Active)->get();
+        $brands = \App\Models\Brand::where('status', Status::Active)->get();
+        $collections = \App\Models\Collection::where('status', Status::Active)->get();
+        $product->load(['productImages', 'productInformation']);
+        return view('owner.products.edit', compact('product', 'categories', 'subCategories', 'childCategories', 'brands', 'collections'));
     }
 
     public function update(Request $request, Product $product)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            // Basic Info
+            'product_type' => 'required|in:simple,variable,digital,service',
+            'product_name' => 'required|string|max:255',
+            'sku' => 'nullable|string|max:100|unique:products,sku,'.$product->id,
+            'barcode' => 'nullable|string|max:100',
+            'short_description' => 'nullable|string',
+            'full_description' => 'nullable|string',
+            
+            // Category & Brand
             'category_id' => 'required|exists:categories,id',
             'sub_category_id' => 'nullable|exists:sub_categories,id',
-            'price' => 'required|numeric|min:0',
-            'discount' => 'nullable|numeric|min:0',
-            'quantity' => 'required|integer|min:0',
-            'status' => 'required|in:active,inactive',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-            'short_description' => 'nullable|string',
-            'long_description' => 'nullable|string',
-            'manufacturer_name' => 'nullable|string',
-            'manufacturer_brand' => 'nullable|string',
-            'manufacturer_part_number' => 'nullable|string',
-            'specifications' => 'nullable|array',
-            'meta_title' => 'nullable|string',
+            'child_category_id' => 'nullable|exists:child_categories,id',
+            'brand_id' => 'nullable|exists:brands,id',
+            'collection_id' => 'nullable|exists:collections,id',
+            
+            // Pricing
+            'purchase_price' => 'nullable|numeric|min:0',
+            'original_price' => 'nullable|numeric|min:0',
+            'sell_price' => 'required|numeric|min:0',
+            'discount_type' => 'required|in:flat,percentage',
+            'discount_value' => 'nullable|numeric|min:0',
+            'gst_rate' => 'nullable|numeric|min:0|max:100',
+            'tax_included' => 'nullable|boolean',
+            'commission_type' => 'required|in:flat,percentage',
+            'commission_value' => 'nullable|numeric|min:0',
+            
+            // Inventory
+            'stock_type' => 'required|in:limited,unlimited',
+            'total_stock' => 'required|integer|min:0',
+            'low_stock_alert' => 'nullable|integer|min:0',
+            'warehouse_location' => 'nullable|string|max:100',
+            
+            // Variations
+            'has_variation' => 'nullable|boolean',
+            
+            // Media
+            'thumbnail_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'video_url' => 'nullable|url',
+            'image_alt_text' => 'nullable|string|max:255',
+            'gallery_images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            
+            // Shipping
+            'weight' => 'nullable|numeric|min:0',
+            'length' => 'nullable|numeric|min:0',
+            'width' => 'nullable|numeric|min:0',
+            'height' => 'nullable|numeric|min:0',
+            'shipping_class' => 'required|in:normal,heavy',
+            'free_shipping' => 'nullable|boolean',
+            'cod_available' => 'nullable|boolean',
+            
+            // Status & Workflow
+            'product_status' => 'required|in:draft,pending,approved,rejected',
+            'is_active' => 'required|in:active,inactive',
+            'is_featured' => 'nullable|boolean',
+            'is_returnable' => 'nullable|boolean',
+            'return_days' => 'nullable|integer|min:0',
+            
+            // SEO
+            'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string',
             'meta_keywords' => 'nullable|string',
-            'gallery_images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-            'published_at' => 'nullable|date',
+            'search_tags' => 'nullable|string',
         ]);
 
         try {
             DB::beginTransaction();
 
             $productData = [
-                'name' => $request->name,
-                'slug' => Str::slug($request->name),
+                // Basic Info
+                'product_type' => $request->product_type,
+                'product_name' => $request->product_name,
+                'slug' => Str::slug($request->product_name),
+                'sku' => $request->sku,
+                'barcode' => $request->barcode,
+                'short_description' => $request->short_description,
+                'full_description' => $request->full_description,
+                
+                // Category & Brand
                 'category_id' => $request->category_id,
                 'sub_category_id' => $request->sub_category_id,
-                'price' => $request->price,
-                'discount' => $request->discount ?? 0,
-                'quantity' => $request->quantity,
-                'status' => $request->status,
-                'published_at' => $request->published_at,
+                'child_category_id' => $request->child_category_id,
+                'brand_id' => $request->brand_id,
+                'collection_id' => $request->collection_id,
+                
+                // Pricing
+                'purchase_price' => $request->purchase_price,
+                'original_price' => $request->original_price,
+                'sell_price' => $request->sell_price,
+                'discount_type' => $request->discount_type ?? 'flat',
+                'discount_value' => $request->discount_value ?? 0,
+                'gst_rate' => $request->gst_rate ?? 0,
+                'tax_included' => $request->tax_included ?? false,
+                'commission_type' => $request->commission_type ?? 'percentage',
+                'commission_value' => $request->commission_value ?? 0,
+                
+                // Inventory
+                'stock_type' => $request->stock_type,
+                'total_stock' => $request->total_stock,
+                'available_stock' => $request->total_stock - ($product->reserved_stock ?? 0),
+                'low_stock_alert' => $request->low_stock_alert ?? 10,
+                'warehouse_location' => $request->warehouse_location,
+                
+                // Variations
+                'has_variation' => $request->has_variation ?? false,
+                
+                // Media
+                'video_url' => $request->video_url,
+                'image_alt_text' => $request->image_alt_text,
+                
+                // Shipping
+                'weight' => $request->weight,
+                'length' => $request->length,
+                'width' => $request->width,
+                'height' => $request->height,
+                'shipping_class' => $request->shipping_class ?? 'normal',
+                'free_shipping' => $request->free_shipping ?? false,
+                'cod_available' => $request->cod_available ?? true,
+                
+                // Status & Workflow
+                'product_status' => $request->product_status,
+                'is_active' => $request->is_active,
+                'is_featured' => $request->is_featured ?? false,
+                'is_returnable' => $request->is_returnable ?? true,
+                'return_days' => $request->return_days ?? 7,
+                
+                // SEO
+                'meta_title' => $request->meta_title,
+                'meta_description' => $request->meta_description,
+                'meta_keywords' => $request->meta_keywords,
+                'search_tags' => $request->search_tags,
             ];
 
-            if ($request->hasFile('image')) {
-                if($product->image){
-                    deleteImgFile($product->image, self::IMAGE_PATH);
+            if ($request->hasFile('thumbnail_image')) {
+                if($product->thumbnail_image){
+                    deleteImgFile($product->thumbnail_image, self::IMAGE_PATH);
                 }
-                $productData['image'] = uploadImgFile($request->image, self::IMAGE_PATH);
+                $productData['thumbnail_image'] = uploadImgFile($request->thumbnail_image, self::IMAGE_PATH);
             }
 
             $product->update($productData);
-
-            // Product Information
-            $product->productInformation()->updateOrCreate(
-                ['product_id' => $product->id],
-                [
-                    'short_description' => $request->short_description,
-                    'long_description' => $request->long_description,
-                    'manufacturer_name' => $request->manufacturer_name,
-                    'manufacturer_brand' => $request->manufacturer_brand,
-                    'manufacturer_part_number' => $request->manufacturer_part_number,
-                    'specifications' => $request->specifications,
-                    'meta_title' => $request->meta_title,
-                    'meta_description' => $request->meta_description,
-                    'meta_keywords' => $request->meta_keywords,
-                ]
-            );
 
             // Gallery Images (Append new ones)
             if ($request->hasFile('gallery_images')) {
@@ -249,8 +445,8 @@ class ProductController extends Controller
         try {
             DB::beginTransaction();
             
-            if($product->image){
-                // deleteImgFile($product->image, self::IMAGE_PATH);
+            if($product->thumbnail_image){
+                deleteImgFile($product->thumbnail_image, self::IMAGE_PATH);
             }
 
             foreach($product->productImages as $image){
@@ -258,7 +454,6 @@ class ProductController extends Controller
                 $image->delete();
             }
 
-            $product->productInformation()->delete();
             $product->delete();
 
             DB::commit();
@@ -271,13 +466,13 @@ class ProductController extends Controller
 
     public function show(Product $product)
     {
-        $product->load(['category', 'subCategory', 'productInformation', 'productImages']);
+        $product->load(['category', 'subCategory', 'childCategory', 'brand', 'collection', 'productImages']);
         return view('owner.products.show', compact('product'));
     }
 
     public function status(Request $request, Product $product)
     {
-        $product->update(['status' => $request->status == 'true' ? Status::Active : Status::Inactive]);
+        $product->update(['is_active' => $request->status == 'true' ? Status::Active : Status::Inactive]);
         return response()->json(['success' => true, 'message' => 'Status updated successfully.']);
     }
 
