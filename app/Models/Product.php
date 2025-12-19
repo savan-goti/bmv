@@ -27,7 +27,6 @@ class Product extends Model
         'branch_id',
         'added_by_role',
         'added_by_user_id',
-        'added_by_type',
         'approved_by_admin_id',
         'approved_at',
         
@@ -36,6 +35,7 @@ class Product extends Model
         'sub_category_id',
         'child_category_id',
         'brand_id',
+        'collection_id',
         
         // Pricing
         'purchase_price',
@@ -86,14 +86,10 @@ class Product extends Model
         'meta_keywords',
         'search_tags',
         'schema_markup',
-        
-        // Legacy
-        'published_at',
     ];
 
     protected $casts = [
         'is_active' => Status::class,
-        'published_at' => 'datetime',
         'approved_at' => 'datetime',
         'tax_included' => 'boolean',
         'has_variation' => 'boolean',
@@ -124,9 +120,9 @@ class Product extends Model
         return $this->belongsTo(Brand::class);
     }
 
-    public function collections()
+    public function collection()
     {
-        return $this->belongsToMany(Collection::class, 'collection_product');
+        return $this->belongsTo(Collection::class);
     }
 
     public function owner()

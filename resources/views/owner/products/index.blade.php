@@ -20,10 +20,28 @@
                 <div class="card-body">
                     <div class="row mb-4">
                         <div class="col-md-3">
-                            <select name="status" id="filter-status" class="form-select">
+                            <select name="is_active" id="filter-status" class="form-select">
                                 <option value="">All Status</option>
                                 <option value="active">Active</option>
                                 <option value="inactive">Inactive</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select name="product_status" id="filter-product-status" class="form-select">
+                                <option value="">All Product Status</option>
+                                <option value="draft">Draft</option>
+                                <option value="pending">Pending</option>
+                                <option value="approved">Approved</option>
+                                <option value="rejected">Rejected</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select name="product_type" id="filter-product-type" class="form-select">
+                                <option value="">All Product Types</option>
+                                <option value="simple">Simple</option>
+                                <option value="variable">Variable</option>
+                                <option value="digital">Digital</option>
+                                <option value="service">Service</option>
                             </select>
                         </div>
                     </div>
@@ -35,10 +53,13 @@
                                     <th>ID</th>
                                     <th>Image</th>
                                     <th>Name</th>
+                                    <th>SKU</th>
                                     <th>Category</th>
+                                    <th>Brand</th>
                                     <th>Price</th>
-                                    <th>Quantity</th>
-                                    <th>Status</th>
+                                    <th>Stock</th>
+                                    <th>Product Status</th>
+                                    <th>Active Status</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
@@ -60,17 +81,29 @@
             ajax: {
                 url: "{{ route('owner.products.ajaxData') }}",
                 data: function (d) {
-                    d.status = $('#filter-status').val();
+                    d.is_active = $('#filter-status').val();
+                    d.product_status = $('#filter-product-status').val();
+                    d.product_type = $('#filter-product-type').val();
                 }
             },
             columns: [
                 { data: 'id', name: 'id', title: 'ID' },
-                { data: 'image', name: 'image', title: 'Image', orderable: false, searchable: false },
-                { data: 'name', name: 'name', title: 'Name' },
+                { data: 'thumbnail_image', name: 'thumbnail_image', title: 'Image', orderable: false, searchable: false },
+                { data: 'product_name', name: 'product_name', title: 'Name' },
+                { data: 'sku', name: 'sku', title: 'SKU' },
                 { data: 'category_name', name: 'category.name', title: 'Category' },
-                { data: 'price', name: 'price', title: 'Price' },
-                { data: 'quantity', name: 'quantity', title: 'Quantity' },
-                { data: 'status', name: 'status', title: 'Status' },
+                { 
+                    data: 'brand', 
+                    name: 'brand.name', 
+                    title: 'Brand',
+                    render: function(data, type, row) {
+                        return data && data.name ? data.name : 'N/A';
+                    }
+                },
+                { data: 'sell_price', name: 'sell_price', title: 'Price' },
+                { data: 'total_stock', name: 'total_stock', title: 'Stock' },
+                { data: 'product_status', name: 'product_status', title: 'Product Status', orderable: false },
+                { data: 'is_active', name: 'is_active', title: 'Active Status', orderable: false },
                 { data: 'action', name: 'action', title: 'Action', orderable: false, searchable: false },
             ],
             drawCallback: function() {
@@ -80,7 +113,7 @@
             }
         });
 
-        $('#filter-status').change(function(){
+        $('#filter-status, #filter-product-status, #filter-product-type').change(function(){
             table.draw();
         });
 
