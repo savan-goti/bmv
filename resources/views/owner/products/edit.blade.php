@@ -168,17 +168,17 @@
                                     <div class="col-md-6">
                                         <div class="mb-3">
                                             <label for="product_name" class="form-label">Product Name <span class="text-danger">*</span></label>
-                                            <input type="text" class="form-control" id="product_name" name="product_name" value="{{ $product->name }}" required>
+                                            <input type="text" class="form-control" id="product_name" name="product_name" value="{{ $product->product_name }}" required>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="mb-3">
                                             <label for="product_type" class="form-label">Product Type <span class="text-danger">*</span></label>
                                             <select class="form-select" name="product_type" id="product_type" required>
-                                                <option value="simple" {{ ($product->productInformation->product_type ?? 'simple') == 'simple' ? 'selected' : '' }}>Simple</option>
-                                                <option value="variable" {{ ($product->productInformation->product_type ?? '') == 'variable' ? 'selected' : '' }}>Variable</option>
-                                                <option value="digital" {{ ($product->productInformation->product_type ?? '') == 'digital' ? 'selected' : '' }}>Digital</option>
-                                                <option value="service" {{ ($product->productInformation->product_type ?? '') == 'service' ? 'selected' : '' }}>Service</option>
+                                                <option value="simple" {{ ($product->product_type ?? 'simple') == 'simple' ? 'selected' : '' }}>Simple</option>
+                                                <option value="variable" {{ ($product->product_type ?? '') == 'variable' ? 'selected' : '' }}>Variable</option>
+                                                <option value="digital" {{ ($product->product_type ?? '') == 'digital' ? 'selected' : '' }}>Digital</option>
+                                                <option value="service" {{ ($product->product_type ?? '') == 'service' ? 'selected' : '' }}>Service</option>
                                             </select>
                                         </div>
                                     </div>
@@ -188,25 +188,25 @@
                                     <div class="col-md-6">
                                         <div class="mb-3">
                                             <label for="sku" class="form-label">SKU</label>
-                                            <input type="text" class="form-control" id="sku" name="sku" value="{{ $product->productInformation->sku ?? '' }}">
+                                            <input type="text" class="form-control" id="sku" name="sku" value="{{ $product->sku ?? '' }}">
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="mb-3">
                                             <label for="barcode" class="form-label">Barcode</label>
-                                            <input type="text" class="form-control" id="barcode" name="barcode" value="{{ $product->productInformation->barcode ?? '' }}">
+                                            <input type="text" class="form-control" id="barcode" name="barcode" value="{{ $product->barcode ?? '' }}">
                                         </div>
                                     </div>
                                 </div>
 
                                 <div class="mb-3">
                                     <label for="short_description" class="form-label">Short Description</label>
-                                    <textarea class="form-control" id="short_description" name="short_description" rows="3">{{ $product->productInformation->short_description ?? '' }}</textarea>
+                                    <textarea class="form-control" id="short_description" name="short_description" rows="3">{{ $product->short_description ?? '' }}</textarea>
                                 </div>
 
                                 <div class="mb-3">
                                     <label for="full_description" class="form-label">Full Description</label>
-                                    <textarea class="form-control" id="full_description" name="full_description" rows="5">{{ $product->productInformation->long_description ?? '' }}</textarea>
+                                    <textarea class="form-control" id="full_description" name="full_description" rows="5">{{ $product->full_description ?? '' }}</textarea>
                                 </div>
 
                                 <!-- Tab Navigation -->
@@ -223,19 +223,19 @@
                                     <div class="col-md-4">
                                         <div class="mb-3">
                                             <label for="purchase_price" class="form-label">Purchase Price</label>
-                                            <input type="number" class="form-control" id="purchase_price" name="purchase_price" step="0.01" min="0" value="{{ $product->productInformation->purchase_price ?? 0 }}">
+                                            <input type="number" class="form-control" id="purchase_price" name="purchase_price" step="0.01" min="0" value="{{ $product->purchase_price ?? 0 }}">
                                         </div>
                                     </div>
                                     <div class="col-md-4">
                                         <div class="mb-3">
                                             <label for="original_price" class="form-label">Original Price</label>
-                                            <input type="number" class="form-control" id="original_price" name="original_price" step="0.01" min="0" value="{{ $product->productInformation->original_price ?? 0 }}">
+                                            <input type="number" class="form-control" id="original_price" name="original_price" step="0.01" min="0" value="{{ $product->original_price ?? 0 }}">
                                         </div>
                                     </div>
                                     <div class="col-md-4">
                                         <div class="mb-3">
                                             <label for="sell_price" class="form-label">Sell Price <span class="text-danger">*</span></label>
-                                            <input type="number" class="form-control" id="sell_price" name="sell_price" step="0.01" min="0" value="{{ $product->price }}" required>
+                                            <input type="number" class="form-control" id="sell_price" name="sell_price" step="0.01" min="0" value="{{ $product->sell_price }}" required>
                                         </div>
                                     </div>
                                 </div>
@@ -246,11 +246,11 @@
                                             <label class="form-label">Discount Type <span class="text-danger">*</span></label>
                                             <div>
                                                 <div class="form-check form-check-inline">
-                                                    <input class="form-check-input" type="radio" name="discount_type" id="discount_flat" value="flat" {{ ($product->productInformation->discount_type ?? 'flat') == 'flat' ? 'checked' : '' }}>
+                                                    <input class="form-check-input" type="radio" name="discount_type" id="discount_flat" value="flat" {{ ($product->discount_type ?? 'flat') == 'flat' ? 'checked' : '' }}>
                                                     <label class="form-check-label" for="discount_flat">Flat</label>
                                                 </div>
                                                 <div class="form-check form-check-inline">
-                                                    <input class="form-check-input" type="radio" name="discount_type" id="discount_percentage" value="percentage" {{ ($product->productInformation->discount_type ?? '') == 'percentage' ? 'checked' : '' }}>
+                                                    <input class="form-check-input" type="radio" name="discount_type" id="discount_percentage" value="percentage" {{ ($product->discount_type ?? '') == 'percentage' ? 'checked' : '' }}>
                                                     <label class="form-check-label" for="discount_percentage">Percentage</label>
                                                 </div>
                                             </div>
@@ -259,7 +259,7 @@
                                     <div class="col-md-6">
                                         <div class="mb-3">
                                             <label for="discount_value" class="form-label">Discount Value</label>
-                                            <input type="number" class="form-control" id="discount_value" name="discount_value" step="0.01" min="0" value="{{ $product->discount ?? 0 }}">
+                                            <input type="number" class="form-control" id="discount_value" name="discount_value" step="0.01" min="0" value="{{ $product->discount_value ?? 0 }}">
                                         </div>
                                     </div>
                                 </div>
@@ -268,14 +268,14 @@
                                     <div class="col-md-6">
                                         <div class="mb-3">
                                             <label for="gst_rate" class="form-label">GST Rate (%)</label>
-                                            <input type="number" class="form-control" id="gst_rate" name="gst_rate" step="0.01" min="0" max="100" value="{{ $product->productInformation->gst_rate ?? 0 }}">
+                                            <input type="number" class="form-control" id="gst_rate" name="gst_rate" step="0.01" min="0" max="100" value="{{ $product->gst_rate ?? 0 }}">
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="mb-3">
                                             <label class="form-label">&nbsp;</label>
                                             <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" id="tax_included" name="tax_included" value="1" {{ ($product->productInformation->tax_included ?? false) ? 'checked' : '' }}>
+                                                <input class="form-check-input" type="checkbox" id="tax_included" name="tax_included" value="1" {{ ($product->tax_included ?? false) ? 'checked' : '' }}>
                                                 <label class="form-check-label" for="tax_included">Tax Included in Price</label>
                                             </div>
                                         </div>
@@ -288,11 +288,11 @@
                                             <label class="form-label">Commission Type <span class="text-danger">*</span></label>
                                             <div>
                                                 <div class="form-check form-check-inline">
-                                                    <input class="form-check-input" type="radio" name="commission_type" id="commission_flat" value="flat" {{ ($product->productInformation->commission_type ?? '') == 'flat' ? 'checked' : '' }}>
+                                                    <input class="form-check-input" type="radio" name="commission_type" id="commission_flat" value="flat" {{ ($product->commission_type ?? '') == 'flat' ? 'checked' : '' }}>
                                                     <label class="form-check-label" for="commission_flat">Flat</label>
                                                 </div>
                                                 <div class="form-check form-check-inline">
-                                                    <input class="form-check-input" type="radio" name="commission_type" id="commission_percentage" value="percentage" {{ ($product->productInformation->commission_type ?? 'percentage') == 'percentage' ? 'checked' : '' }}>
+                                                    <input class="form-check-input" type="radio" name="commission_type" id="commission_percentage" value="percentage" {{ ($product->commission_type ?? 'percentage') == 'percentage' ? 'checked' : '' }}>
                                                     <label class="form-check-label" for="commission_percentage">Percentage</label>
                                                 </div>
                                             </div>
@@ -301,7 +301,7 @@
                                     <div class="col-md-6">
                                         <div class="mb-3">
                                             <label for="commission_value" class="form-label">Commission Value</label>
-                                            <input type="number" class="form-control" id="commission_value" name="commission_value" step="0.01" min="0" value="{{ $product->productInformation->commission_value ?? 0 }}">
+                                            <input type="number" class="form-control" id="commission_value" name="commission_value" step="0.01" min="0" value="{{ $product->commission_value ?? 0 }}">
                                         </div>
                                     </div>
                                 </div>
@@ -325,11 +325,11 @@
                                             <label class="form-label">Stock Type <span class="text-danger">*</span></label>
                                             <div>
                                                 <div class="form-check form-check-inline">
-                                                    <input class="form-check-input" type="radio" name="stock_type" id="stock_limited" value="limited" {{ ($product->productInformation->stock_type ?? 'limited') == 'limited' ? 'checked' : '' }}>
+                                                    <input class="form-check-input" type="radio" name="stock_type" id="stock_limited" value="limited" {{ ($product->stock_type ?? 'limited') == 'limited' ? 'checked' : '' }}>
                                                     <label class="form-check-label" for="stock_limited">Limited</label>
                                                 </div>
                                                 <div class="form-check form-check-inline">
-                                                    <input class="form-check-input" type="radio" name="stock_type" id="stock_unlimited" value="unlimited" {{ ($product->productInformation->stock_type ?? '') == 'unlimited' ? 'checked' : '' }}>
+                                                    <input class="form-check-input" type="radio" name="stock_type" id="stock_unlimited" value="unlimited" {{ ($product->stock_type ?? '') == 'unlimited' ? 'checked' : '' }}>
                                                     <label class="form-check-label" for="stock_unlimited">Unlimited</label>
                                                 </div>
                                             </div>
@@ -338,7 +338,7 @@
                                     <div class="col-md-6">
                                         <div class="mb-3">
                                             <label for="total_stock" class="form-label">Total Stock <span class="text-danger">*</span></label>
-                                            <input type="number" class="form-control" id="total_stock" name="total_stock" min="0" value="{{ $product->quantity }}" required>
+                                            <input type="number" class="form-control" id="total_stock" name="total_stock" min="0" value="{{ $product->total_stock }}" required>
                                         </div>
                                     </div>
                                 </div>
@@ -347,20 +347,20 @@
                                     <div class="col-md-6">
                                         <div class="mb-3">
                                             <label for="low_stock_alert" class="form-label">Low Stock Alert</label>
-                                            <input type="number" class="form-control" id="low_stock_alert" name="low_stock_alert" min="0" value="{{ $product->productInformation->low_stock_alert ?? 10 }}">
+                                            <input type="number" class="form-control" id="low_stock_alert" name="low_stock_alert" min="0" value="{{ $product->low_stock_alert ?? 10 }}">
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="mb-3">
                                             <label for="warehouse_location" class="form-label">Warehouse Location</label>
-                                            <input type="text" class="form-control" id="warehouse_location" name="warehouse_location" value="{{ $product->productInformation->warehouse_location ?? '' }}">
+                                            <input type="text" class="form-control" id="warehouse_location" name="warehouse_location" value="{{ $product->warehouse_location ?? '' }}">
                                         </div>
                                     </div>
                                 </div>
 
                                 <div class="mb-3">
                                     <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="has_variation" name="has_variation" value="1" {{ ($product->productInformation->has_variation ?? false) ? 'checked' : '' }}>
+                                        <input class="form-check-input" type="checkbox" id="has_variation" name="has_variation" value="1" {{ ($product->has_variation ?? false) ? 'checked' : '' }}>
                                         <label class="form-check-label" for="has_variation">This product has variations</label>
                                     </div>
                                 </div>
@@ -382,16 +382,16 @@
                                     <label for="thumbnail_image" class="form-label">Thumbnail Image</label>
                                     <input type="file" class="form-control" id="thumbnail_image" name="thumbnail_image" accept="image/*">
                                     <small class="text-muted">Recommended size: 800x800px</small>
-                                    @if($product->image)
+                                    @if($product->thumbnail_image)
                                         <div class="mt-2">
-                                            <img src="{{ asset(\App\Http\Controllers\Owner\ProductController::IMAGE_PATH . $product->image) }}" alt="{{ $product->name }}" width="150" class="img-thumbnail">
+                                            <img src="{{ asset(\App\Http\Controllers\Owner\ProductController::IMAGE_PATH . $product->thumbnail_image) }}" alt="{{ $product->product_name }}" width="150" class="img-thumbnail">
                                         </div>
                                     @endif
                                 </div>
 
                                 <div class="mb-3">
                                     <label for="image_alt_text" class="form-label">Image Alt Text</label>
-                                    <input type="text" class="form-control" id="image_alt_text" name="image_alt_text" value="{{ $product->productInformation->image_alt_text ?? '' }}">
+                                    <input type="text" class="form-control" id="image_alt_text" name="image_alt_text" value="{{ $product->image_alt_text ?? '' }}">
                                 </div>
 
                                 <div class="mb-3">
@@ -414,7 +414,7 @@
 
                                 <div class="mb-3">
                                     <label for="video_url" class="form-label">Video URL</label>
-                                    <input type="url" class="form-control" id="video_url" name="video_url" value="{{ $product->productInformation->video_url ?? '' }}" placeholder="https://youtube.com/watch?v=...">
+                                    <input type="url" class="form-control" id="video_url" name="video_url" value="{{ $product->video_url ?? '' }}" placeholder="https://youtube.com/watch?v=...">
                                 </div>
 
                                 <!-- Tab Navigation -->
@@ -434,15 +434,15 @@
                                     <div class="col-md-6">
                                         <div class="mb-3">
                                             <label for="weight" class="form-label">Weight (kg)</label>
-                                            <input type="number" class="form-control" id="weight" name="weight" step="0.01" min="0" value="{{ $product->productInformation->weight ?? 0 }}">
+                                            <input type="number" class="form-control" id="weight" name="weight" step="0.01" min="0" value="{{ $product->weight ?? 0 }}">
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="mb-3">
                                             <label for="shipping_class" class="form-label">Shipping Class <span class="text-danger">*</span></label>
                                             <select class="form-select" name="shipping_class" id="shipping_class" required>
-                                                <option value="normal" {{ ($product->productInformation->shipping_class ?? 'normal') == 'normal' ? 'selected' : '' }}>Normal</option>
-                                                <option value="heavy" {{ ($product->productInformation->shipping_class ?? '') == 'heavy' ? 'selected' : '' }}>Heavy</option>
+                                                <option value="normal" {{ ($product->shipping_class ?? 'normal') == 'normal' ? 'selected' : '' }}>Normal</option>
+                                                <option value="heavy" {{ ($product->shipping_class ?? '') == 'heavy' ? 'selected' : '' }}>Heavy</option>
                                             </select>
                                         </div>
                                     </div>
@@ -452,19 +452,19 @@
                                     <div class="col-md-4">
                                         <div class="mb-3">
                                             <label for="length" class="form-label">Length (cm)</label>
-                                            <input type="number" class="form-control" id="length" name="length" step="0.01" min="0" value="{{ $product->productInformation->length ?? 0 }}">
+                                            <input type="number" class="form-control" id="length" name="length" step="0.01" min="0" value="{{ $product->length ?? 0 }}">
                                         </div>
                                     </div>
                                     <div class="col-md-4">
                                         <div class="mb-3">
                                             <label for="width" class="form-label">Width (cm)</label>
-                                            <input type="number" class="form-control" id="width" name="width" step="0.01" min="0" value="{{ $product->productInformation->width ?? 0 }}">
+                                            <input type="number" class="form-control" id="width" name="width" step="0.01" min="0" value="{{ $product->width ?? 0 }}">
                                         </div>
                                     </div>
                                     <div class="col-md-4">
                                         <div class="mb-3">
                                             <label for="height" class="form-label">Height (cm)</label>
-                                            <input type="number" class="form-control" id="height" name="height" step="0.01" min="0" value="{{ $product->productInformation->height ?? 0 }}">
+                                            <input type="number" class="form-control" id="height" name="height" step="0.01" min="0" value="{{ $product->height ?? 0 }}">
                                         </div>
                                     </div>
                                 </div>
@@ -473,7 +473,7 @@
                                     <div class="col-md-6">
                                         <div class="mb-3">
                                             <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" id="free_shipping" name="free_shipping" value="1" {{ ($product->productInformation->free_shipping ?? false) ? 'checked' : '' }}>
+                                                <input class="form-check-input" type="checkbox" id="free_shipping" name="free_shipping" value="1" {{ ($product->free_shipping ?? false) ? 'checked' : '' }}>
                                                 <label class="form-check-label" for="free_shipping">Free Shipping</label>
                                             </div>
                                         </div>
@@ -481,7 +481,7 @@
                                     <div class="col-md-6">
                                         <div class="mb-3">
                                             <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" id="cod_available" name="cod_available" value="1" {{ ($product->productInformation->cod_available ?? true) ? 'checked' : '' }}>
+                                                <input class="form-check-input" type="checkbox" id="cod_available" name="cod_available" value="1" {{ ($product->cod_available ?? true) ? 'checked' : '' }}>
                                                 <label class="form-check-label" for="cod_available">COD Available</label>
                                             </div>
                                         </div>
@@ -503,24 +503,24 @@
                             <div class="tab-pane" id="seo" role="tabpanel">
                                 <div class="mb-3">
                                     <label for="meta_title" class="form-label">Meta Title</label>
-                                    <input type="text" class="form-control" id="meta_title" name="meta_title" maxlength="255" value="{{ $product->productInformation->meta_title ?? '' }}">
+                                    <input type="text" class="form-control" id="meta_title" name="meta_title" maxlength="255" value="{{ $product->meta_title ?? '' }}">
                                     <small class="text-muted">Recommended: 50-60 characters</small>
                                 </div>
 
                                 <div class="mb-3">
                                     <label for="meta_description" class="form-label">Meta Description</label>
-                                    <textarea class="form-control" id="meta_description" name="meta_description" rows="3" maxlength="160">{{ $product->productInformation->meta_description ?? '' }}</textarea>
+                                    <textarea class="form-control" id="meta_description" name="meta_description" rows="3" maxlength="160">{{ $product->meta_description ?? '' }}</textarea>
                                     <small class="text-muted">Recommended: 150-160 characters</small>
                                 </div>
 
                                 <div class="mb-3">
                                     <label for="meta_keywords" class="form-label">Meta Keywords</label>
-                                    <input type="text" class="form-control" id="meta_keywords" name="meta_keywords" value="{{ $product->productInformation->meta_keywords ?? '' }}" placeholder="keyword1, keyword2, keyword3">
+                                    <input type="text" class="form-control" id="meta_keywords" name="meta_keywords" value="{{ $product->meta_keywords ?? '' }}" placeholder="keyword1, keyword2, keyword3">
                                 </div>
 
                                 <div class="mb-3">
                                     <label for="search_tags" class="form-label">Search Tags</label>
-                                    <input type="text" class="form-control" id="search_tags" name="search_tags" value="{{ $product->productInformation->search_tags ?? '' }}" placeholder="tag1, tag2, tag3">
+                                    <input type="text" class="form-control" id="search_tags" name="search_tags" value="{{ $product->search_tags ?? '' }}" placeholder="tag1, tag2, tag3">
                                 </div>
 
                                 <!-- Tab Navigation -->
@@ -566,6 +566,9 @@
                             <label for="child_category_id" class="form-label">Child Category</label>
                             <select class="form-select" name="child_category_id" id="child_category_id">
                                 <option value="">Select Child Category</option>
+                                @foreach($childCategories as $childCategory)
+                                    <option value="{{ $childCategory->id }}" {{ $product->child_category_id == $childCategory->id ? 'selected' : '' }}>{{ $childCategory->name }}</option>
+                                @endforeach
                             </select>
                         </div>
 
@@ -599,39 +602,39 @@
                         <div class="mb-3">
                             <label for="product_status" class="form-label">Product Status <span class="text-danger">*</span></label>
                             <select class="form-select" name="product_status" id="product_status" required>
-                                <option value="draft" {{ ($product->productInformation->product_status ?? 'draft') == 'draft' ? 'selected' : '' }}>Draft</option>
-                                <option value="pending" {{ ($product->productInformation->product_status ?? '') == 'pending' ? 'selected' : '' }}>Pending</option>
-                                <option value="approved" {{ ($product->productInformation->product_status ?? '') == 'approved' ? 'selected' : '' }}>Approved</option>
-                                <option value="rejected" {{ ($product->productInformation->product_status ?? '') == 'rejected' ? 'selected' : '' }}>Rejected</option>
+                                <option value="draft" {{ ($product->product_status ?? 'draft') == 'draft' ? 'selected' : '' }}>Draft</option>
+                                <option value="pending" {{ ($product->product_status ?? '') == 'pending' ? 'selected' : '' }}>Pending</option>
+                                <option value="approved" {{ ($product->product_status ?? '') == 'approved' ? 'selected' : '' }}>Approved</option>
+                                <option value="rejected" {{ ($product->product_status ?? '') == 'rejected' ? 'selected' : '' }}>Rejected</option>
                             </select>
                         </div>
 
 
                         <div class="mb-3">
                             <label for="is_active" class="form-label">Active Status <span class="text-danger">*</span></label>
-                            <select class="form-select" name="status" id="is_active" required>
-                                <option value="active" {{ $product->status === \App\Enums\Status::Active ? 'selected' : '' }}>Active</option>
-                                <option value="inactive" {{ $product->status === \App\Enums\Status::Inactive ? 'selected' : '' }}>Inactive</option>
+                            <select class="form-select" name="is_active" id="is_active" required>
+                                <option value="active" {{ $product->is_active === \App\Enums\Status::Active ? 'selected' : '' }}>Active</option>
+                                <option value="inactive" {{ $product->is_active === \App\Enums\Status::Inactive ? 'selected' : '' }}>Inactive</option>
                             </select>
                         </div>
 
                         <div class="mb-3">
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="is_featured" name="is_featured" value="1" {{ ($product->productInformation->is_featured ?? false) ? 'checked' : '' }}>
+                                <input class="form-check-input" type="checkbox" id="is_featured" name="is_featured" value="1" {{ ($product->is_featured ?? false) ? 'checked' : '' }}>
                                 <label class="form-check-label" for="is_featured">Featured Product</label>
                             </div>
                         </div>
 
                         <div class="mb-3">
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="is_returnable" name="is_returnable" value="1" {{ ($product->productInformation->is_returnable ?? true) ? 'checked' : '' }}>
+                                <input class="form-check-input" type="checkbox" id="is_returnable" name="is_returnable" value="1" {{ ($product->is_returnable ?? true) ? 'checked' : '' }}>
                                 <label class="form-check-label" for="is_returnable">Returnable</label>
                             </div>
                         </div>
 
                         <div class="mb-3">
                             <label for="return_days" class="form-label">Return Days</label>
-                            <input type="number" class="form-control" id="return_days" name="return_days" min="0" value="{{ $product->productInformation->return_days ?? 7 }}">
+                            <input type="number" class="form-control" id="return_days" name="return_days" min="0" value="{{ $product->return_days ?? 7 }}">
                         </div>
                     </div>
                 </div>
@@ -947,7 +950,7 @@
             if ($(this).val() === 'unlimited') {
                 $('#total_stock').val(999999).prop('readonly', true);
             } else {
-                $('#total_stock').val({{ $product->quantity }}).prop('readonly', false);
+                $('#total_stock').val({{ $product->total_stock }}).prop('readonly', false);
             }
         });
 

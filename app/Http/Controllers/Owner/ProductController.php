@@ -466,7 +466,7 @@ class ProductController extends Controller
 
     public function show(Product $product)
     {
-        $product->load(['category', 'subCategory', 'childCategory', 'brand', 'collection', 'productImages']);
+        $product->load(['category', 'subCategory', 'childCategory', 'brand', 'collection', 'productImages', 'productInformation', 'productReviews']);
         return view('owner.products.show', compact('product'));
     }
 
