@@ -40,6 +40,10 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+        'api' => [
+            'driver' => 'jwt',
+            'provider' => 'customers',
+        ],
         'owner' => [
             'driver' => 'session',
             'provider' => 'owners',
@@ -79,6 +83,10 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', App\Models\User::class),
+        ],
+        'customers' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Customer::class,
         ],
         'owners' => [
             'driver' => 'eloquent',
@@ -145,6 +153,12 @@ return [
         'sellers' => [
             'provider' => 'sellers',
             'table' => 'seller_password_reset_tokens',
+            'expire' => 60,
+            'throttle' => 60,
+        ],
+        'customers' => [
+            'provider' => 'customers',
+            'table' => 'password_reset_tokens',
             'expire' => 60,
             'throttle' => 60,
         ],
