@@ -8,6 +8,7 @@ use App\Http\Traits\ResponseTrait;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Session;
+use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends Controller
 {
@@ -193,6 +194,87 @@ class AuthController extends Controller
         }
         
         return false;
+    }
+
+    /**
+     * Redirect to Google OAuth
+     */
+    public function redirectToGoogle()
+    {
+        return Socialite::driver('google')->redirect();
+    }
+
+    /**
+     * Handle Google OAuth callback
+     */
+    public function handleGoogleCallback(Request $request)
+    {
+        try {
+            $googleUser = Socialite::driver('google')->user();
+            
+            // Check if user exists with this Google ID
+            $owner = \App\Models\Owner::where('google_id', $googleUser->getId())->first();
+            
+            if (!$owner) {
+                // Check if user exists with this email
+                $owner = \App\Models\Owner::where('email', $googleUser->getEmail())->first();
+                
+                if ($owner) {
+                    // Link Google account to existing owner
+                    $owner->update([
+                        'google_id' => $googleUser->getId(),
+                        'google_token' => $googleUser->token,
+                        'google_refresh_token' => $googleUser->refreshToken,
+                        'avatar' => $googleUser->getAvatar(),
+                        'email_verified_at' => $owner->email_verified_at ?? now(),
+                    ]);
+                } else {
+                    // Create new owner account
+                    $owner = \App\Models\Owner::create([
+                        'full_name' => $googleUser->getName(),
+                        'email' => $googleUser->getEmail(),
+                        'google_id' => $googleUser->getId(),
+                        'google_token' => $googleUser->token,
+                        'google_refresh_token' => $googleUser->refreshToken,
+                        'avatar' => $googleUser->getAvatar(),
+                        'email_verified_at' => now(),
+                        'password' => \Hash::make(\Str::random(32)), // Random password for Google users
+                        'status' => 1, // Active status
+                    ]);
+                }
+            } else {
+                // Update existing Google user's tokens
+                $owner->update([
+                    'google_token' => $googleUser->token,
+                    'google_refresh_token' => $googleUser->refreshToken,
+                    'avatar' => $googleUser->getAvatar(),
+                ]);
+            }
+
+            // Check if owner account is active
+            if ($owner->status != 1) {
+                return redirect()->route('owner.login')->with('error', 'Your account is inactive. Please contact the administrator.');
+            }
+
+            // Login the owner
+            Auth::guard('owner')->login($owner, true);
+            $request->session()->regenerate();
+
+            // Update last login info
+            $owner->update([
+                'last_login_at' => now(),
+                'last_login_ip' => $request->ip(),
+            ]);
+
+            // Set guard in session
+            Session::setGuard($request->session()->getId(), 'owner');
+
+            return redirect()->route('owner.dashboard')->with('success', 'Successfully logged in with Google!');
+
+        } catch (\Exception $e) {
+            \Log::error('Google OAuth Error: ' . $e->getMessage());
+            return redirect()->route('owner.login')->with('error', 'Failed to login with Google. Please try again.');
+        }
     }
 
     public function logout(Request $request)
