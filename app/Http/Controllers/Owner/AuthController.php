@@ -201,7 +201,9 @@ class AuthController extends Controller
      */
     public function redirectToGoogle()
     {
-        return Socialite::driver('google')->redirect();
+        return Socialite::driver('google')
+            ->redirectUrl(route('owner.auth.google.callback'))
+            ->redirect();
     }
 
     /**

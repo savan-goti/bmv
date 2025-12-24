@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\Setting;
 use App\Models\Session;
 use App\Models\Seller;
+use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends Controller
 {
@@ -161,6 +162,94 @@ class AuthController extends Controller
         }
 
         return $this->sendError('Invalid email or password');
+    }
+
+    /**
+     * Redirect to Google OAuth
+     */
+    public function redirectToGoogle()
+    {
+        return Socialite::driver('google')
+            ->redirectUrl(route('seller.auth.google.callback'))
+            ->redirect();
+    }
+
+    /**
+     * Handle Google OAuth callback
+     */
+    public function handleGoogleCallback(Request $request)
+    {
+        try {
+            $googleUser = Socialite::driver('google')->user();
+            
+            // Check if user exists with this Google ID
+            $seller = Seller::where('google_id', $googleUser->getId())->first();
+            
+            if (!$seller) {
+                // Check if user exists with this email
+                $seller = Seller::where('email', $googleUser->getEmail())->first();
+                
+                if ($seller) {
+                    // Link Google account to existing seller
+                    $seller->update([
+                        'google_id' => $googleUser->getId(),
+                        'google_token' => $googleUser->token,
+                        'google_refresh_token' => $googleUser->refreshToken,
+                        'avatar' => $googleUser->getAvatar(),
+                        'email_verified_at' => $seller->email_verified_at ?? now(),
+                    ]);
+                } else {
+                    // Create new seller account
+                    $seller = Seller::create([
+                        'owner_name' => $googleUser->getName(),
+                        'email' => $googleUser->getEmail(),
+                        'google_id' => $googleUser->getId(),
+                        'google_token' => $googleUser->token,
+                        'google_refresh_token' => $googleUser->refreshToken,
+                        'avatar' => $googleUser->getAvatar(),
+                        'email_verified_at' => now(),
+                        'password' => \Hash::make(\Str::random(32)), // Random password for Google users
+                        'status' => 0, // Inactive status - needs approval
+                        'is_approved' => false,
+                    ]);
+                }
+            } else {
+                // Update existing Google user's tokens
+                $seller->update([
+                    'google_token' => $googleUser->token,
+                    'google_refresh_token' => $googleUser->refreshToken,
+                    'avatar' => $googleUser->getAvatar(),
+                ]);
+            }
+
+            // Check if seller account is active and approved
+            if ($seller->status != 1) {
+                return redirect()->route('seller.login')->with('error', 'Your account is inactive. Please contact the administrator.');
+            }
+
+            if (!$seller->is_approved) {
+                return redirect()->route('seller.login')->with('error', 'Your account is pending approval. Please wait for admin approval.');
+            }
+
+            // Login the seller
+            Auth::guard('seller')->login($seller, true);
+            $request->session()->regenerate();
+
+            // Update last login info
+            $seller->update([
+                'last_login_at' => now(),
+                'last_login_ip' => $request->ip(),
+            ]);
+
+            // Set guard in session
+            Session::setGuard($request->session()->getId(), 'seller');
+
+            return redirect()->route('seller.dashboard')->with('success', 'Successfully logged in with Google!');
+
+        } catch (\Exception $e) {
+            \Log::error('Google OAuth Error: ' . $e->getMessage());
+            return redirect()->route('seller.login')->with('error', 'Failed to login with Google. Please try again.');
+        }
     }
 
     /**

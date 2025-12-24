@@ -17,9 +17,13 @@ class Staff extends Authenticatable
     protected $fillable = [
         'admin_id',
         'profile_image',
+        'avatar',
         'name',
         'father_name',
         'email',
+        'google_id',
+        'google_token',
+        'google_refresh_token',
         'phone',
         'date_of_birth',
         'gender',
@@ -44,6 +48,7 @@ class Staff extends Authenticatable
         'login_verification_code',
         'login_verification_code_expires_at',
     ];
+
 
     protected $hidden = [
         'password',
