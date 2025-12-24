@@ -14,12 +14,17 @@ Route::middleware(['guest:admin'])->group(function () {
     Route::get('/login', [AuthController::class, 'login'])->name('login');
     Route::post('/login', [AuthController::class, 'authenticate'])->name('authenticate');
     
+    // Google OAuth Routes
+    Route::get('/auth/google', [AuthController::class, 'redirectToGoogle'])->name('auth.google');
+    Route::get('/auth/google/callback', [AuthController::class, 'handleGoogleCallback'])->name('auth.google.callback');
+    
     // Forgot Password Routes
     Route::get('/forgot-password', [ForgotPasswordController::class, 'showForgotPasswordForm'])->name('forgot-password');
     Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('forgot-password.send');
     Route::get('/reset-password/{token}', [ForgotPasswordController::class, 'showResetPasswordForm'])->name('reset-password.form');
     Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword'])->name('reset-password.update');
 });
+
 
 // Email Verification Route (accessible without authentication via signed URL)
 Route::get('/email/verify/{id}/{hash}', [SettingsController::class, 'verifyEmail'])->name('email.verify');

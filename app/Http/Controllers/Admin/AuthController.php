@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Setting;
 use App\Models\Session;
+use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends Controller
 {
@@ -159,6 +160,79 @@ class AuthController extends Controller
         }
 
         return $this->sendError('Invalid email or password');
+    }
+
+    /**
+     * Redirect to Google OAuth
+     */
+    public function redirectToGoogle()
+    {
+        return Socialite::driver('google')
+            ->redirectUrl(route('admin.auth.google.callback'))
+            ->redirect();
+    }
+
+    /**
+     * Handle Google OAuth callback
+     */
+    public function handleGoogleCallback(Request $request)
+    {
+        try {
+            $googleUser = Socialite::driver('google')->user();
+            
+            // Check if user exists with this Google ID
+            $admin = \App\Models\Admin::where('google_id', $googleUser->getId())->first();
+            
+            if (!$admin) {
+                // Check if user exists with this email
+                $admin = \App\Models\Admin::where('email', $googleUser->getEmail())->first();
+                
+                if ($admin) {
+                    // Link Google account to existing admin
+                    $admin->update([
+                        'google_id' => $googleUser->getId(),
+                        'google_token' => $googleUser->token,
+                        'google_refresh_token' => $googleUser->refreshToken,
+                        'avatar' => $googleUser->getAvatar(),
+                        'email_verified_at' => $admin->email_verified_at ?? now(),
+                    ]);
+                } else {
+                    // Don't create new admin accounts via Google login
+                    return redirect()->route('admin.login')->with('error', 'No admin account found with this email. Please contact the owner.');
+                }
+            } else {
+                // Update existing Google user's tokens
+                $admin->update([
+                    'google_token' => $googleUser->token,
+                    'google_refresh_token' => $googleUser->refreshToken,
+                    'avatar' => $googleUser->getAvatar(),
+                ]);
+            }
+
+            // Check if admin account is active
+            if ($admin->status != 1) {
+                return redirect()->route('admin.login')->with('error', 'Your account is inactive. Please contact the owner.');
+            }
+
+            // Login the admin
+            Auth::guard('admin')->login($admin, true);
+            $request->session()->regenerate();
+
+            // Update last login info
+            $admin->update([
+                'last_login_at' => now(),
+                'last_login_ip' => $request->ip(),
+            ]);
+
+            // Set guard in session
+            Session::setGuard($request->session()->getId(), 'admin');
+
+            return redirect()->route('admin.dashboard')->with('success', 'Successfully logged in with Google!');
+
+        } catch (\Exception $e) {
+            \Log::error('Google OAuth Error: ' . $e->getMessage());
+            return redirect()->route('admin.login')->with('error', 'Failed to login with Google. Please try again.');
+        }
     }
 
     /**

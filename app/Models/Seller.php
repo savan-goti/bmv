@@ -15,6 +15,7 @@ class Seller extends Authenticatable
     protected $fillable = [
         'business_name',
         'business_logo',
+        'avatar',
         'business_type',
         'category_id',
         'sub_category_id',
@@ -23,6 +24,9 @@ class Seller extends Authenticatable
         'bar_code',
         'store_link',
         'email',
+        'google_id',
+        'google_token',
+        'google_refresh_token',
         'date_of_birth',
         'gender',
         'country_code',
@@ -71,6 +75,7 @@ class Seller extends Authenticatable
         'login_verification_code_expires_at',
         'gst_vat', // Keeping existing column
     ];
+
 
     protected $hidden = [
         'password',

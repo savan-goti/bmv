@@ -15,9 +15,13 @@ class Admin extends Authenticatable
     protected $fillable = [
         'owner_id',
         'profile_image',
+        'avatar',
         'name',
         'father_name',
         'email',
+        'google_id',
+        'google_token',
+        'google_refresh_token',
         'date_of_birth',
         'gender',
         'phone',
@@ -41,6 +45,7 @@ class Admin extends Authenticatable
         'login_verification_code',
         'login_verification_code_expires_at',
     ];
+
 
 
     protected $hidden = [
