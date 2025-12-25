@@ -25,6 +25,17 @@
                         </div>
 
                         <div class="mb-3">
+                            <label for="category_type" class="form-label">Category Type</label>
+                            <select class="form-select" name="category_type" id="category_type" required>
+                                <option value="">Select Category Type</option>
+                                @foreach($categoryTypes as $value => $label)
+                                    <option value="{{ $value }}" {{ $category->category_type->value === $value ? 'selected' : '' }}>{{ $label }}</option>
+                                @endforeach
+                            </select>
+                            <label id="category_type-error" class="text-danger error" for="category_type" style="display: none"></label>
+                        </div>
+
+                        <div class="mb-3">
                             <label for="image" class="form-label">Image</label>
                             <input type="file" class="form-control" id="image" name="image" accept="image/*">
                             @if($category->image)
@@ -62,10 +73,12 @@
         $("#categoryEditForm").validate({
             rules: {
                 name: { required: true },
+                category_type: { required: true },
                 status: { required: true }
             },
             messages: {
                 name: { required: "The name field is required" },
+                category_type: { required: "The category type field is required" },
                 status: { required: "The status field is required" }
             },
             errorPlacement: function (error, element) {
@@ -100,6 +113,7 @@
                         let data = xhr.responseJSON;
                         if (data.hasOwnProperty('error')) {
                              if (data.error.hasOwnProperty('name')) $("#name-error").html(data.error.name).show();
+                             if (data.error.hasOwnProperty('category_type')) $("#category_type-error").html(data.error.category_type).show();
                              if (data.error.hasOwnProperty('image')) $("#image-error").html(data.error.image).show();
                              if (data.error.hasOwnProperty('status')) $("#status-error").html(data.error.status).show();
                         } else if (data.hasOwnProperty('message')) {

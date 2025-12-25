@@ -6,12 +6,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Enums\Status;
+use App\Enums\CategoryType;
 
 class Category extends Model
 {
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
+        'category_type',
         'name',
         'slug',
         'image',
@@ -19,6 +21,7 @@ class Category extends Model
     ];
 
     protected $casts = [
+        'category_type' => CategoryType::class,
         'status' => Status::class,
     ];
 

@@ -20,6 +20,15 @@
                 <div class="card-body">
                     <div class="row mb-4">
                         <div class="col-md-3">
+                            <select name="category_type" id="filter-category-type" class="form-select">
+                                <option value="">All Category Types</option>
+                                <option value="product">Product</option>
+                                <option value="service">Service</option>
+                                <option value="digital">Digital</option>
+                                <option value="mixed">Mixed</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
                             <select name="status" id="filter-status" class="form-select">
                                 <option value="">All Status</option>
                                 <option value="active">Active</option>
@@ -30,15 +39,6 @@
 
                     <div class="table-responsive">
                         <table id="ajax-datatables" class="table table-bordered table-striped">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Image</th>
-                                    <th>Name</th>
-                                    <th>Status</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
                         </table>
                     </div>
                 </div>
@@ -57,6 +57,7 @@
             ajax: {
                 url: "{{ route('owner.categories.ajaxData') }}",
                 data: function (d) {
+                    d.category_type = $('#filter-category-type').val();
                     d.status = $('#filter-status').val();
                 }
             },
@@ -64,6 +65,7 @@
                 { data: 'id', name: 'id', title: 'ID' },
                 { data: 'image', name: 'image', title: 'Image', orderable: false, searchable: false },
                 { data: 'name', name: 'name', title: 'Name' },
+                { data: 'category_type', name: 'category_type', title: 'Category Type' },
                 { data: 'status', name: 'status', title: 'Status' },
                 { data: 'action', name: 'action', title: 'Action', orderable: false, searchable: false },
             ],
@@ -72,6 +74,10 @@
                     new bootstrap.Tooltip(el);
                 });
             }
+        });
+
+        $('#filter-category-type').change(function(){
+            table.draw();
         });
 
         $('#filter-status').change(function(){
