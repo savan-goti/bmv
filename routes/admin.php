@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AuthController;
+use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\StaffController;
@@ -14,9 +15,13 @@ Route::middleware(['guest:admin'])->group(function () {
     Route::get('/login', [AuthController::class, 'login'])->name('login');
     Route::post('/login', [AuthController::class, 'authenticate'])->name('authenticate');
     
-    // Google OAuth Routes
-    Route::get('/auth/google', [AuthController::class, 'redirectToGoogle'])->name('auth.google');
-    Route::get('/auth/google/callback', [AuthController::class, 'handleGoogleCallback'])->name('auth.google.callback');
+    // Google OAuth Routes - Using centralized GoogleAuthController
+    Route::get('/auth/google', function() {
+        return app(GoogleAuthController::class)->redirectToGoogle('admin');
+    })->name('auth.google');
+    Route::get('/auth/google/callback', function() {
+        return app(GoogleAuthController::class)->handleGoogleCallback('admin');
+    })->name('auth.google.callback');
     
     // Forgot Password Routes
     Route::get('/forgot-password', [ForgotPasswordController::class, 'showForgotPasswordForm'])->name('forgot-password');
