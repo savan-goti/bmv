@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Session;
 use Laravel\Socialite\Facades\Socialite;
+use App\Models\Owner;
 
 class AuthController extends Controller
 {
@@ -33,7 +34,7 @@ class AuthController extends Controller
         }
 
         // Find the owner by email
-        $owner = \App\Models\Owner::where('email', $request->email)->first();
+        $owner = Owner::where('email', $request->email)->first();
 
         if (!$owner) {
             return $this->sendError('Invalid email or password');
@@ -215,11 +216,11 @@ class AuthController extends Controller
             $googleUser = Socialite::driver('google')->user();
             
             // Check if user exists with this Google ID
-            $owner = \App\Models\Owner::where('google_id', $googleUser->getId())->first();
+            $owner = Owner::where('google_id', $googleUser->getId())->first();
             
             if (!$owner) {
                 // Check if user exists with this email
-                $owner = \App\Models\Owner::where('email', $googleUser->getEmail())->first();
+                $owner = Owner::where('email', $googleUser->getEmail())->first();
                 
                 if ($owner) {
                     // Link Google account to existing owner
@@ -232,7 +233,7 @@ class AuthController extends Controller
                     ]);
                 } else {
                     // Create new owner account
-                    $owner = \App\Models\Owner::create([
+                    $owner = Owner::create([
                         'full_name' => $googleUser->getName(),
                         'email' => $googleUser->getEmail(),
                         'google_id' => $googleUser->getId(),
@@ -254,7 +255,7 @@ class AuthController extends Controller
             }
 
             // Check if owner account is active
-            if ($owner->status != 1) {
+            if ($owner->status != 'active') {
                 return redirect()->route('owner.login')->with('error', 'Your account is inactive. Please contact the administrator.');
             }
 
