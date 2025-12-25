@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 use App\Http\Traits\ResponseTrait;
 use App\Enums\Status;
+use App\Enums\CategoryType;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -27,6 +28,12 @@ class CategoryController extends Controller
     public function ajaxData()
     {
         $result = Category::query();
+        
+        // Filter by category type if provided
+        if (request()->has('category_type') && request()->category_type != '') {
+            $result->where('category_type', request()->category_type);
+        }
+        
         return DataTables::eloquent($result)
             ->addIndexColumn()
             ->addColumn('action', function($row){
@@ -35,6 +42,9 @@ class CategoryController extends Controller
                 $btn = '<a href="'.$editUrl.'" class="btn btn-sm btn-info me-1"><i class="bx bx-edit"></i> Edit</a>';
                 $btn .= '<button type="button" class="btn btn-sm btn-danger delete-item" data-url="'.$deleteUrl.'"><i class="bx bx-trash"></i> Delete</button>';
                 return $btn;
+            })
+            ->editColumn('category_type', function($row){
+                return '<span class="badge bg-primary">'.$row->category_type->label().'</span>';
             })
             ->editColumn('status', function($row){
                 $status = $row->status->label();
@@ -50,13 +60,14 @@ class CategoryController extends Controller
                 }
                 return 'N/A';
             })
-            ->rawColumns(['action', 'status', 'image'])
+            ->rawColumns(['action', 'category_type', 'status', 'image'])
             ->make(true);
     }
 
     public function create()
     {
-        return view('owner.categories.create');
+        $categoryTypes = CategoryType::options();
+        return view('owner.categories.create', compact('categoryTypes'));
     }
 
     public function store(Request $request)
@@ -65,6 +76,7 @@ class CategoryController extends Controller
             DB::beginTransaction();
 
             $validator = Validator::make($request->all(), [
+                'category_type' => 'required|in:' . implode(',', CategoryType::values()),
                 'name' => 'required|string|max:255',
                 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
                 'status' => 'required|in:active,inactive',
@@ -95,7 +107,8 @@ class CategoryController extends Controller
 
     public function edit(Category $category)
     {
-        return view('owner.categories.edit', compact('category'));
+        $categoryTypes = CategoryType::options();
+        return view('owner.categories.edit', compact('category', 'categoryTypes'));
     }
 
     public function update(Request $request, Category $category)
@@ -104,6 +117,7 @@ class CategoryController extends Controller
             DB::beginTransaction();
 
             $validator = Validator::make($request->all(), [
+                'category_type' => 'required|in:' . implode(',', CategoryType::values()),
                 'name' => 'required|string|max:255',
                 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
                 'status' => 'required|in:active,inactive',
