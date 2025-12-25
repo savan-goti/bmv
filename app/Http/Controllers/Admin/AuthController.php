@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Setting;
 use App\Models\Session;
+use App\Models\Admin;
 use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends Controller
@@ -35,7 +36,7 @@ class AuthController extends Controller
         }
 
         // Find the admin by email
-        $admin = \App\Models\Admin::where('email', $request->email)->first();
+        $admin = Admin::where('email', $request->email)->first();
 
         if (!$admin) {
             return $this->sendError('Invalid email or password');
@@ -181,11 +182,11 @@ class AuthController extends Controller
             $googleUser = Socialite::driver('google')->user();
             
             // Check if user exists with this Google ID
-            $admin = \App\Models\Admin::where('google_id', $googleUser->getId())->first();
+            $admin = Admin::where('google_id', $googleUser->getId())->first();
             
             if (!$admin) {
                 // Check if user exists with this email
-                $admin = \App\Models\Admin::where('email', $googleUser->getEmail())->first();
+                $admin = Admin::where('email', $googleUser->getEmail())->first();
                 
                 if ($admin) {
                     // Link Google account to existing admin
@@ -231,6 +232,7 @@ class AuthController extends Controller
 
         } catch (\Exception $e) {
             \Log::error('Google OAuth Error: ' . $e->getMessage());
+            dd($e->getMessage());
             return redirect()->route('admin.login')->with('error', 'Failed to login with Google. Please try again.');
         }
     }
