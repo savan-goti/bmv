@@ -6,18 +6,22 @@
             <span class="logo-sm">
                 <img src="{{ \App\Models\Setting::first()->favicon??asset('assets/img/no_img.jpg') }}" alt="" height="30">
             </span>
-            <span class="logo-lg">
-                <img src="{{ \App\Models\Setting::first()->dark_logo??asset('assets/img/no_img.jpg') }}" alt="" class="w-100">
-            </span>
+            @if(\App\Models\Setting::first()->dark_logo)
+                <span class="logo-lg">
+                    <img src="{{ \App\Models\Setting::first()->dark_logo }}" alt="" class="w-100">
+                </span>
+            @endif
         </a>
         <!-- Light Logo-->
         <a href="{{route('owner.dashboard')}}" class="logo logo-light">
             <span class="logo-sm">
                 <img src="{{ \App\Models\Setting::first()->favicon??asset('assets/img/no_img.jpg') }}" alt="" height="30">
             </span>
-            <span class="logo-lg">
-                <img src="{{ \App\Models\Setting::first()->light_logo??asset('assets/img/no_img.jpg') }}" alt="" class="w-100">
-            </span>
+            @if(\App\Models\Setting::first()->light_logo)
+                <span class="logo-lg">
+                    <img src="{{ \App\Models\Setting::first()->light_logo }}" alt="" class="w-100">
+                </span>
+            @endif
         </a>
         <button type="button" class="btn btn-sm p-0 fs-20 header-item float-end btn-vertical-sm-hover" id="vertical-hover">
             <i class="ri-record-circle-line"></i>
