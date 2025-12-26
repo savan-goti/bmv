@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('categories', function (Blueprint $table) {
             $table->id();
+            $table->enum('category_type', ['product', 'service', 'digital', 'mixed'])->default('product');
             $table->string('name');
             $table->string('slug')->unique();
             $table->string('image')->nullable();

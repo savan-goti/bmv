@@ -12,43 +12,53 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('owners', function (Blueprint $table) {
-            $table->id(); // BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY
-
-            $table->string('session_id', 100)->nullable();
-            $table->string('bar_code', 100)->unique()->nullable();
-            $table->string('token', 255)->nullable();
-            $table->string('profile_image', 255)->nullable();
-            $table->string('full_name', 150);
-            $table->string('username', 100)->unique();
-            $table->string('email', 150)->unique();
-            $table->string('phone_code', 10)->default('+91');
-            $table->string('phone', 15)->unique()->nullable();
-            $table->string('otp', 6)->nullable();
-            $table->string('password', 255);
-
-            $table->date('dob')->nullable();
-            $table->enum('gender', ['male', 'female', 'other'])->nullable();
+            $table->id();
+            
+            // Basic Information
+            $table->string('name');
+            $table->string('email')->unique();
+            $table->string('google_id')->nullable()->unique();
+            $table->text('google_token')->nullable();
+            $table->text('google_refresh_token')->nullable();
+            $table->string('avatar')->nullable();
+            $table->string('phone')->nullable();
+            $table->string('password');
+            
+            // Profile
+            $table->string('profile_image')->nullable();
             $table->text('address')->nullable();
-            $table->text('description')->nullable();
-            $table->json('permissions')->nullable();
-
-            $table->string('language_preference', 50)->default('en');
-            $table->enum('marital_status', ['single', 'married', 'divorced', 'widowed'])
-                  ->default('single');
-
-            $table->enum('status', [
-                'active','inactive','blocked','unblocked',
-                'pending','approved','rejected','suspended'
-            ])->default('pending');
-
+            $table->string('city')->nullable();
+            $table->string('state')->nullable();
+            $table->string('country')->nullable();
+            $table->string('postal_code')->nullable();
+            
+            // Business Information
+            $table->string('business_name')->nullable();
+            $table->string('business_type')->nullable();
+            $table->text('business_description')->nullable();
+            $table->string('tax_id')->nullable();
+            $table->string('registration_number')->nullable();
+            
+            // Status & Security
+            $table->enum('status', ['active', 'inactive', 'suspended'])->default('active');
             $table->dateTime('last_login_at')->nullable();
             $table->string('last_login_ip', 50)->nullable();
+            
+            // Two-Factor Authentication
             $table->boolean('two_factor_enabled')->default(false);
-            $table->dateTime('email_verified_at')->nullable();
-
-            $table->unsignedBigInteger('created_by')->nullable()->comment('self or admin id');
-            $table->unsignedBigInteger('creator_id')->nullable()->comment('auth admin id');
-
+            $table->text('two_factor_secret')->nullable();
+            $table->text('two_factor_recovery_codes')->nullable();
+            $table->timestamp('two_factor_confirmed_at')->nullable();
+            
+            // Login Email Verification
+            $table->boolean('login_email_verification_enabled')->default(false);
+            $table->string('login_verification_code', 10)->nullable();
+            $table->timestamp('login_verification_code_expires_at')->nullable();
+            
+            // Email Verification & Remember Token
+            $table->timestamp('email_verified_at')->nullable();
+            $table->rememberToken();
+            
             $table->timestamps();
             $table->softDeletes();
         });
