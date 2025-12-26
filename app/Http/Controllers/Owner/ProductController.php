@@ -40,9 +40,7 @@ class ProductController extends Controller
             $result->where('product_status', $request->product_status);
         }
         
-        if ($request->has('product_type') && $request->product_type != '') {
-            $result->where('product_type', $request->product_type);
-        }
+
         
         return DataTables::eloquent($result)
             ->addIndexColumn()
@@ -101,7 +99,7 @@ class ProductController extends Controller
     {
         $validated = $request->validate([
             // Basic Info
-            'product_type' => 'required|in:simple,variable,digital,service',
+
             'product_name' => 'required|string|max:255',
             'sku' => 'nullable|string|max:100|unique:products,sku',
             'barcode' => 'nullable|string|max:100',
@@ -169,7 +167,7 @@ class ProductController extends Controller
 
             $productData = [
                 // Basic Info
-                'product_type' => $request->product_type,
+
                 'product_name' => $request->product_name,
                 'slug' => Str::slug($request->product_name),
                 'sku' => $request->sku,
@@ -279,7 +277,7 @@ class ProductController extends Controller
     {
         $validated = $request->validate([
             // Basic Info
-            'product_type' => 'required|in:simple,variable,digital,service',
+
             'product_name' => 'required|string|max:255',
             'sku' => 'nullable|string|max:100|unique:products,sku,'.$product->id,
             'barcode' => 'nullable|string|max:100',
@@ -347,7 +345,7 @@ class ProductController extends Controller
 
             $productData = [
                 // Basic Info
-                'product_type' => $request->product_type,
+
                 'product_name' => $request->product_name,
                 'slug' => Str::slug($request->product_name),
                 'sku' => $request->sku,
