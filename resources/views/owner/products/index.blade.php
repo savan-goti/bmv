@@ -35,15 +35,7 @@
                                 <option value="rejected">Rejected</option>
                             </select>
                         </div>
-                        <div class="col-md-3">
-                            <select name="product_type" id="filter-product-type" class="form-select">
-                                <option value="">All Product Types</option>
-                                <option value="simple">Simple</option>
-                                <option value="variable">Variable</option>
-                                <option value="digital">Digital</option>
-                                <option value="service">Service</option>
-                            </select>
-                        </div>
+
                     </div>
 
                     <div class="table-responsive">
@@ -83,7 +75,6 @@
                 data: function (d) {
                     d.is_active = $('#filter-status').val();
                     d.product_status = $('#filter-product-status').val();
-                    d.product_type = $('#filter-product-type').val();
                 }
             },
             columns: [
@@ -113,7 +104,7 @@
             }
         });
 
-        $('#filter-status, #filter-product-status, #filter-product-type').change(function(){
+        $('#filter-status, #filter-product-status').change(function(){
             table.draw();
         });
 

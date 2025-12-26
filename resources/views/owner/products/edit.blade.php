@@ -165,21 +165,10 @@
                             <!-- Basic Info Tab -->
                             <div class="tab-pane active" id="basic-info" role="tabpanel">
                                 <div class="row">
-                                    <div class="col-md-6">
+                                    <div class="col-md-12">
                                         <div class="mb-3">
                                             <label for="product_name" class="form-label">Product Name <span class="text-danger">*</span></label>
                                             <input type="text" class="form-control" id="product_name" name="product_name" value="{{ $product->product_name }}" required>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="product_type" class="form-label">Product Type <span class="text-danger">*</span></label>
-                                            <select class="form-select" name="product_type" id="product_type" required>
-                                                <option value="simple" {{ ($product->product_type ?? 'simple') == 'simple' ? 'selected' : '' }}>Simple</option>
-                                                <option value="variable" {{ ($product->product_type ?? '') == 'variable' ? 'selected' : '' }}>Variable</option>
-                                                <option value="digital" {{ ($product->product_type ?? '') == 'digital' ? 'selected' : '' }}>Digital</option>
-                                                <option value="service" {{ ($product->product_type ?? '') == 'service' ? 'selected' : '' }}>Service</option>
-                                            </select>
                                         </div>
                                     </div>
                                 </div>
@@ -715,8 +704,8 @@
             var currentTab = $('.tab-pane.active').attr('id');
             var currentIndex = tabs.indexOf('#' + currentTab);
             
-            // Check if product type is digital
-            var isDigital = $('#product_type').val() === 'digital';
+            // Product type field removed - no longer checking for digital products
+            var isDigital = false;
             
             // Check if current tab is valid
             var isCurrentValid = validateCurrentTab($('.tab-pane.active'));
@@ -864,8 +853,8 @@
             var currentTab = $('.nav-tabs .nav-link.active');
             var nextTab = currentTab.parent().next('li').find('a');
             
-            // Check if product type is digital and current tab is Media
-            var isDigital = $('#product_type').val() === 'digital';
+            // Product type field removed - no longer checking for digital products
+            var isDigital = false;
             var currentTabId = currentTab.attr('href');
             
             // Skip shipping tab for digital products
@@ -936,14 +925,7 @@
             }
         });
 
-        // Product Type Change - Hide shipping for digital products
-        $('#product_type').change(function() {
-            if ($(this).val() === 'digital') {
-                $('.nav-link[href="#shipping"]').parent().hide();
-            } else {
-                $('.nav-link[href="#shipping"]').parent().show();
-            }
-        });
+
 
         // Stock Type Toggle
         $('input[name="stock_type"]').change(function() {
@@ -996,7 +978,7 @@
         $("#productEditForm").validate({
             rules: {
                 product_name: { required: true },
-                product_type: { required: true },
+
                 category_id: { required: true },
                 sell_price: { required: true, number: true, min: 0 },
                 total_stock: { required: true, number: true, min: 0 },

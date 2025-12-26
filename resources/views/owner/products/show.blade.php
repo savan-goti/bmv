@@ -145,10 +145,7 @@
                                                         class="bx bx-caret-right font-size-16 align-middle text-primary me-1"></i>
                                                     Collection: {{ $product->collection->name }}</p>
                                             @endif
-                                            <p class="text-muted"><i
-                                                    class="bx bx-caret-right font-size-16 align-middle text-primary me-1"></i>
-                                                Type: <span class="badge bg-info">{{ ucfirst($product->product_type) }}</span>
-                                            </p>
+
                                         </div>
                                     </div>
                                 </div>
