@@ -44,12 +44,15 @@
                             <div class="p-2">
                                 <form id="forgotPasswordForm" method="post">
                                     @csrf
-                                    <div class="mb-4">
-                                        <label class="form-label">Email Address</label>
-                                        <input type="email" class="form-control" id="email" name="email" 
-                                               placeholder="Enter your email address">
-                                        <label id="email-error" class="text-danger error" for="email" style="display: none"></label>
-                                    </div>
+                                    
+                                    <x-input-field 
+                                        type="email" 
+                                        name="email" 
+                                        id="email" 
+                                        label="Email Address" 
+                                        placeholder="Enter your email address" 
+                                        containerClass="mb-4"
+                                    />
 
                                     <div class="mt-4">
                                         <button class="btn btn-primary w-100" type="submit" id="submitButton">
