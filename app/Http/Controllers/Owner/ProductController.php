@@ -7,6 +7,9 @@ use App\Models\Product;
 use App\Models\Category;
 use App\Models\SubCategory;
 use App\Models\ProductImage;
+use App\Models\ChildCategory;
+use App\Models\Brand;
+use App\Models\Collection;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 use App\Http\Traits\ResponseTrait;
@@ -18,9 +21,6 @@ use Illuminate\Support\Facades\Auth;
 class ProductController extends Controller
 {
     use ResponseTrait;
-
-    const IMAGE_PATH = 'uploads/products/';
-    const GALLERY_PATH = 'uploads/products/gallery/';
 
     public function index()
     {
@@ -63,7 +63,7 @@ class ProductController extends Controller
             })
             ->editColumn('thumbnail_image', function($row){
                 if($row->thumbnail_image){
-                    return '<img src="'.asset(self::IMAGE_PATH.$row->thumbnail_image).'" alt="'.$row->product_name.'" class="img-thumbnail" width="50">';
+                    return '<img src="'.asset(PRODUCT_IMAGE_PATH.$row->thumbnail_image).'" alt="'.$row->product_name.'" class="img-thumbnail" width="50">';
                 }
                 return 'N/A';
             })
@@ -90,8 +90,8 @@ class ProductController extends Controller
     public function create()
     {
         $categories = Category::where('status', Status::Active)->get();
-        $brands = \App\Models\Brand::where('status', Status::Active)->get();
-        $collections = \App\Models\Collection::where('status', Status::Active)->get();
+        $brands = Brand::where('status', Status::Active)->get();
+        $collections = Collection::where('status', Status::Active)->get();
         return view('owner.products.create', compact('categories', 'brands', 'collections'));
     }
 
@@ -134,10 +134,10 @@ class ProductController extends Controller
             'has_variation' => 'nullable|boolean',
             
             // Media
-            'thumbnail_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'thumbnail_image' => 'nullable',
             'video_url' => 'nullable|url',
             'image_alt_text' => 'nullable|string|max:255',
-            'gallery_images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'gallery_images.*' => 'nullable',
             
             // Shipping
             'weight' => 'nullable|numeric|min:0',
@@ -236,15 +236,15 @@ class ProductController extends Controller
                 'search_tags' => $request->search_tags,
             ];
 
-            if ($request->hasFile('thumbnail_image')) {
-                $productData['thumbnail_image'] = uploadImgFile($request->thumbnail_image, self::IMAGE_PATH);
+            if ($request->has('thumbnail_image')) {
+                $productData['thumbnail_image'] = uploadFilepondFile($request->thumbnail_image, PRODUCT_IMAGE_PATH);
             }
 
             $product = Product::create($productData);
 
             // Gallery Images
-            if ($request->hasFile('gallery_images')) {
-                $galleryImages = uploadMultipleImages($request->file('gallery_images'), self::GALLERY_PATH);
+            if ($request->has('gallery_images') && is_array($request->gallery_images)) {
+                $galleryImages = uploadMultipleImages($request->gallery_images, PRODUCT_GALLERY_PATH);
                 foreach ($galleryImages as $index => $imageName) {
                     $product->productImages()->create([
                         'image' => $imageName,
@@ -266,9 +266,9 @@ class ProductController extends Controller
     {
         $categories = Category::where('status', Status::Active)->get();
         $subCategories = SubCategory::where('category_id', $product->category_id)->where('status', Status::Active)->get();
-        $childCategories = \App\Models\ChildCategory::where('sub_category_id', $product->sub_category_id)->where('status', Status::Active)->get();
-        $brands = \App\Models\Brand::where('status', Status::Active)->get();
-        $collections = \App\Models\Collection::where('status', Status::Active)->get();
+        $childCategories = ChildCategory::where('sub_category_id', $product->sub_category_id)->where('status', Status::Active)->get();
+        $brands = Brand::where('status', Status::Active)->get();
+        $collections = Collection::where('status', Status::Active)->get();
         $product->load(['productImages', 'productInformation']);
         return view('owner.products.edit', compact('product', 'categories', 'subCategories', 'childCategories', 'brands', 'collections'));
     }
@@ -312,10 +312,12 @@ class ProductController extends Controller
             'has_variation' => 'nullable|boolean',
             
             // Media
-            'thumbnail_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-            'video_url' => 'nullable|url',
+            'thumbnail_image' => 'nullable',
+
+            'video_url' => 'nullable|string|max:255',
             'image_alt_text' => 'nullable|string|max:255',
-            'gallery_images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+
+            'gallery_images.*' => 'nullable',
             
             // Shipping
             'weight' => 'nullable|numeric|min:0',
@@ -408,18 +410,18 @@ class ProductController extends Controller
                 'search_tags' => $request->search_tags,
             ];
 
-            if ($request->hasFile('thumbnail_image')) {
+            if ($request->has('thumbnail_image')) {
                 if($product->thumbnail_image){
-                    deleteImgFile($product->thumbnail_image, self::IMAGE_PATH);
+                    deleteImgFile($product->thumbnail_image, PRODUCT_IMAGE_PATH);
                 }
-                $productData['thumbnail_image'] = uploadImgFile($request->thumbnail_image, self::IMAGE_PATH);
+                $productData['thumbnail_image'] = uploadFilepondFile($request->thumbnail_image, PRODUCT_IMAGE_PATH);
             }
 
             $product->update($productData);
 
             // Gallery Images (Append new ones)
-            if ($request->hasFile('gallery_images')) {
-                $galleryImages = uploadMultipleImages($request->file('gallery_images'), self::GALLERY_PATH);
+            if ($request->has('gallery_images') && $request->gallery_images && is_array($request->gallery_images)) {
+                $galleryImages = uploadMultipleImages($request->gallery_images, PRODUCT_GALLERY_PATH);
                 $currentMaxOrder = $product->productImages()->max('sort_order') ?? 0;
                 foreach ($galleryImages as $index => $imageName) {
                     $product->productImages()->create([
@@ -444,11 +446,11 @@ class ProductController extends Controller
             DB::beginTransaction();
             
             if($product->thumbnail_image){
-                deleteImgFile($product->thumbnail_image, self::IMAGE_PATH);
+                deleteImgFile($product->thumbnail_image, PRODUCT_IMAGE_PATH);
             }
 
             foreach($product->productImages as $image){
-                deleteImgFile($image->image, self::GALLERY_PATH);
+                deleteImgFile($image->image, PRODUCT_GALLERY_PATH);
                 $image->delete();
             }
 
@@ -476,7 +478,7 @@ class ProductController extends Controller
 
     public function deleteImage(ProductImage $productImage)
     {
-        deleteImgFile($productImage->image, self::GALLERY_PATH);
+        deleteImgFile($productImage->image, PRODUCT_GALLERY_PATH);
         $productImage->delete();
         return response()->json(['success' => true, 'message' => 'Image deleted successfully.']);
     }

@@ -58,3 +58,10 @@ if (!defined('BLOG_IMAGE_PATH'))
     define('BLOG_IMAGE_PATH', 'uploads/blog_images/');
 
 
+if (!defined('PRODUCT_IMAGE_PATH'))
+    define('PRODUCT_IMAGE_PATH', 'uploads/products/');
+
+if (!defined('PRODUCT_GALLERY_PATH'))
+    define('PRODUCT_GALLERY_PATH', 'uploads/products/gallery/');
+    
+
