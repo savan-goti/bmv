@@ -19,110 +19,131 @@
                         @csrf
                         @method('PUT')
                         <div class="mb-3">
-                            <label for="profile_image" class="form-label">Profile Image</label>
-                            <input type="file" class="form-control" id="profile_image" name="profile_image">
+                            <x-input-field 
+                                type="file" 
+                                name="profile_image" 
+                                label="Profile Image" 
+                            />
                             @if($admin->profile_image)
                                 <img src="{{ asset($admin->profile_image) }}" alt="Profile Image" width="100" class="mt-2">
                             @endif
-                            <label id="profile_image-error" class="text-danger error" for="profile_image" style="display: none"></label>
                         </div>
 
-                        <div class="mb-3">
-                            <label for="name" class="form-label">Name</label>
-                            <input type="text" class="form-control" id="name" name="name" value="{{ $admin->name }}" required>
-                            <label id="name-error" class="text-danger error" for="name" style="display: none"></label>
-                        </div>
+                        <x-input-field 
+                            name="name" 
+                            label="Name" 
+                            placeholder="Enter admin name"
+                            value="{{ $admin->name }}"
+                            required 
+                        />
 
-                        <div class="mb-3">
-                            <label for="father_name" class="form-label">Father Name</label>
-                            <input type="text" class="form-control" id="father_name" name="father_name" value="{{ $admin->father_name }}">
-                            <label id="father_name-error" class="text-danger error" for="father_name" style="display: none"></label>
-                        </div>
+                        <x-input-field 
+                            name="father_name" 
+                            label="Father Name" 
+                            placeholder="Enter father name"
+                            value="{{ $admin->father_name }}"
+                        />
 
-                        <div class="mb-3">
-                            <label for="email" class="form-label">Email</label>
-                            <input type="email" class="form-control" id="email" name="email" value="{{ $admin->email }}" required>
-                            <label id="email-error" class="text-danger error" for="email" style="display: none"></label>
-                        </div>
+                        <x-input-field 
+                            type="email"
+                            name="email" 
+                            label="Email" 
+                            placeholder="Enter email address"
+                            value="{{ $admin->email }}"
+                            required 
+                        />
 
-                        <div class="mb-3">
-                            <label for="date_of_birth" class="form-label">Date of Birth</label>
-                            <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" value="{{ $admin->date_of_birth }}">
-                            <label id="date_of_birth-error" class="text-danger error" for="date_of_birth" style="display: none"></label>
-                        </div>
+                        <x-input-field 
+                            type="date"
+                            name="date_of_birth" 
+                            label="Date of Birth" 
+                            value="{{ $admin->date_of_birth }}"
+                        />
 
-                        <div class="mb-3">
-                            <label for="gender" class="form-label">Gender</label>
-                            <select class="form-select" id="gender" name="gender">
-                                <option value="" selected disabled>Select Gender</option>
-                                <option value="male" {{ $admin->gender == 'male' ? 'selected' : '' }}>Male</option>
-                                <option value="female" {{ $admin->gender == 'female' ? 'selected' : '' }}>Female</option>
-                                <option value="other" {{ $admin->gender == 'other' ? 'selected' : '' }}>Other</option>
-                            </select>
-                            <label id="gender-error" class="text-danger error" for="gender" style="display: none"></label>
-                        </div>
+                        <x-input-field 
+                            type="select" 
+                            name="gender" 
+                            label="Gender" 
+                            placeholder="Select Gender"
+                        >
+                            <option value="male" {{ $admin->gender == 'male' ? 'selected' : '' }}>Male</option>
+                            <option value="female" {{ $admin->gender == 'female' ? 'selected' : '' }}>Female</option>
+                            <option value="other" {{ $admin->gender == 'other' ? 'selected' : '' }}>Other</option>
+                        </x-input-field>
 
-                        <div class="mb-3">
-                            <label for="phone" class="form-label">Phone</label>
-                            <input type="text" class="form-control" id="phone" name="phone" value="{{ $admin->phone }}">
-                            <label id="phone-error" class="text-danger error" for="phone" style="display: none"></label>
-                        </div>
+                        <x-input-field 
+                            name="phone" 
+                            label="Phone" 
+                            placeholder="Enter phone number"
+                            value="{{ $admin->phone }}"
+                        />
 
-                        <div class="mb-3">
-                            <label for="role" class="form-label">Role</label>
-                            <select class="form-select" id="role" name="role" required>
-                                <option value="admin" {{ $admin->role == 'admin' ? 'selected' : '' }}>Admin</option>
-                                <option value="manager" {{ $admin->role == 'manager' ? 'selected' : '' }}>Manager</option>
-                                <option value="super_admin" {{ $admin->role == 'super_admin' ? 'selected' : '' }}>Super Admin</option>
-                            </select>
-                            <label id="role-error" class="text-danger error" for="role" style="display: none"></label>
-                        </div>
+                        <x-input-field 
+                            type="select" 
+                            name="role" 
+                            label="Role" 
+                            required
+                        >
+                            <option value="admin" {{ $admin->role == 'admin' ? 'selected' : '' }}>Admin</option>
+                            <option value="manager" {{ $admin->role == 'manager' ? 'selected' : '' }}>Manager</option>
+                            <option value="super_admin" {{ $admin->role == 'super_admin' ? 'selected' : '' }}>Super Admin</option>
+                        </x-input-field>
 
-                        <div class="mb-3">
-                            <label for="education" class="form-label">Education</label>
-                            <input type="text" class="form-control" id="education" name="education" value="{{ $admin->education }}">
-                            <label id="education-error" class="text-danger error" for="education" style="display: none"></label>
-                        </div>
+                        <x-input-field 
+                            name="education" 
+                            label="Education" 
+                            placeholder="Enter education details"
+                            value="{{ $admin->education }}"
+                        />
 
+                        <x-input-field 
+                            type="textarea"
+                            name="address" 
+                            label="Address" 
+                            placeholder="Enter address"
+                            value="{{ $admin->address }}"
+                            rows="3"
+                        />
 
-                        <div class="mb-3">
-                            <label for="address" class="form-label">Address</label>
-                            <textarea class="form-control" id="address" name="address" rows="3">{{ $admin->address }}</textarea>
-                            <label id="address-error" class="text-danger error" for="address" style="display: none"></label>
-                        </div>
+                        <x-input-field 
+                            type="select" 
+                            name="status" 
+                            label="Status" 
+                            required
+                        >
+                            <option value="active" {{ $admin->status == 'active' ? 'selected' : '' }}>Active</option>
+                            <option value="inactive" {{ $admin->status == 'inactive' ? 'selected' : '' }}>Inactive</option>
+                        </x-input-field>
 
-                        <div class="mb-3">
-                            <label for="status" class="form-label">Status</label>
-                            <select class="form-select" name="status" required>
-                                <option value="active" {{ $admin->status == 'active' ? 'selected' : '' }}>Active</option>
-                                <option value="inactive" {{ $admin->status == 'inactive' ? 'selected' : '' }}>Inactive</option>
-                            </select>
-                            <label id="status-error" class="text-danger error" for="status" style="display: none"></label>
-                        </div>
+                        <x-input-field 
+                            type="date"
+                            name="resignation_date" 
+                            label="Resignation Date" 
+                            value="{{ $admin->resignation_date }}"
+                        />
 
-                        <div class="mb-3">
-                            <label for="resignation_date" class="form-label">Resignation Date</label>
-                            <input type="date" class="form-control" id="resignation_date" name="resignation_date" value="{{ $admin->resignation_date }}">
-                            <label id="resignation_date-error" class="text-danger error" for="resignation_date" style="display: none"></label>
-                        </div>
+                        <x-input-field 
+                            type="textarea"
+                            name="purpose" 
+                            label="Purpose" 
+                            placeholder="Enter purpose"
+                            value="{{ $admin->purpose }}"
+                            rows="3"
+                        />
 
-                        <div class="mb-3">
-                            <label for="purpose" class="form-label">Purpose</label>
-                            <textarea class="form-control" id="purpose" name="purpose" rows="3">{{ $admin->purpose }}</textarea>
-                            <label id="purpose-error" class="text-danger error" for="purpose" style="display: none"></label>
-                        </div>
+                        <x-input-field 
+                            type="password"
+                            name="password" 
+                            label="Password (Leave blank to keep current)" 
+                            placeholder="Enter new password"
+                        />
 
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Password (Leave blank to keep current)</label>
-                            <input type="password" class="form-control" id="password" name="password">
-                            <label id="password-error" class="text-danger error" for="password" style="display: none"></label>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="password_confirmation" class="form-label">Confirm Password</label>
-                            <input type="password" class="form-control" id="password_confirmation" name="password_confirmation">
-                            <label id="password_confirmation-error" class="text-danger error" for="password_confirmation" style="display: none"></label>
-                        </div>
+                        <x-input-field 
+                            type="password"
+                            name="password_confirmation" 
+                            label="Confirm Password" 
+                            placeholder="Confirm new password"
+                        />
 
                         <button type="submit" class="btn btn-primary" id="adminEditButton">
                             <i class="bx bx-loader spinner me-2" style="display: none" id="adminEditBtnSpinner"></i>Update Admin

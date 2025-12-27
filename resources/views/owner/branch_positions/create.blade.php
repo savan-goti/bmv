@@ -19,105 +19,58 @@
                         @csrf
                         
                         <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="branch_id" class="form-label">Branch <span class="text-danger">*</span></label>
-                                    <select class="form-select" id="branch_id" name="branch_id" required>
-                                        <option value="">Select Branch</option>
-                                        @foreach($branches as $b)
-                                            <option value="{{ $b->id }}" {{ $branch && $branch->id == $b->id ? 'selected' : '' }}>{{ $b->name }} ({{ $b->code }})</option>
-                                        @endforeach
-                                    </select>
-                                    <label id="branch_id-error" class="text-danger error" for="branch_id" style="display: none"></label>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="person_type" class="form-label">Person Type <span class="text-danger">*</span></label>
-                                    <select class="form-select" id="person_type" name="person_type" required>
-                                        <option value="">Select Type</option>
-                                        <option value="Admin">Admin</option>
-                                        <option value="Staff">Staff</option>
-                                    </select>
-                                    <label id="person_type-error" class="text-danger error" for="person_type" style="display: none"></label>
-                                </div>
-                            </div>
+                            <div class="col-md-6"><x-input-field type="select" name="branch_id" label="Branch" required>
+                                <option value="">Select Branch</option>
+                                @foreach($branches as $b)
+                                    <option value="{{ $b->id }}" {{ $branch && $branch->id == $b->id ? 'selected' : '' }}>{{ $b->name }} ({{ $b->code }})</option>
+                                @endforeach
+                            </x-input-field></div>
+                            <div class="col-md-6"><x-input-field type="select" id="person_type" name="person_type" label="Person Type" required>
+                                <option value="">Select Type</option>
+                                <option value="Admin">Admin</option>
+                                <option value="Staff">Staff</option>
+                            </x-input-field></div>
                         </div>
 
                         <div class="row">
                             <div class="col-md-6">
-                                <div class="mb-3" id="admin_select_wrapper" style="display: none;">
-                                    <label for="admin_id" class="form-label">Select Admin <span class="text-danger">*</span></label>
-                                    <select class="form-select" id="admin_id" name="person_id" disabled>
+                                <div id="admin_select_wrapper" style="display: none;">
+                                    <x-input-field type="select" id="admin_id" name="person_id" label="Select Admin" disabled>
                                         <option value="">Select Admin</option>
                                         @foreach($admins as $admin)
                                             <option value="{{ $admin->id }}">{{ $admin->name }} - {{ $admin->email }}</option>
                                         @endforeach
-                                    </select>
-                                    <label id="person_id-error" class="text-danger error" for="person_id" style="display: none"></label>
+                                    </x-input-field>
                                 </div>
-                                <div class="mb-3" id="staff_select_wrapper" style="display: none;">
-                                    <label for="staff_id" class="form-label">Select Staff <span class="text-danger">*</span></label>
-                                    <select class="form-select" id="staff_id" name="person_id" disabled>
+                                <div id="staff_select_wrapper" style="display: none;">
+                                    <x-input-field type="select" id="staff_id" name="person_id" label="Select Staff" disabled>
                                         <option value="">Select Staff</option>
                                         @foreach($staffs as $staff)
                                             <option value="{{ $staff->id }}">{{ $staff->name }} - {{ $staff->email }}</option>
                                         @endforeach
-                                    </select>
+                                    </x-input-field>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="job_position_id" class="form-label">Job Position <span class="text-danger">*</span></label>
-                                    <select class="form-select" id="job_position_id" name="job_position_id" required>
-                                        <option value="">Select Job Position</option>
-                                        @foreach($jobPositions as $jp)
-                                            <option value="{{ $jp->id }}">{{ $jp->name }} @if($jp->department) - {{ $jp->department }} @endif</option>
-                                        @endforeach
-                                    </select>
-                                    <label id="job_position_id-error" class="text-danger error" for="job_position_id" style="display: none"></label>
-                                </div>
-                            </div>
+                            <div class="col-md-6"><x-input-field type="select" name="job_position_id" label="Job Position" required>
+                                <option value="">Select Job Position</option>
+                                @foreach($jobPositions as $jp)
+                                    <option value="{{ $jp->id }}">{{ $jp->name }} @if($jp->department) - {{ $jp->department }} @endif</option>
+                                @endforeach
+                            </x-input-field></div>
                         </div>
 
                         <div class="row">
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    <label for="start_date" class="form-label">Start Date</label>
-                                    <input type="date" class="form-control" id="start_date" name="start_date">
-                                    <label id="start_date-error" class="text-danger error" for="start_date" style="display: none"></label>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    <label for="end_date" class="form-label">End Date</label>
-                                    <input type="date" class="form-control" id="end_date" name="end_date">
-                                    <label id="end_date-error" class="text-danger error" for="end_date" style="display: none"></label>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    <label for="salary" class="form-label">Salary</label>
-                                    <input type="number" step="0.01" class="form-control" id="salary" name="salary" placeholder="0.00">
-                                    <label id="salary-error" class="text-danger error" for="salary" style="display: none"></label>
-                                </div>
-                            </div>
+                            <div class="col-md-4"><x-input-field type="date" name="start_date" label="Start Date" /></div>
+                            <div class="col-md-4"><x-input-field type="date" name="end_date" label="End Date" /></div>
+                            <div class="col-md-4"><x-input-field type="number" name="salary" label="Salary" placeholder="0.00" step="0.01" /></div>
                         </div>
 
-                        <div class="mb-3">
-                            <label for="notes" class="form-label">Notes</label>
-                            <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
-                            <label id="notes-error" class="text-danger error" for="notes" style="display: none"></label>
-                        </div>
+                        <x-input-field type="textarea" name="notes" label="Notes" rows="3" />
 
-                        <div class="mb-3">
-                            <label for="is_active" class="form-label">Status <span class="text-danger">*</span></label>
-                            <select class="form-select" name="is_active" required>
-                                <option value="1" selected>Active</option>
-                                <option value="0">Inactive</option>
-                            </select>
-                            <label id="is_active-error" class="text-danger error" for="is_active" style="display: none"></label>
-                        </div>
+                        <x-input-field type="select" name="is_active" label="Status" required>
+                            <option value="1" selected>Active</option>
+                            <option value="0">Inactive</option>
+                        </x-input-field>
 
                         <button type="submit" class="btn btn-primary" id="branchPositionCreateButton">
                             <i class="bx bx-loader spinner me-2" style="display: none" id="branchPositionCreateBtnSpinner"></i>Assign Position
@@ -143,7 +96,7 @@
             $('#admin_id, #staff_id').val('').prop('required', false).prop('disabled', true);
             
             // Clear any existing validation errors
-            $('#person_id-error').hide().html('');
+            $('#admin_id-error, #staff_id-error').hide().html('');
             
             if (type === 'Admin') {
                 $('#admin_select_wrapper').show();

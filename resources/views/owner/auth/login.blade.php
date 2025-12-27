@@ -57,23 +57,28 @@
                             <div class="p-2 mt-4">
                                 <form id="loginForm" method="post">
                                     @csrf
-                                    <div class="mb-3">
-                                        <label for="email" class="form-label">Email ID</label>
-                                        <input type="text" class="form-control" id="email" placeholder="Enter Email ID"
-                                               name="email">
-                                        <label id="email-error" class="text-danger error" for="email" style="display: none"></label>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label" for="password">Password</label>
-                                        <div class="position-relative auth-pass-inputgroup">
-                                            <input type="password" class="form-control pe-5 password-input"
-                                                   name="password" placeholder="Enter Password" id="password">
-                                            <label id="password-error" class="text-danger error" for="password" style="display: none"></label>
-                                            <button
-                                                class="btn btn-link position-absolute end-0 top-0 text-decoration-none text-muted password-addon material-shadow-none"
-                                                type="button" id="password-addon"><i class="ri-eye-fill align-middle"></i></button>
-                                        </div>
-                                    </div>
+                                    
+                                    <x-input-field 
+                                        name="email" 
+                                        label="Email ID" 
+                                        placeholder="Enter Email ID" 
+                                        required 
+                                    />
+
+                                    <x-input-field 
+                                        type="password" 
+                                        name="password" 
+                                        label="Password" 
+                                        placeholder="Enter Password" 
+                                        inputClass="form-control pe-5 password-input"
+                                        required
+                                    >
+                                        <x-slot name="suffix">
+                                            <button class="btn btn-link position-absolute end-0 top-0 text-decoration-none text-muted password-addon material-shadow-none" type="button" id="password-addon">
+                                                <i class="ri-eye-fill align-middle"></i>
+                                            </button>
+                                        </x-slot>
+                                    </x-input-field>
                                     
                                     <!-- Authentication Method Tabs (Hidden by default, shown when needed) -->
                                     <div class="mb-3" id="authMethodTabs" style="display: none;">
@@ -88,38 +93,45 @@
                                     </div>
                                     
                                     <!-- Two-Factor Authentication Code (Hidden by default) -->
-                                    <div class="mb-3" id="twoFactorCodeContainer" style="display: none;">
+                                    <div id="twoFactorCodeContainer" style="display: none;">
                                         <div class="alert alert-info mb-3">
                                             <i class="ri-shield-check-line me-2"></i>
                                             <strong>Two-Factor Authentication Required</strong>
                                             <p class="mb-0 small mt-1">Please enter the 6-digit code from your authenticator app or use one of your recovery codes.</p>
                                         </div>
-                                        <label for="two_factor_code" class="form-label">Authentication Code</label>
-                                        <input type="text" class="form-control" id="two_factor_code" 
-                                               placeholder="Enter 6-digit code or recovery code" name="two_factor_code" maxlength="10" autocomplete="off">
-                                        <small class="text-muted d-block mt-1">Enter the 6-digit code from your authenticator app or use a recovery code (up to 10 characters).</small>
-                                        <label id="two_factor_code-error" class="text-danger error" for="two_factor_code" style="display: none"></label>
+                                        <x-input-field 
+                                            name="two_factor_code" 
+                                            label="Authentication Code" 
+                                            placeholder="Enter 6-digit code or recovery code" 
+                                            maxlength="10" 
+                                            autocomplete="off"
+                                            helpText="Enter the 6-digit code from your authenticator app or use a recovery code (up to 10 characters)."
+                                        />
                                     </div>
                                     
                                     <!-- Login Email Verification Code (Hidden by default) -->
-                                    <div class="mb-3" id="loginVerificationCodeContainer" style="display: none;">
+                                    <div id="loginVerificationCodeContainer" style="display: none;">
                                         <div class="alert alert-success mb-3">
                                             <i class="ri-mail-check-line me-2"></i>
                                             <strong>Email Verification Required</strong>
                                             <p class="mb-0 small mt-1">A verification code has been sent to your email. Please check your inbox and enter the code below.</p>
                                         </div>
-                                        <label for="login_verification_code" class="form-label">Verification Code</label>
-                                        <input type="text" class="form-control" id="login_verification_code" 
-                                               placeholder="Enter 6-digit code" name="login_verification_code" maxlength="6" autocomplete="off">
-                                        <small class="text-muted d-block mt-1">The code will expire in 10 minutes.</small>
-                                        <label id="login_verification_code-error" class="text-danger error" for="login_verification_code" style="display: none"></label>
+                                        <x-input-field 
+                                            name="login_verification_code" 
+                                            label="Verification Code" 
+                                            placeholder="Enter 6-digit code" 
+                                            maxlength="6" 
+                                            autocomplete="off"
+                                            helpText="The code will expire in 10 minutes."
+                                        />
                                     </div>
                                     
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" value="" name="remember_me"
-                                               id="auth-remember-check">
-                                        <label class="form-check-label" for="auth-remember-check">Remember Me</label>
-                                    </div>
+                                    <x-checkbox 
+                                        name="remember_me" 
+                                        id="auth-remember-check" 
+                                        label="Remember Me" 
+                                        value="1" 
+                                    />
 
                                     <div class="float-end mt-2">
                                         <a href="{{route('owner.forgot-password')}}" class="text-muted">Forgot password?</a>

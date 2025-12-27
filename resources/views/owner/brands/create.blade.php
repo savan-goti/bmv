@@ -22,50 +22,57 @@
                         @csrf
 
                         <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="name" class="form-label">Name <span class="text-danger">*</span></label>
-                                <input type="text" name="name" id="name" class="form-control @error('name') is-invalid @enderror" 
-                                    value="{{ old('name') }}" required>
-                                @error('name')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                            <div class="col-md-6">
+                                <x-input-field 
+                                    name="name" 
+                                    label="Name" 
+                                    placeholder="Enter brand name"
+                                    value="{{ old('name') }}"
+                                    required 
+                                />
                             </div>
 
-                            <div class="col-md-6 mb-3">
-                                <label for="website" class="form-label">Website</label>
-                                <input type="url" name="website" id="website" class="form-control @error('website') is-invalid @enderror" 
-                                    value="{{ old('website') }}" placeholder="https://example.com">
-                                @error('website')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                            <div class="col-md-6">
+                                <x-input-field 
+                                    type="url"
+                                    name="website" 
+                                    label="Website" 
+                                    placeholder="https://example.com"
+                                    value="{{ old('website') }}"
+                                />
                             </div>
 
-                            <div class="col-md-6 mb-3">
-                                <label for="status" class="form-label">Status <span class="text-danger">*</span></label>
-                                <select name="status" id="status" class="form-select @error('status') is-invalid @enderror" required>
+                            <div class="col-md-6">
+                                <x-input-field 
+                                    type="select" 
+                                    name="status" 
+                                    label="Status" 
+                                    required
+                                >
                                     <option value="active" {{ old('status') == 'active' ? 'selected' : '' }}>Active</option>
                                     <option value="inactive" {{ old('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
-                                </select>
-                                @error('status')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                                </x-input-field>
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label for="logo" class="form-label">Logo</label>
-                                <input type="file" name="logo" id="logo" class="form-control @error('logo') is-invalid @enderror" accept="image/*">
-                                @error('logo')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                                <x-input-field 
+                                    type="file" 
+                                    name="logo" 
+                                    label="Logo" 
+                                    accept="image/*"
+                                />
                                 <div id="logo-preview" class="mt-2"></div>
                             </div>
 
-                            <div class="col-md-12 mb-3">
-                                <label for="description" class="form-label">Description</label>
-                                <textarea name="description" id="description" rows="4" class="form-control @error('description') is-invalid @enderror">{{ old('description') }}</textarea>
-                                @error('description')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                            <div class="col-md-12">
+                                <x-input-field 
+                                    type="textarea"
+                                    name="description" 
+                                    label="Description" 
+                                    placeholder="Enter brand description"
+                                    value="{{ old('description') }}"
+                                    rows="4"
+                                />
                             </div>
                         </div>
 

@@ -23,50 +23,53 @@
                         @method('PUT')
 
                         <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="name" class="form-label">Name <span class="text-danger">*</span></label>
-                                <input type="text" name="name" id="name" class="form-control @error('name') is-invalid @enderror" 
-                                    value="{{ old('name', $collection->name) }}" required>
-                                @error('name')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                            <div class="col-md-6">
+                                <x-input-field 
+                                    name="name" 
+                                    label="Name" 
+                                    placeholder="Enter collection name"
+                                    value="{{ old('name', $collection->name) }}"
+                                    required 
+                                />
                             </div>
 
-                            <div class="col-md-6 mb-3">
-                                <label for="status" class="form-label">Status <span class="text-danger">*</span></label>
-                                <select name="status" id="status" class="form-select @error('status') is-invalid @enderror" required>
+                            <div class="col-md-6">
+                                <x-input-field 
+                                    type="select" 
+                                    name="status" 
+                                    label="Status" 
+                                    required
+                                >
                                     <option value="active" {{ old('status', $collection->status->value) == 'active' ? 'selected' : '' }}>Active</option>
                                     <option value="inactive" {{ old('status', $collection->status->value) == 'inactive' ? 'selected' : '' }}>Inactive</option>
-                                </select>
-                                @error('status')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                                </x-input-field>
+                            </div>
+
+                            <div class="col-md-6">
+                                <x-input-field 
+                                    type="date"
+                                    name="start_date" 
+                                    label="Start Date" 
+                                    value="{{ old('start_date', $collection->start_date?->format('Y-m-d')) }}"
+                                />
+                            </div>
+
+                            <div class="col-md-6">
+                                <x-input-field 
+                                    type="date"
+                                    name="end_date" 
+                                    label="End Date" 
+                                    value="{{ old('end_date', $collection->end_date?->format('Y-m-d')) }}"
+                                />
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label for="start_date" class="form-label">Start Date</label>
-                                <input type="date" name="start_date" id="start_date" class="form-control @error('start_date') is-invalid @enderror" 
-                                    value="{{ old('start_date', $collection->start_date?->format('Y-m-d')) }}">
-                                @error('start_date')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <div class="col-md-6 mb-3">
-                                <label for="end_date" class="form-label">End Date</label>
-                                <input type="date" name="end_date" id="end_date" class="form-control @error('end_date') is-invalid @enderror" 
-                                    value="{{ old('end_date', $collection->end_date?->format('Y-m-d')) }}">
-                                @error('end_date')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <div class="col-md-6 mb-3">
-                                <label for="image" class="form-label">Image</label>
-                                <input type="file" name="image" id="image" class="form-control @error('image') is-invalid @enderror" accept="image/*">
-                                @error('image')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                                <x-input-field 
+                                    type="file" 
+                                    name="image" 
+                                    label="Image" 
+                                    accept="image/*"
+                                />
                                 
                                 @if($collection->getRawOriginal('image'))
                                     <div class="mt-2">
@@ -79,22 +82,25 @@
                                 <div id="image-preview" class="mt-2"></div>
                             </div>
 
-                            <div class="col-md-6 mb-3">
-                                <div class="form-check mt-4">
-                                    <input class="form-check-input" type="checkbox" name="is_featured" id="is_featured" value="1" 
-                                        {{ old('is_featured', $collection->is_featured) ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="is_featured">
-                                        Featured Collection
-                                    </label>
-                                </div>
+                            <div class="col-md-6">
+                                <x-checkbox 
+                                    name="is_featured" 
+                                    value="1" 
+                                    label="Featured Collection"
+                                    :checked="old('is_featured', $collection->is_featured) ?? false"
+                                    container-class="mt-4"
+                                />
                             </div>
 
-                            <div class="col-md-12 mb-3">
-                                <label for="description" class="form-label">Description</label>
-                                <textarea name="description" id="description" rows="4" class="form-control @error('description') is-invalid @enderror">{{ old('description', $collection->description) }}</textarea>
-                                @error('description')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                            <div class="col-md-12">
+                                <x-input-field 
+                                    type="textarea"
+                                    name="description" 
+                                    label="Description" 
+                                    placeholder="Enter collection description"
+                                    value="{{ old('description', $collection->description) }}"
+                                    rows="4"
+                                />
                             </div>
 
                             <div class="col-md-12 mb-3">

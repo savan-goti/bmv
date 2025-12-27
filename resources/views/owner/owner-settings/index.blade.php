@@ -106,11 +106,15 @@
 
                                             <form id="verifyTwoFactorForm">
                                                 @csrf
-                                                <div class="mb-3">
-                                                    <label for="verification_code" class="form-label">Enter the 6-digit code from your authenticator app:</label>
-                                                    <input type="text" class="form-control" id="verification_code" name="code" 
-                                                           placeholder="000000" maxlength="6" pattern="[0-9]{6}" required>
-                                                </div>
+                                                <x-input-field 
+                                                    name="code" 
+                                                    id="verification_code"
+                                                    label="Enter the 6-digit code from your authenticator app:" 
+                                                    placeholder="000000" 
+                                                    maxlength="6" 
+                                                    pattern="[0-9]{6}" 
+                                                    required 
+                                                />
                                                 <div class="d-flex gap-2">
                                                     <button type="submit" class="btn btn-success" id="verifyTwoFactorBtn">
                                                         <i class="bx bx-loader spinner me-2" style="display: none" id="verifyTwoFactorSpinner"></i>

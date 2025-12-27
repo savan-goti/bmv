@@ -64,6 +64,8 @@
     @endif
 
     <div class="position-relative">
+        {{ $prefix ?? '' }}
+
         @if($icon && $iconPosition === 'left')
             <i class="{{ $icon }} position-absolute top-50 translate-middle-y ms-3" style="z-index: 10;"></i>
         @endif
@@ -84,6 +86,8 @@
         @if($icon && $iconPosition === 'right')
             <i class="{{ $icon }} position-absolute top-50 end-0 translate-middle-y me-3" style="z-index: 10;"></i>
         @endif
+
+        {{ $suffix ?? '' }}
     </div>
 
     @if($helpText)

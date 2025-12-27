@@ -20,111 +20,37 @@
                         @method('PUT')
                         
                         <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="name" class="form-label">Branch Name <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="name" name="name" value="{{ $branch->name }}" required>
-                                    <label id="name-error" class="text-danger error" for="name" style="display: none"></label>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="code" class="form-label">Branch Code <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="code" name="code" value="{{ $branch->code }}" required>
-                                    <label id="code-error" class="text-danger error" for="code" style="display: none"></label>
-                                </div>
-                            </div>
+                            <div class="col-md-6"><x-input-field name="name" label="Branch Name" placeholder="Enter branch name" value="{{ $branch->name }}" required /></div>
+                            <div class="col-md-6"><x-input-field name="code" label="Branch Code" placeholder="e.g., BR001" value="{{ $branch->code }}" required /></div>
                         </div>
 
                         <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="email" class="form-label">Email</label>
-                                    <input type="email" class="form-control" id="email" name="email" value="{{ $branch->email }}">
-                                    <label id="email-error" class="text-danger error" for="email" style="display: none"></label>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="phone" class="form-label">Phone</label>
-                                    <input type="text" class="form-control" id="phone" name="phone" value="{{ $branch->phone }}">
-                                    <label id="phone-error" class="text-danger error" for="phone" style="display: none"></label>
-                                </div>
-                            </div>
+                            <div class="col-md-6"><x-input-field type="email" name="email" label="Email" placeholder="Enter email" value="{{ $branch->email }}" /></div>
+                            <div class="col-md-6"><x-input-field name="phone" label="Phone" placeholder="Enter phone" value="{{ $branch->phone }}" /></div>
                         </div>
 
-                        <div class="mb-3">
-                            <label for="address" class="form-label">Address</label>
-                            <textarea class="form-control" id="address" name="address" rows="2">{{ $branch->address }}</textarea>
-                            <label id="address-error" class="text-danger error" for="address" style="display: none"></label>
+                        <x-input-field type="textarea" name="address" label="Address" placeholder="Enter address" value="{{ $branch->address }}" rows="2" />
+
+                        <div class="row">
+                            <div class="col-md-4"><x-input-field name="city" label="City" placeholder="Enter city" value="{{ $branch->city }}" /></div>
+                            <div class="col-md-4"><x-input-field name="state" label="State" placeholder="Enter state" value="{{ $branch->state }}" /></div>
+                            <div class="col-md-4"><x-input-field name="country" label="Country" placeholder="Enter country" value="{{ $branch->country }}" /></div>
                         </div>
 
                         <div class="row">
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    <label for="city" class="form-label">City</label>
-                                    <input type="text" class="form-control" id="city" name="city" value="{{ $branch->city }}">
-                                    <label id="city-error" class="text-danger error" for="city" style="display: none"></label>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    <label for="state" class="form-label">State</label>
-                                    <input type="text" class="form-control" id="state" name="state" value="{{ $branch->state }}">
-                                    <label id="state-error" class="text-danger error" for="state" style="display: none"></label>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    <label for="country" class="form-label">Country</label>
-                                    <input type="text" class="form-control" id="country" name="country" value="{{ $branch->country }}">
-                                    <label id="country-error" class="text-danger error" for="country" style="display: none"></label>
-                                </div>
-                            </div>
+                            <div class="col-md-6"><x-input-field name="postal_code" label="Postal Code" placeholder="Enter postal code" value="{{ $branch->postal_code }}" /></div>
+                            <div class="col-md-6"><x-input-field type="date" name="opening_date" label="Opening Date" value="{{ $branch->opening_date }}" /></div>
                         </div>
 
                         <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="postal_code" class="form-label">Postal Code</label>
-                                    <input type="text" class="form-control" id="postal_code" name="postal_code" value="{{ $branch->postal_code }}">
-                                    <label id="postal_code-error" class="text-danger error" for="postal_code" style="display: none"></label>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="opening_date" class="form-label">Opening Date</label>
-                                    <input type="date" class="form-control" id="opening_date" name="opening_date" value="{{ $branch->opening_date }}">
-                                    <label id="opening_date-error" class="text-danger error" for="opening_date" style="display: none"></label>
-                                </div>
-                            </div>
+                            <div class="col-md-6"><x-input-field name="manager_name" label="Manager Name" placeholder="Enter manager name" value="{{ $branch->manager_name }}" /></div>
+                            <div class="col-md-6"><x-input-field name="manager_phone" label="Manager Phone" placeholder="Enter manager phone" value="{{ $branch->manager_phone }}" /></div>
                         </div>
 
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="manager_name" class="form-label">Manager Name</label>
-                                    <input type="text" class="form-control" id="manager_name" name="manager_name" value="{{ $branch->manager_name }}">
-                                    <label id="manager_name-error" class="text-danger error" for="manager_name" style="display: none"></label>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="manager_phone" class="form-label">Manager Phone</label>
-                                    <input type="text" class="form-control" id="manager_phone" name="manager_phone" value="{{ $branch->manager_phone }}">
-                                    <label id="manager_phone-error" class="text-danger error" for="manager_phone" style="display: none"></label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="status" class="form-label">Status <span class="text-danger">*</span></label>
-                            <select class="form-select" name="status" required>
-                                <option value="active" {{ $branch->status == 'active' ? 'selected' : '' }}>Active</option>
-                                <option value="inactive" {{ $branch->status == 'inactive' ? 'selected' : '' }}>Inactive</option>
-                            </select>
-                            <label id="status-error" class="text-danger error" for="status" style="display: none"></label>
-                        </div>
+                        <x-input-field type="select" name="status" label="Status" required>
+                            <option value="active" {{ $branch->status == 'active' ? 'selected' : '' }}>Active</option>
+                            <option value="inactive" {{ $branch->status == 'inactive' ? 'selected' : '' }}>Inactive</option>
+                        </x-input-field>
 
                         <button type="submit" class="btn btn-primary" id="branchEditButton">
                             <i class="bx bx-loader spinner me-2" style="display: none" id="branchEditBtnSpinner"></i>Update Branch

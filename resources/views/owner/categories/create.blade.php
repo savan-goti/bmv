@@ -17,37 +17,41 @@
                 <div class="card-body">
                     <form id="categoryCreateForm" method="POST" enctype="multipart/form-data">
                         @csrf
-                        <div class="mb-3">
-                            <label for="name" class="form-label">Name</label>
-                            <input type="text" class="form-control" id="name" name="name" required>
-                            <label id="name-error" class="text-danger error" for="name" style="display: none"></label>
-                        </div>
+                        <x-input-field 
+                            name="name" 
+                            label="Name" 
+                            placeholder="Enter category name"
+                            required 
+                        />
 
-                        <div class="mb-3">
-                            <label for="category_type" class="form-label">Category Type</label>
-                            <select class="form-select" name="category_type" id="category_type" required>
-                                <option value="">Select Category Type</option>
-                                @foreach($categoryTypes as $value => $label)
-                                    <option value="{{ $value }}">{{ $label }}</option>
-                                @endforeach
-                            </select>
-                            <label id="category_type-error" class="text-danger error" for="category_type" style="display: none"></label>
-                        </div>
+                        <x-input-field 
+                            type="select" 
+                            name="category_type" 
+                            label="Category Type" 
+                            placeholder="Select Category Type"
+                            required
+                        >
+                            @foreach($categoryTypes as $value => $label)
+                                <option value="{{ $value }}">{{ $label }}</option>
+                            @endforeach
+                        </x-input-field>
 
-                        <div class="mb-3">
-                            <label for="image" class="form-label">Image</label>
-                            <input type="file" class="form-control" id="image" name="image" accept="image/*">
-                            <label id="image-error" class="text-danger error" for="image" style="display: none"></label>
-                        </div>
+                        <x-input-field 
+                            type="file" 
+                            name="image" 
+                            label="Image" 
+                            accept="image/*"
+                        />
 
-                        <div class="mb-3">
-                            <label for="status" class="form-label">Status</label>
-                            <select class="form-select" name="status" required>
-                                <option value="active">Active</option>
-                                <option value="inactive">Inactive</option>
-                            </select>
-                            <label id="status-error" class="text-danger error" for="status" style="display: none"></label>
-                        </div>
+                        <x-input-field 
+                            type="select" 
+                            name="status" 
+                            label="Status" 
+                            required
+                        >
+                            <option value="active" selected>Active</option>
+                            <option value="inactive">Inactive</option>
+                        </x-input-field>
 
                         <button type="submit" class="btn btn-primary" id="categoryCreateButton">
                             <i class="bx bx-loader spinner me-2" style="display: none" id="categoryCreateBtnSpinner"></i>Create Category
