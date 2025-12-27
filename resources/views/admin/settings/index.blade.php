@@ -106,11 +106,15 @@
 
                                             <form id="verifyTwoFactorForm">
                                                 @csrf
-                                                <div class="mb-3">
-                                                    <label for="verification_code" class="form-label">Enter the 6-digit code from your authenticator app:</label>
-                                                    <input type="text" class="form-control" id="verification_code" name="code" 
-                                                           placeholder="000000" maxlength="6" pattern="[0-9]{6}" required>
-                                                </div>
+                                                <x-input-field 
+                                                    name="code" 
+                                                    id="verification_code" 
+                                                    label="Enter the 6-digit code from your authenticator app:" 
+                                                    placeholder="000000" 
+                                                    maxlength="6" 
+                                                    pattern="[0-9]{6}" 
+                                                    required 
+                                                />
                                                 <div class="d-flex gap-2">
                                                     <button type="submit" class="btn btn-success" id="verifyTwoFactorBtn">
                                                         <i class="bx bx-loader spinner me-2" style="display: none" id="verifyTwoFactorSpinner"></i>
@@ -176,20 +180,25 @@
                                 <h6 class="mb-3">Login Authentication Method</h6>
                                 <div class="row align-items-center">
                                     <div class="col-md-8">
-                                        <label class="form-label mb-1">Preferred Authentication Method</label>
                                         <p class="text-muted small mb-0">
                                             Choose your preferred method for login authentication. Email Verification sends a code to your email, while 2FA uses an authenticator app.
                                         </p>
                                     </div>
                                     <div class="col-md-4">
-                                        <select class="form-select" id="loginAuthMethodSelect" name="login_auth_method">
+                                        <x-input-field 
+                                            type="select" 
+                                            name="login_auth_method" 
+                                            id="loginAuthMethodSelect" 
+                                            label="Preferred Authentication Method" 
+                                            labelClass="form-label mb-1"
+                                        >
                                             <option value="email_verification" {{ ($admin->login_auth_method ?? 'email_verification') == 'email_verification' ? 'selected' : '' }}>
                                                 Email Verification
                                             </option>
                                             <option value="two_factor" {{ ($admin->login_auth_method ?? 'email_verification') == 'two_factor' ? 'selected' : '' }}>
                                                 Two-Factor Authentication
                                             </option>
-                                        </select>
+                                        </x-input-field>
                                     </div>
                                 </div>
                                 
@@ -881,15 +890,20 @@
                                 </ol>
                                 
                                 <form id="deleteAccountForm">
-                                    <div class="mb-3">
-                                        <label for="delete_password" class="form-label">Password</label>
-                                        <input type="password" class="form-control" id="delete_password" name="password" required>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="delete_confirmation" class="form-label">Type DELETE to confirm</label>
-                                        <input type="text" class="form-control" id="delete_confirmation" name="confirmation" 
-                                               placeholder="DELETE" required>
-                                    </div>
+                                    <x-input-field 
+                                        type="password" 
+                                        name="password" 
+                                        id="delete_password" 
+                                        label="Password" 
+                                        required 
+                                    />
+                                    <x-input-field 
+                                        name="confirmation" 
+                                        id="delete_confirmation" 
+                                        label="Type DELETE to confirm" 
+                                        placeholder="DELETE" 
+                                        required 
+                                    />
                                 </form>
                             </div>
                             <div class="modal-footer">

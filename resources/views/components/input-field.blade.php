@@ -47,7 +47,7 @@
         'pattern' => $pattern,
         'autocomplete' => $autocomplete,
         'accept' => $type === 'file' ? $accept : null,
-        'multiple' => $type === 'file' && $multiple ? true : null,
+        'multiple' => ($type === 'file' || $type === 'select') && $multiple ? true : null,
     ])->filter(function ($value) {
         return $value !== null && $value !== '';
     });

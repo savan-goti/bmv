@@ -25,38 +25,51 @@
                                 </div>
                             </div>
 
-                            <div class="mb-3">
-                                <label for="business_name" class="form-label">Business Name<span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="business_name" name="business_name" value="{{ $seller->business_name }}">
-                                <label id="business_name-error" class="text-danger error" for="business_name" style="display: none"></label>
-                            </div>
+                            <x-input-field 
+                                name="business_name" 
+                                id="business_name" 
+                                label="Business Name" 
+                                value="{{ $seller->business_name }}" 
+                                required 
+                            />
 
-                            <div class="mb-3">
-                                <label for="owner_name" class="form-label">Owner Name<span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="owner_name" name="owner_name" value="{{ $seller->owner_name }}">
-                                <label id="owner_name-error" class="text-danger error" for="owner_name" style="display: none"></label>
-                            </div>
+                            <x-input-field 
+                                name="owner_name" 
+                                id="owner_name" 
+                                label="Owner Name" 
+                                value="{{ $seller->owner_name }}" 
+                                required 
+                            />
 
-                            <div class="mb-3">
-                                <label for="email" class="form-label">Email<span class="text-danger">*</span></label>
-                                <input type="email" class="form-control" id="email" name="email" value="{{ $seller->email }}" required>
-                                <label id="email-error" class="text-danger error" for="email" style="display: none"></label>
-                            </div>
+                            <x-input-field 
+                                type="email"
+                                name="email" 
+                                id="email" 
+                                label="Email" 
+                                value="{{ $seller->email }}" 
+                                required 
+                            />
 
-                            <div class="mb-3">
-                                <label for="phone" class="form-label">Phone</label>
-                                <div class="input-group">
+                            <x-input-field 
+                                name="phone" 
+                                id="phone" 
+                                label="Phone" 
+                                value="{{ $seller->phone }}" 
+                                maxlength="15"
+                            >
+                                <x-slot:prefix>
                                     <span class="input-group-text">+91</span>
-                                    <input type="text" class="form-control" id="phone" maxlength="15" name="phone" value="{{ $seller->phone }}">
-                                </div>
-                                <label id="phone-error" class="text-danger error" for="phone" style="display: none"></label>
-                            </div>
+                                </x-slot:prefix>
+                            </x-input-field>
 
-                            <div class="mb-3">
-                                <label for="address" class="form-label">Address</label>
-                                <textarea class="form-control" id="address" name="address" rows="3">{{ $seller->address }}</textarea>
-                                <label id="address-error" class="text-danger error" for="address" style="display: none"></label>
-                            </div>
+                            <x-input-field 
+                                type="textarea"
+                                name="address" 
+                                id="address" 
+                                label="Address" 
+                                value="{{ $seller->address }}" 
+                                rows="3"
+                            />
 
                             <button type="submit" name="submit" value="submit" class="btn btn-primary" id="profileUpdateButton"><i class="bx bx-loader spinner me-2" style="display: none" id="profileUpdateBtnSpinner"></i>Update</button>
                         </form>
@@ -70,39 +83,57 @@
                         <form method="POST" id="changePasswordForm">
                             @csrf
 
-                            <div class="mb-2">
-                                <label for="oldPasswordInput" class="form-label">Old Password<span class="text-danger">*</span></label>
-                                <div class="position-relative auth-pass-inputgroup">
-                                    <input type="password" class="form-control pe-5 password-input"
-                                        name="oldPassword" placeholder="Enter Current Password" id="oldPasswordInput">
-                                    <label id="old-password-error" class="text-danger error" for="password" style="display: none"></label>
-                                    <button
-                                        class="btn btn-link position-absolute end-0 top-0 text-decoration-none text-muted password-addon material-shadow-none"
-                                        type="button" id="password-addon"><i class="ri-eye-fill align-middle"></i></button>
-                                </div>
-                            </div>
-                            <div class="mb-2">
-                                <label for="newPasswordInput" class="form-label">New Password<span class="text-danger">*</span></label>
-                                <div class="position-relative auth-pass-inputgroup">
-                                    <input type="password" class="form-control pe-5 password-input"
-                                        name="newPassword" placeholder="Enter New Password" id="newPasswordInput">
-                                    <label id="new-password-error" class="text-danger error" for="password" style="display: none"></label>
-                                    <button
-                                        class="btn btn-link position-absolute end-0 top-0 text-decoration-none text-muted password-addon material-shadow-none"
-                                        type="button" id="password-addon1"><i class="ri-eye-fill align-middle"></i></button>
-                                </div>
-                            </div>
-                            <div class="mb-2">
-                                <label for="confirmPasswordInput" class="form-label">Confirm Password<span class="text-danger">*</span></label>
-                                <div class="position-relative auth-pass-inputgroup">
-                                    <input type="password" class="form-control pe-5 password-input"
-                                        name="confirm_password" placeholder="Enter Confirm Password" id="confirmPasswordInput">
-                                    <label id="confirm_password-error" class="text-danger error" for="confirm_password" style="display: none"></label>
-                                    <button
-                                        class="btn btn-link position-absolute end-0 top-0 text-decoration-none text-muted password-addon material-shadow-none"
-                                        type="button" id="password-addon2"><i class="ri-eye-fill align-middle"></i></button>
-                                </div>
-                            </div>
+                            <x-input-field 
+                                type="password" 
+                                name="oldPassword" 
+                                id="oldPasswordInput" 
+                                label="Old Password" 
+                                placeholder="Enter Current Password" 
+                                required 
+                                inputClass="pe-5 password-input"
+                            >
+                                <x-slot:suffix>
+                                    <button class="btn btn-link position-absolute end-0 top-0 text-decoration-none text-muted password-addon material-shadow-none" 
+                                            type="button" id="password-addon">
+                                        <i class="ri-eye-fill align-middle"></i>
+                                    </button>
+                                </x-slot:suffix>
+                            </x-input-field>
+
+                            <x-input-field 
+                                type="password" 
+                                name="newPassword" 
+                                id="newPasswordInput" 
+                                label="New Password" 
+                                placeholder="Enter New Password" 
+                                required 
+                                inputClass="pe-5 password-input"
+                            >
+                                <x-slot:suffix>
+                                    <button class="btn btn-link position-absolute end-0 top-0 text-decoration-none text-muted password-addon material-shadow-none" 
+                                            type="button" id="password-addon1">
+                                        <i class="ri-eye-fill align-middle"></i>
+                                    </button>
+                                </x-slot:suffix>
+                            </x-input-field>
+
+                            <x-input-field 
+                                type="password" 
+                                name="confirm_password" 
+                                id="confirmPasswordInput" 
+                                label="Confirm Password" 
+                                placeholder="Enter Confirm Password" 
+                                required 
+                                inputClass="pe-5 password-input"
+                            >
+                                <x-slot:suffix>
+                                    <button class="btn btn-link position-absolute end-0 top-0 text-decoration-none text-muted password-addon material-shadow-none" 
+                                            type="button" id="password-addon2">
+                                        <i class="ri-eye-fill align-middle"></i>
+                                    </button>
+                                </x-slot:suffix>
+                            </x-input-field>
+
                             <div class="mt-3">
                                 <button type="submit" name="submit" value="submit" class="btn btn-primary" id="changePasswordButton"><i class="bx bx-loader spinner me-2" style="display: none" id="changePasswordBtnSpinner"></i>Change Password</button>
                             </div>
@@ -153,7 +184,11 @@
                 }
             },
             errorPlacement: function (error, element) {
-                element.after(error);
+                if (element.parent('.input-group').length) {
+                    error.insertAfter(element.parent());
+                } else {
+                    element.after(error);
+                }
             },
             errorClass: "text-danger",
             submitHandler: function (form, e) {
@@ -229,7 +264,11 @@
                 }
             },
             errorPlacement: function (error, element) {
-                element.after(error);
+                if (element.parent('.input-group').length) {
+                    error.insertAfter(element.parent());
+                } else {
+                    element.after(error);
+                }
             },
             errorClass: "text-danger",
             submitHandler: function (form, e) {
@@ -273,6 +312,18 @@
                         $("#changePasswordBtnSpinner").hide();
                     },
                 });
+            }
+        });
+
+        // Toggle password visibility
+        $('.password-addon').on('click', function() {
+            var input = $(this).siblings('input');
+            if (input.attr('type') === 'password') {
+                input.attr('type', 'text');
+                $(this).find('i').removeClass('ri-eye-fill').addClass('ri-eye-off-fill');
+            } else {
+                input.attr('type', 'password');
+                $(this).find('i').removeClass('ri-eye-off-fill').addClass('ri-eye-fill');
             }
         });
     });

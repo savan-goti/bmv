@@ -42,41 +42,48 @@
                                     @csrf
                                     <input type="hidden" name="token" value="{{ $token }}">
                                     
-                                    <div class="mb-3">
-                                        <label class="form-label">Email Address</label>
-                                        <input type="email" class="form-control" id="email" name="email" 
-                                               placeholder="Enter your email address" value="{{ $email ?? '' }}" readonly>
-                                        <label id="email-error" class="text-danger error" for="email" style="display: none"></label>
-                                    </div>
+                                    <x-input-field 
+                                        type="email" 
+                                        name="email" 
+                                        id="email" 
+                                        label="Email Address" 
+                                        placeholder="Enter your email address" 
+                                        value="{{ $email ?? '' }}" 
+                                        readonly 
+                                    />
 
-                                    <div class="mb-3">
-                                        <label class="form-label">New Password</label>
-                                        <div class="position-relative auth-pass-inputgroup">
-                                            <input type="password" class="form-control pe-5 password-input" 
-                                                   name="password" placeholder="Enter new password" id="password">
-                                            <label id="password-error" class="text-danger error" for="password" style="display: none"></label>
+                                    <x-input-field 
+                                        type="password" 
+                                        name="password" 
+                                        id="password" 
+                                        label="New Password" 
+                                        placeholder="Enter new password" 
+                                        inputClass="pe-5 password-input"
+                                        help-text="Must be at least 8 characters."
+                                    >
+                                        <x-slot:suffix>
                                             <button class="btn btn-link position-absolute end-0 top-0 text-decoration-none text-muted password-addon material-shadow-none" 
                                                     type="button" id="password-addon">
                                                 <i class="ri-eye-fill align-middle"></i>
                                             </button>
-                                        </div>
-                                        <div id="passwordHelpBlock" class="form-text">
-                                            Must be at least 8 characters.
-                                        </div>
-                                    </div>
+                                        </x-slot:suffix>
+                                    </x-input-field>
 
-                                    <div class="mb-3">
-                                        <label class="form-label">Confirm Password</label>
-                                        <div class="position-relative auth-pass-inputgroup">
-                                            <input type="password" class="form-control pe-5 password-input" 
-                                                   name="password_confirmation" placeholder="Confirm password" id="password_confirmation">
-                                            <label id="password_confirmation-error" class="text-danger error" for="password_confirmation" style="display: none"></label>
+                                    <x-input-field 
+                                        type="password" 
+                                        name="password_confirmation" 
+                                        id="password_confirmation" 
+                                        label="Confirm Password" 
+                                        placeholder="Confirm password" 
+                                        inputClass="pe-5 password-input"
+                                    >
+                                        <x-slot:suffix>
                                             <button class="btn btn-link position-absolute end-0 top-0 text-decoration-none text-muted password-addon material-shadow-none" 
                                                     type="button" id="password-confirmation-addon">
                                                 <i class="ri-eye-fill align-middle"></i>
                                             </button>
-                                        </div>
-                                    </div>
+                                        </x-slot:suffix>
+                                    </x-input-field>
 
                                     <div class="mt-4">
                                         <button class="btn btn-primary w-100" type="submit" id="submitButton">

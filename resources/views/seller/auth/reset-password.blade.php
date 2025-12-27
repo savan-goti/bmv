@@ -3,11 +3,11 @@
 
 <head>
     <meta charset="utf-8" />
-    <title>Reset Password | Staff</title>
+    <title>Reset Password | Seller</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    @include('staff.layouts.header-links')
+    @include('seller.layouts.header-links')
 
 </head>
 
@@ -42,41 +42,48 @@
                                     @csrf
                                     <input type="hidden" name="token" value="{{ $token }}">
                                     
-                                    <div class="mb-3">
-                                        <label class="form-label">Email Address</label>
-                                        <input type="email" class="form-control" id="email" name="email" 
-                                               placeholder="Enter your email address" value="{{ $email ?? '' }}" readonly>
-                                        <label id="email-error" class="text-danger error" for="email" style="display: none"></label>
-                                    </div>
+                                    <x-input-field 
+                                        type="email" 
+                                        name="email" 
+                                        id="email" 
+                                        label="Email Address" 
+                                        placeholder="Enter your email address" 
+                                        value="{{ $email ?? '' }}" 
+                                        readonly 
+                                    />
 
-                                    <div class="mb-3">
-                                        <label class="form-label">New Password</label>
-                                        <div class="position-relative auth-pass-inputgroup">
-                                            <input type="password" class="form-control pe-5 password-input" 
-                                                   name="password" placeholder="Enter new password" id="password">
-                                            <label id="password-error" class="text-danger error" for="password" style="display: none"></label>
+                                    <x-input-field 
+                                        type="password" 
+                                        name="password" 
+                                        id="password" 
+                                        label="New Password" 
+                                        placeholder="Enter new password" 
+                                        inputClass="pe-5 password-input"
+                                        help-text="Must be at least 8 characters."
+                                    >
+                                        <x-slot:suffix>
                                             <button class="btn btn-link position-absolute end-0 top-0 text-decoration-none text-muted password-addon material-shadow-none" 
                                                     type="button" id="password-addon">
                                                 <i class="ri-eye-fill align-middle"></i>
                                             </button>
-                                        </div>
-                                        <div id="passwordHelpBlock" class="form-text">
-                                            Must be at least 8 characters.
-                                        </div>
-                                    </div>
+                                        </x-slot:suffix>
+                                    </x-input-field>
 
-                                    <div class="mb-3">
-                                        <label class="form-label">Confirm Password</label>
-                                        <div class="position-relative auth-pass-inputgroup">
-                                            <input type="password" class="form-control pe-5 password-input" 
-                                                   name="password_confirmation" placeholder="Confirm password" id="password_confirmation">
-                                            <label id="password_confirmation-error" class="text-danger error" for="password_confirmation" style="display: none"></label>
+                                    <x-input-field 
+                                        type="password" 
+                                        name="password_confirmation" 
+                                        id="password_confirmation" 
+                                        label="Confirm Password" 
+                                        placeholder="Confirm password" 
+                                        inputClass="pe-5 password-input"
+                                    >
+                                        <x-slot:suffix>
                                             <button class="btn btn-link position-absolute end-0 top-0 text-decoration-none text-muted password-addon material-shadow-none" 
-                                                    type="button" id="password-confirmation-addon">
+                                                    type="button" id="password_confirmation-addon">
                                                 <i class="ri-eye-fill align-middle"></i>
                                             </button>
-                                        </div>
-                                    </div>
+                                        </x-slot:suffix>
+                                    </x-input-field>
 
                                     <div class="mt-4">
                                         <button class="btn btn-primary w-100" type="submit" id="submitButton">
@@ -92,7 +99,7 @@
                     <!-- end card -->
 
                     <div class="mt-4 text-center">
-                        <p class="mb-0">Wait, I remember my password... <a href="{{route('staff.login')}}" class="fw-semibold text-primary text-decoration-underline"> Click here </a> </p>
+                        <p class="mb-0">Wait, I remember my password... <a href="{{route('seller.login')}}" class="fw-semibold text-primary text-decoration-underline"> Click here </a> </p>
                     </div>
 
                 </div>
@@ -110,7 +117,7 @@
                 <div class="col-lg-12">
                     <div class="text-center">
                         <p class="mb-0 text-muted">
-                            © <script>document.write(new Date().getFullYear())</script> Staff Panel. Crafted with <i class="mdi mdi-heart text-danger"></i> by KeMedia SRL.
+                            © <script>document.write(new Date().getFullYear())</script> Seller Panel. Crafted with <i class="mdi mdi-heart text-danger"></i> by KeMedia SRL.
                         </p>
                     </div>
                 </div>
@@ -121,8 +128,8 @@
 </div>
 <!-- end auth-page-wrapper -->
 
-@include('staff.layouts.footer-links')
-@include('staff.layouts.common-js')
+@include('seller.layouts.footer-links')
+@include('seller.layouts.common-js')
 
 <script>
     $(document).ready(function(){
@@ -162,7 +169,7 @@
             submitHandler: function (form, e) {
                 e.preventDefault();
                 $.ajax({
-                    url: "{{route('staff.reset-password.update')}}",
+                    url: "{{route('seller.reset-password.update')}}",
                     method: "post",
                     dataType: "json",
                     data: new FormData(form),
@@ -176,7 +183,7 @@
                     success: function (result) {
                         sendSuccess(result.message);
                         setTimeout(function () {
-                            window.location.href = "{{route('staff.login')}}";
+                            window.location.href = "{{route('seller.login')}}";
                         }, 2000);
                     },
                     error: function (xhr) {
@@ -205,19 +212,15 @@
             }
         });
 
-        // Additional password addon for confirmation field
-        document.getElementById('password-confirmation-addon').addEventListener('click', function() {
-            var passwordInput = document.getElementById('password_confirmation');
-            var icon = this.querySelector('i');
-            
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                icon.classList.remove('ri-eye-fill');
-                icon.classList.add('ri-eye-off-fill');
+        // Toggle password visibility
+        $('.password-addon').on('click', function() {
+            var input = $(this).siblings('input');
+            if (input.attr('type') === 'password') {
+                input.attr('type', 'text');
+                $(this).find('i').removeClass('ri-eye-fill').addClass('ri-eye-off-fill');
             } else {
-                passwordInput.type = 'password';
-                icon.classList.remove('ri-eye-off-fill');
-                icon.classList.add('ri-eye-fill');
+                input.attr('type', 'password');
+                $(this).find('i').removeClass('ri-eye-off-fill').addClass('ri-eye-fill');
             }
         });
     });

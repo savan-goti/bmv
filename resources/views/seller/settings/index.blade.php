@@ -106,11 +106,15 @@
 
                                             <form id="verifyTwoFactorForm">
                                                 @csrf
-                                                <div class="mb-3">
-                                                    <label for="verification_code" class="form-label">Enter the 6-digit code from your authenticator app:</label>
-                                                    <input type="text" class="form-control" id="verification_code" name="code" 
-                                                           placeholder="000000" maxlength="6" pattern="[0-9]{6}" required>
-                                                </div>
+                                                <x-input-field 
+                                                    name="code" 
+                                                    id="verification_code" 
+                                                    label="Enter the 6-digit code from your authenticator app:" 
+                                                    placeholder="000000" 
+                                                    maxlength="6" 
+                                                    pattern="[0-9]{6}" 
+                                                    required 
+                                                />
                                                 <div class="d-flex gap-2">
                                                     <button type="submit" class="btn btn-success" id="verifyTwoFactorBtn">
                                                         <i class="bx bx-loader spinner me-2" style="display: none" id="verifyTwoFactorSpinner"></i>
@@ -807,15 +811,20 @@
                                 </ol>
                                 
                                 <form id="deleteAccountForm">
-                                    <div class="mb-3">
-                                        <label for="delete_password" class="form-label">Password</label>
-                                        <input type="password" class="form-control" id="delete_password" name="password" required>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="delete_confirmation" class="form-label">Type DELETE to confirm</label>
-                                        <input type="text" class="form-control" id="delete_confirmation" name="confirmation" 
-                                               placeholder="DELETE" required>
-                                    </div>
+                                    <x-input-field 
+                                        type="password" 
+                                        name="password" 
+                                        id="delete_password" 
+                                        label="Password" 
+                                        required 
+                                    />
+                                    <x-input-field 
+                                        name="confirmation" 
+                                        id="delete_confirmation" 
+                                        label="Type DELETE to confirm" 
+                                        placeholder="DELETE" 
+                                        required 
+                                    />
                                 </form>
                             </div>
                             <div class="modal-footer">

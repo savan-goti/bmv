@@ -18,111 +18,139 @@
                     <form id="staffEditForm" method="POST">
                         @csrf
                         @method('PUT')
-                        <div class="mb-3">
-                            <label for="profile_image" class="form-label">Profile Image</label>
-                            <input type="file" class="form-control" id="profile_image" name="profile_image">
-                            @if($staff->profile_image)
-                                <img src="{{ asset($staff->profile_image) }}" alt="Profile Image" width="100" class="mt-2">
-                            @endif
-                            <label id="profile_image-error" class="text-danger error" for="profile_image" style="display: none"></label>
-                        </div>
+                        
+                        <x-input-field 
+                            type="file" 
+                            name="profile_image" 
+                            id="profile_image" 
+                            label="Profile Image" 
+                        />
+                        @if($staff->profile_image)
+                            <div class="mb-3 mt-n2">
+                                <img src="{{ asset($staff->profile_image) }}" alt="Profile Image" width="100" class="img-thumbnail">
+                            </div>
+                        @endif
 
-                        <div class="mb-3">
-                            <label for="name" class="form-label">Name</label>
-                            <input type="text" class="form-control" id="name" name="name" value="{{ $staff->name }}" required>
-                            <label id="name-error" class="text-danger error" for="name" style="display: none"></label>
-                        </div>
+                        <x-input-field 
+                            name="name" 
+                            id="name" 
+                            label="Name" 
+                            value="{{ $staff->name }}" 
+                            required 
+                        />
 
-                        <div class="mb-3">
-                            <label for="father_name" class="form-label">Father Name</label>
-                            <input type="text" class="form-control" id="father_name" name="father_name" value="{{ $staff->father_name }}">
-                            <label id="father_name-error" class="text-danger error" for="father_name" style="display: none"></label>
-                        </div>
+                        <x-input-field 
+                            name="father_name" 
+                            id="father_name" 
+                            label="Father Name" 
+                            value="{{ $staff->father_name }}" 
+                        />
 
-                        <div class="mb-3">
-                            <label for="email" class="form-label">Email</label>
-                            <input type="email" class="form-control" id="email" name="email" value="{{ $staff->email }}" required>
-                            <label id="email-error" class="text-danger error" for="email" style="display: none"></label>
-                        </div>
+                        <x-input-field 
+                            type="email" 
+                            name="email" 
+                            id="email" 
+                            label="Email" 
+                            value="{{ $staff->email }}" 
+                            required 
+                        />
 
-                        <div class="mb-3">
-                            <label for="date_of_birth" class="form-label">Date of Birth</label>
-                            <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" value="{{ $staff->date_of_birth }}">
-                            <label id="date_of_birth-error" class="text-danger error" for="date_of_birth" style="display: none"></label>
-                        </div>
+                        <x-input-field 
+                            type="date" 
+                            name="date_of_birth" 
+                            id="date_of_birth" 
+                            label="Date of Birth" 
+                            value="{{ $staff->date_of_birth }}" 
+                        />
 
-                        <div class="mb-3">
-                            <label for="gender" class="form-label">Gender</label>
-                            <select class="form-select" id="gender" name="gender">
-                                <option value="" selected disabled>Select Gender</option>
-                                <option value="male" {{ $staff->gender == 'male' ? 'selected' : '' }}>Male</option>
-                                <option value="female" {{ $staff->gender == 'female' ? 'selected' : '' }}>Female</option>
-                                <option value="other" {{ $staff->gender == 'other' ? 'selected' : '' }}>Other</option>
-                            </select>
-                            <label id="gender-error" class="text-danger error" for="gender" style="display: none"></label>
-                        </div>
+                        <x-input-field 
+                            type="select" 
+                            name="gender" 
+                            id="gender" 
+                            label="Gender"
+                        >
+                            <option value="" selected disabled>Select Gender</option>
+                            <option value="male" {{ $staff->gender == 'male' ? 'selected' : '' }}>Male</option>
+                            <option value="female" {{ $staff->gender == 'female' ? 'selected' : '' }}>Female</option>
+                            <option value="other" {{ $staff->gender == 'other' ? 'selected' : '' }}>Other</option>
+                        </x-input-field>
 
-                        <div class="mb-3">
-                            <label for="phone" class="form-label">Phone</label>
-                            <input type="text" class="form-control" id="phone" name="phone" value="{{ $staff->phone }}">
-                            <label id="phone-error" class="text-danger error" for="phone" style="display: none"></label>
-                        </div>
+                        <x-input-field 
+                            name="phone" 
+                            id="phone" 
+                            label="Phone" 
+                            value="{{ $staff->phone }}" 
+                        />
 
-                        <div class="mb-3">
-                            <label for="assigned_role" class="form-label">Assigned Role</label>
-                            <select class="form-select" id="assigned_role" name="assigned_role" required>
-                                <option value="editor" {{ $staff->assigned_role == 'editor' ? 'selected' : '' }}>Editor</option>
-                                <option value="viewer" {{ $staff->assigned_role == 'viewer' ? 'selected' : '' }}>Viewer</option>
-                                <option value="support" {{ $staff->assigned_role == 'support' ? 'selected' : '' }}>Support</option>
-                            </select>
-                            <label id="assigned_role-error" class="text-danger error" for="assigned_role" style="display: none"></label>
-                        </div>
+                        <x-input-field 
+                            type="select" 
+                            name="assigned_role" 
+                            id="assigned_role" 
+                            label="Assigned Role" 
+                            required
+                        >
+                            <option value="editor" {{ $staff->assigned_role == 'editor' ? 'selected' : '' }}>Editor</option>
+                            <option value="viewer" {{ $staff->assigned_role == 'viewer' ? 'selected' : '' }}>Viewer</option>
+                            <option value="support" {{ $staff->assigned_role == 'support' ? 'selected' : '' }}>Support</option>
+                        </x-input-field>
 
-                        <div class="mb-3">
-                            <label for="education" class="form-label">Education</label>
-                            <input type="text" class="form-control" id="education" name="education" value="{{ $staff->education }}">
-                            <label id="education-error" class="text-danger error" for="education" style="display: none"></label>
-                        </div>
+                        <x-input-field 
+                            name="education" 
+                            id="education" 
+                            label="Education" 
+                            value="{{ $staff->education }}" 
+                        />
 
+                        <x-input-field 
+                            type="textarea" 
+                            name="address" 
+                            id="address" 
+                            label="Address" 
+                            rows="3" 
+                            value="{{ $staff->address }}"
+                        />
 
-                        <div class="mb-3">
-                            <label for="address" class="form-label">Address</label>
-                            <textarea class="form-control" id="address" name="address" rows="3">{{ $staff->address }}</textarea>
-                            <label id="address-error" class="text-danger error" for="address" style="display: none"></label>
-                        </div>
+                        <x-input-field 
+                            type="select" 
+                            name="status" 
+                            id="status" 
+                            label="Status" 
+                            required
+                        >
+                            <option value="active" {{ $staff->status == 'active' ? 'selected' : '' }}>Active</option>
+                            <option value="inactive" {{ $staff->status == 'inactive' ? 'selected' : '' }}>Inactive</option>
+                        </x-input-field>
 
-                        <div class="mb-3">
-                            <label for="status" class="form-label">Status</label>
-                            <select class="form-select" name="status" required>
-                                <option value="active" {{ $staff->status == 'active' ? 'selected' : '' }}>Active</option>
-                                <option value="inactive" {{ $staff->status == 'inactive' ? 'selected' : '' }}>Inactive</option>
-                            </select>
-                            <label id="status-error" class="text-danger error" for="status" style="display: none"></label>
-                        </div>
+                        <x-input-field 
+                            type="date" 
+                            name="resignation_date" 
+                            id="resignation_date" 
+                            label="Resignation Date" 
+                            value="{{ $staff->resignation_date }}" 
+                        />
 
-                        <div class="mb-3">
-                            <label for="resignation_date" class="form-label">Resignation Date</label>
-                            <input type="date" class="form-control" id="resignation_date" name="resignation_date" value="{{ $staff->resignation_date }}">
-                            <label id="resignation_date-error" class="text-danger error" for="resignation_date" style="display: none"></label>
-                        </div>
+                        <x-input-field 
+                            type="textarea" 
+                            name="purpose" 
+                            id="purpose" 
+                            label="Purpose" 
+                            rows="3" 
+                            value="{{ $staff->purpose }}"
+                        />
 
-                        <div class="mb-3">
-                            <label for="purpose" class="form-label">Purpose</label>
-                            <textarea class="form-control" id="purpose" name="purpose" rows="3">{{ $staff->purpose }}</textarea>
-                            <label id="purpose-error" class="text-danger error" for="purpose" style="display: none"></label>
-                        </div>
+                        <x-input-field 
+                            type="password" 
+                            name="password" 
+                            id="password" 
+                            label="Password (Leave blank to keep current)" 
+                        />
 
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Password (Leave blank to keep current)</label>
-                            <input type="password" class="form-control" id="password" name="password">
-                            <label id="password-error" class="text-danger error" for="password" style="display: none"></label>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="password_confirmation" class="form-label">Confirm Password</label>
-                            <input type="password" class="form-control" id="password_confirmation" name="password_confirmation">
-                            <label id="password_confirmation-error" class="text-danger error" for="password_confirmation" style="display: none"></label>
-                        </div>
+                        <x-input-field 
+                            type="password" 
+                            name="password_confirmation" 
+                            id="password_confirmation" 
+                            label="Confirm Password" 
+                        />
 
                         <button type="submit" class="btn btn-primary" id="staffEditButton">
                             <i class="bx bx-loader spinner me-2" style="display: none" id="staffEditBtnSpinner"></i>Update Staff
