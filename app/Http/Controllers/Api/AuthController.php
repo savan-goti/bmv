@@ -173,7 +173,7 @@ class AuthController extends Controller
 
             // Check if customer is active
             $customer = auth('api')->user();
-            if ($customer->status != 1) {
+            if ($customer->status != 'active') {
                 auth('api')->logout();
                 return $this->sendError('Your account is inactive. Please contact support.', 403);
             }
