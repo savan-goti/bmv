@@ -164,39 +164,51 @@
                         <div class="tab-content p-3 text-muted">
                             <!-- Basic Info Tab -->
                             <div class="tab-pane active" id="basic-info" role="tabpanel">
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <div class="mb-3">
-                                            <label for="product_name" class="form-label">Product Name <span class="text-danger">*</span></label>
-                                            <input type="text" class="form-control" id="product_name" name="product_name" value="{{ $product->product_name }}" required>
-                                        </div>
-                                    </div>
-                                </div>
+                                <x-input-field 
+                                    name="product_name" 
+                                    label="Product Name" 
+                                    placeholder="Enter product name"
+                                    value="{{ $product->product_name }}"
+                                    required 
+                                />
 
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="sku" class="form-label">SKU</label>
-                                            <input type="text" class="form-control" id="sku" name="sku" value="{{ $product->sku ?? '' }}">
-                                        </div>
+                                        <x-input-field 
+                                            name="sku" 
+                                            label="SKU" 
+                                            placeholder="Enter SKU"
+                                            value="{{ $product->sku ?? '' }}"
+                                            help-text="Stock Keeping Unit"
+                                        />
                                     </div>
                                     <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="barcode" class="form-label">Barcode</label>
-                                            <input type="text" class="form-control" id="barcode" name="barcode" value="{{ $product->barcode ?? '' }}">
-                                        </div>
+                                        <x-input-field 
+                                            name="barcode" 
+                                            label="Barcode" 
+                                            placeholder="Enter barcode number"
+                                            value="{{ $product->barcode ?? '' }}"
+                                        />
                                     </div>
                                 </div>
 
-                                <div class="mb-3">
-                                    <label for="short_description" class="form-label">Short Description</label>
-                                    <textarea class="form-control" id="short_description" name="short_description" rows="3">{{ $product->short_description ?? '' }}</textarea>
-                                </div>
+                                <x-input-field 
+                                    type="textarea" 
+                                    name="short_description" 
+                                    label="Short Description" 
+                                    placeholder="Brief product summary"
+                                    value="{{ $product->short_description ?? '' }}"
+                                    rows="3"
+                                />
 
-                                <div class="mb-3">
-                                    <label for="full_description" class="form-label">Full Description</label>
-                                    <textarea class="form-control" id="full_description" name="full_description" rows="5">{{ $product->full_description ?? '' }}</textarea>
-                                </div>
+                                <x-input-field 
+                                    type="textarea" 
+                                    name="full_description" 
+                                    label="Full Description" 
+                                    placeholder="Detailed product description"
+                                    value="{{ $product->full_description ?? '' }}"
+                                    rows="5"
+                                />
 
                                 <!-- Tab Navigation -->
                                 <div class="d-flex justify-content-end mt-4">
@@ -210,88 +222,108 @@
                             <div class="tab-pane" id="pricing" role="tabpanel">
                                 <div class="row">
                                     <div class="col-md-4">
-                                        <div class="mb-3">
-                                            <label for="purchase_price" class="form-label">Purchase Price</label>
-                                            <input type="number" class="form-control" id="purchase_price" name="purchase_price" step="0.01" min="0" value="{{ $product->purchase_price ?? 0 }}">
-                                        </div>
+                                        <x-input-field 
+                                            type="number" 
+                                            name="purchase_price" 
+                                            label="Purchase Price" 
+                                            placeholder="0.00"
+                                            step="0.01"
+                                            min="0"
+                                            value="{{ $product->purchase_price ?? 0 }}"
+                                        />
                                     </div>
                                     <div class="col-md-4">
-                                        <div class="mb-3">
-                                            <label for="original_price" class="form-label">Original Price</label>
-                                            <input type="number" class="form-control" id="original_price" name="original_price" step="0.01" min="0" value="{{ $product->original_price ?? 0 }}">
-                                        </div>
+                                        <x-input-field 
+                                            type="number" 
+                                            name="original_price" 
+                                            label="Original Price" 
+                                            placeholder="0.00"
+                                            step="0.01"
+                                            min="0"
+                                            value="{{ $product->original_price ?? 0 }}"
+                                        />
                                     </div>
                                     <div class="col-md-4">
-                                        <div class="mb-3">
-                                            <label for="sell_price" class="form-label">Sell Price <span class="text-danger">*</span></label>
-                                            <input type="number" class="form-control" id="sell_price" name="sell_price" step="0.01" min="0" value="{{ $product->sell_price }}" required>
-                                        </div>
+                                        <x-input-field 
+                                            type="number" 
+                                            name="sell_price" 
+                                            label="Sell Price" 
+                                            placeholder="0.00"
+                                            step="0.01"
+                                            min="0"
+                                            value="{{ $product->sell_price }}"
+                                            required
+                                        />
                                     </div>
                                 </div>
 
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label class="form-label">Discount Type <span class="text-danger">*</span></label>
-                                            <div>
-                                                <div class="form-check form-check-inline">
-                                                    <input class="form-check-input" type="radio" name="discount_type" id="discount_flat" value="flat" {{ ($product->discount_type ?? 'flat') == 'flat' ? 'checked' : '' }}>
-                                                    <label class="form-check-label" for="discount_flat">Flat</label>
-                                                </div>
-                                                <div class="form-check form-check-inline">
-                                                    <input class="form-check-input" type="radio" name="discount_type" id="discount_percentage" value="percentage" {{ ($product->discount_type ?? '') == 'percentage' ? 'checked' : '' }}>
-                                                    <label class="form-check-label" for="discount_percentage">Percentage</label>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <x-radio-group 
+                                            name="discount_type" 
+                                            label="Discount Type" 
+                                            :options="['flat' => 'Flat', 'percentage' => 'Percentage']"
+                                            selected="{{ $product->discount_type ?? 'flat' }}"
+                                            required
+                                        />
                                     </div>
                                     <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="discount_value" class="form-label">Discount Value</label>
-                                            <input type="number" class="form-control" id="discount_value" name="discount_value" step="0.01" min="0" value="{{ $product->discount_value ?? 0 }}">
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="gst_rate" class="form-label">GST Rate (%)</label>
-                                            <input type="number" class="form-control" id="gst_rate" name="gst_rate" step="0.01" min="0" max="100" value="{{ $product->gst_rate ?? 0 }}">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label class="form-label">&nbsp;</label>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" id="tax_included" name="tax_included" value="1" {{ ($product->tax_included ?? false) ? 'checked' : '' }}>
-                                                <label class="form-check-label" for="tax_included">Tax Included in Price</label>
-                                            </div>
-                                        </div>
+                                        <x-input-field 
+                                            type="number" 
+                                            name="discount_value" 
+                                            label="Discount Value" 
+                                            placeholder="0"
+                                            step="0.01"
+                                            min="0"
+                                            value="{{ $product->discount_value ?? 0 }}"
+                                        />
                                     </div>
                                 </div>
 
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label class="form-label">Commission Type <span class="text-danger">*</span></label>
-                                            <div>
-                                                <div class="form-check form-check-inline">
-                                                    <input class="form-check-input" type="radio" name="commission_type" id="commission_flat" value="flat" {{ ($product->commission_type ?? '') == 'flat' ? 'checked' : '' }}>
-                                                    <label class="form-check-label" for="commission_flat">Flat</label>
-                                                </div>
-                                                <div class="form-check form-check-inline">
-                                                    <input class="form-check-input" type="radio" name="commission_type" id="commission_percentage" value="percentage" {{ ($product->commission_type ?? 'percentage') == 'percentage' ? 'checked' : '' }}>
-                                                    <label class="form-check-label" for="commission_percentage">Percentage</label>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <x-input-field 
+                                            type="number" 
+                                            name="gst_rate" 
+                                            label="GST Rate (%)" 
+                                            placeholder="0"
+                                            step="0.01"
+                                            min="0"
+                                            max="100"
+                                            value="{{ $product->gst_rate ?? 0 }}"
+                                        />
                                     </div>
                                     <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="commission_value" class="form-label">Commission Value</label>
-                                            <input type="number" class="form-control" id="commission_value" name="commission_value" step="0.01" min="0" value="{{ $product->commission_value ?? 0 }}">
-                                        </div>
+                                        <x-checkbox 
+                                            name="tax_included" 
+                                            value="1" 
+                                            label="Tax Included in Price"
+                                            :checked="$product->tax_included ?? false"
+                                            container-class="mb-3 mt-4"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <x-radio-group 
+                                            name="commission_type" 
+                                            label="Commission Type" 
+                                            :options="['flat' => 'Flat', 'percentage' => 'Percentage']"
+                                            selected="{{ $product->commission_type ?? 'percentage' }}"
+                                            required
+                                        />
+                                    </div>
+                                    <div class="col-md-6">
+                                        <x-input-field 
+                                            type="number" 
+                                            name="commission_value" 
+                                            label="Commission Value" 
+                                            placeholder="0"
+                                            step="0.01"
+                                            min="0"
+                                            value="{{ $product->commission_value ?? 0 }}"
+                                        />
                                     </div>
                                 </div>
 
@@ -310,49 +342,55 @@
                             <div class="tab-pane" id="inventory" role="tabpanel">
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label class="form-label">Stock Type <span class="text-danger">*</span></label>
-                                            <div>
-                                                <div class="form-check form-check-inline">
-                                                    <input class="form-check-input" type="radio" name="stock_type" id="stock_limited" value="limited" {{ ($product->stock_type ?? 'limited') == 'limited' ? 'checked' : '' }}>
-                                                    <label class="form-check-label" for="stock_limited">Limited</label>
-                                                </div>
-                                                <div class="form-check form-check-inline">
-                                                    <input class="form-check-input" type="radio" name="stock_type" id="stock_unlimited" value="unlimited" {{ ($product->stock_type ?? '') == 'unlimited' ? 'checked' : '' }}>
-                                                    <label class="form-check-label" for="stock_unlimited">Unlimited</label>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <x-radio-group 
+                                            name="stock_type" 
+                                            label="Stock Type" 
+                                            :options="['limited' => 'Limited', 'unlimited' => 'Unlimited']"
+                                            selected="{{ $product->stock_type ?? 'limited' }}"
+                                            required
+                                        />
                                     </div>
                                     <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="total_stock" class="form-label">Total Stock <span class="text-danger">*</span></label>
-                                            <input type="number" class="form-control" id="total_stock" name="total_stock" min="0" value="{{ $product->total_stock }}" required>
-                                        </div>
+                                        <x-input-field 
+                                            type="number" 
+                                            name="total_stock" 
+                                            label="Total Stock" 
+                                            placeholder="0"
+                                            min="0"
+                                            value="{{ $product->total_stock }}"
+                                            required
+                                        />
                                     </div>
                                 </div>
 
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="low_stock_alert" class="form-label">Low Stock Alert</label>
-                                            <input type="number" class="form-control" id="low_stock_alert" name="low_stock_alert" min="0" value="{{ $product->low_stock_alert ?? 10 }}">
-                                        </div>
+                                        <x-input-field 
+                                            type="number" 
+                                            name="low_stock_alert" 
+                                            label="Low Stock Alert" 
+                                            placeholder="10"
+                                            min="0"
+                                            value="{{ $product->low_stock_alert ?? 10 }}"
+                                            help-text="Alert when stock falls below this number"
+                                        />
                                     </div>
                                     <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="warehouse_location" class="form-label">Warehouse Location</label>
-                                            <input type="text" class="form-control" id="warehouse_location" name="warehouse_location" value="{{ $product->warehouse_location ?? '' }}">
-                                        </div>
+                                        <x-input-field 
+                                            name="warehouse_location" 
+                                            label="Warehouse Location" 
+                                            placeholder="Enter warehouse location"
+                                            value="{{ $product->warehouse_location ?? '' }}"
+                                        />
                                     </div>
                                 </div>
 
-                                <div class="mb-3">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="has_variation" name="has_variation" value="1" {{ ($product->has_variation ?? false) ? 'checked' : '' }}>
-                                        <label class="form-check-label" for="has_variation">This product has variations</label>
-                                    </div>
-                                </div>
+                                <x-checkbox 
+                                    name="has_variation" 
+                                    value="1" 
+                                    label="This product has variations"
+                                    :checked="$product->has_variation ?? false"
+                                />
 
                                 <!-- Tab Navigation -->
                                 <div class="d-flex justify-content-between mt-4">
@@ -379,10 +417,13 @@
                                     @endif
                                 </div>
 
-                                <div class="mb-3">
-                                    <label for="image_alt_text" class="form-label">Image Alt Text</label>
-                                    <input type="text" class="form-control" id="image_alt_text" name="image_alt_text" value="{{ $product->image_alt_text ?? '' }}" placeholder="Enter descriptive alt text for SEO">
-                                </div>
+                                <x-input-field 
+                                    name="image_alt_text" 
+                                    label="Image Alt Text" 
+                                    placeholder="Enter descriptive alt text for SEO"
+                                    value="{{ $product->image_alt_text ?? '' }}"
+                                    help-text="Improves SEO and accessibility"
+                                />
 
                                 <div class="mb-3">
                                     <label for="gallery_images" class="form-label">Gallery Images</label>
@@ -408,11 +449,14 @@
                                     @endif
                                 </div>
 
-                                <div class="mb-3">
-                                    <label for="video_url" class="form-label">Video URL</label>
-                                    <input type="url" class="form-control" id="video_url" name="video_url" value="{{ $product->video_url ?? '' }}" placeholder="https://youtube.com/watch?v=...">
-                                    <small class="text-muted">Add a YouTube or Vimeo video URL</small>
-                                </div>
+                                <x-input-field 
+                                    type="url" 
+                                    name="video_url" 
+                                    label="Video URL" 
+                                    placeholder="https://youtube.com/watch?v=..."
+                                    value="{{ $product->video_url ?? '' }}"
+                                    help-text="Add a YouTube or Vimeo video URL"
+                                />
 
                                 <!-- Tab Navigation -->
                                 <div class="d-flex justify-content-between mt-4">
@@ -429,59 +473,81 @@
                             <div class="tab-pane" id="shipping" role="tabpanel">
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="weight" class="form-label">Weight (kg)</label>
-                                            <input type="number" class="form-control" id="weight" name="weight" step="0.01" min="0" value="{{ $product->weight ?? 0 }}">
-                                        </div>
+                                        <x-input-field 
+                                            type="number" 
+                                            name="weight" 
+                                            label="Weight (kg)" 
+                                            placeholder="0.00"
+                                            step="0.01"
+                                            min="0"
+                                            value="{{ $product->weight ?? 0 }}"
+                                        />
                                     </div>
                                     <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="shipping_class" class="form-label">Shipping Class <span class="text-danger">*</span></label>
-                                            <select class="form-select" name="shipping_class" id="shipping_class" required>
-                                                <option value="normal" {{ ($product->shipping_class ?? 'normal') == 'normal' ? 'selected' : '' }}>Normal</option>
-                                                <option value="heavy" {{ ($product->shipping_class ?? '') == 'heavy' ? 'selected' : '' }}>Heavy</option>
-                                            </select>
-                                        </div>
+                                        <x-input-field 
+                                            type="select" 
+                                            name="shipping_class" 
+                                            label="Shipping Class" 
+                                            required
+                                        >
+                                            <option value="normal" {{ ($product->shipping_class ?? 'normal') == 'normal' ? 'selected' : '' }}>Normal</option>
+                                            <option value="heavy" {{ ($product->shipping_class ?? '') == 'heavy' ? 'selected' : '' }}>Heavy</option>
+                                        </x-input-field>
                                     </div>
                                 </div>
 
                                 <div class="row">
                                     <div class="col-md-4">
-                                        <div class="mb-3">
-                                            <label for="length" class="form-label">Length (cm)</label>
-                                            <input type="number" class="form-control" id="length" name="length" step="0.01" min="0" value="{{ $product->length ?? 0 }}">
-                                        </div>
+                                        <x-input-field 
+                                            type="number" 
+                                            name="length" 
+                                            label="Length (cm)" 
+                                            placeholder="0.00"
+                                            step="0.01"
+                                            min="0"
+                                            value="{{ $product->length ?? 0 }}"
+                                        />
                                     </div>
                                     <div class="col-md-4">
-                                        <div class="mb-3">
-                                            <label for="width" class="form-label">Width (cm)</label>
-                                            <input type="number" class="form-control" id="width" name="width" step="0.01" min="0" value="{{ $product->width ?? 0 }}">
-                                        </div>
+                                        <x-input-field 
+                                            type="number" 
+                                            name="width" 
+                                            label="Width (cm)" 
+                                            placeholder="0.00"
+                                            step="0.01"
+                                            min="0"
+                                            value="{{ $product->width ?? 0 }}"
+                                        />
                                     </div>
                                     <div class="col-md-4">
-                                        <div class="mb-3">
-                                            <label for="height" class="form-label">Height (cm)</label>
-                                            <input type="number" class="form-control" id="height" name="height" step="0.01" min="0" value="{{ $product->height ?? 0 }}">
-                                        </div>
+                                        <x-input-field 
+                                            type="number" 
+                                            name="height" 
+                                            label="Height (cm)" 
+                                            placeholder="0.00"
+                                            step="0.01"
+                                            min="0"
+                                            value="{{ $product->height ?? 0 }}"
+                                        />
                                     </div>
                                 </div>
 
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" id="free_shipping" name="free_shipping" value="1" {{ ($product->free_shipping ?? false) ? 'checked' : '' }}>
-                                                <label class="form-check-label" for="free_shipping">Free Shipping</label>
-                                            </div>
-                                        </div>
+                                        <x-checkbox 
+                                            name="free_shipping" 
+                                            value="1" 
+                                            label="Free Shipping"
+                                            :checked="$product->free_shipping ?? false"
+                                        />
                                     </div>
                                     <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" id="cod_available" name="cod_available" value="1" {{ ($product->cod_available ?? true) ? 'checked' : '' }}>
-                                                <label class="form-check-label" for="cod_available">COD Available</label>
-                                            </div>
-                                        </div>
+                                        <x-checkbox 
+                                            name="cod_available" 
+                                            value="1" 
+                                            label="COD Available"
+                                            :checked="$product->cod_available ?? true"
+                                        />
                                     </div>
                                 </div>
 
@@ -498,27 +564,39 @@
 
                             <!-- SEO Tab -->
                             <div class="tab-pane" id="seo" role="tabpanel">
-                                <div class="mb-3">
-                                    <label for="meta_title" class="form-label">Meta Title</label>
-                                    <input type="text" class="form-control" id="meta_title" name="meta_title" maxlength="255" value="{{ $product->meta_title ?? '' }}">
-                                    <small class="text-muted">Recommended: 50-60 characters</small>
-                                </div>
+                                <x-input-field 
+                                    name="meta_title" 
+                                    label="Meta Title" 
+                                    placeholder="Enter meta title"
+                                    maxlength="255"
+                                    value="{{ $product->meta_title ?? '' }}"
+                                    help-text="Recommended: 50-60 characters"
+                                />
 
-                                <div class="mb-3">
-                                    <label for="meta_description" class="form-label">Meta Description</label>
-                                    <textarea class="form-control" id="meta_description" name="meta_description" rows="3" maxlength="160">{{ $product->meta_description ?? '' }}</textarea>
-                                    <small class="text-muted">Recommended: 150-160 characters</small>
-                                </div>
+                                <x-input-field 
+                                    type="textarea" 
+                                    name="meta_description" 
+                                    label="Meta Description" 
+                                    placeholder="Enter meta description"
+                                    rows="3"
+                                    maxlength="160"
+                                    value="{{ $product->meta_description ?? '' }}"
+                                    help-text="Recommended: 150-160 characters"
+                                />
 
-                                <div class="mb-3">
-                                    <label for="meta_keywords" class="form-label">Meta Keywords</label>
-                                    <input type="text" class="form-control" id="meta_keywords" name="meta_keywords" value="{{ $product->meta_keywords ?? '' }}" placeholder="keyword1, keyword2, keyword3">
-                                </div>
+                                <x-input-field 
+                                    name="meta_keywords" 
+                                    label="Meta Keywords" 
+                                    placeholder="keyword1, keyword2, keyword3"
+                                    value="{{ $product->meta_keywords ?? '' }}"
+                                />
 
-                                <div class="mb-3">
-                                    <label for="search_tags" class="form-label">Search Tags</label>
-                                    <input type="text" class="form-control" id="search_tags" name="search_tags" value="{{ $product->search_tags ?? '' }}" placeholder="tag1, tag2, tag3">
-                                </div>
+                                <x-input-field 
+                                    name="search_tags" 
+                                    label="Search Tags" 
+                                    placeholder="tag1, tag2, tag3"
+                                    value="{{ $product->search_tags ?? '' }}"
+                                />
 
                                 <!-- Tab Navigation -->
                                 <div class="d-flex justify-content-start mt-4">
@@ -539,55 +617,61 @@
                         <h5 class="card-title mb-0">Product Organization</h5>
                     </div>
                     <div class="card-body">
-                        <div class="mb-3">
-                            <label for="category_id" class="form-label">Category <span class="text-danger">*</span></label>
-                            <select class="form-select" name="category_id" id="category_id" required>
-                                <option value="">Select Category</option>
-                                @foreach($categories as $category)
-                                    <option value="{{ $category->id }}" {{ $product->category_id == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
+                        <x-input-field 
+                            type="select" 
+                            name="category_id" 
+                            label="Category" 
+                            placeholder="Select Category"
+                            required
+                        >
+                            @foreach($categories as $category)
+                                <option value="{{ $category->id }}" {{ $product->category_id == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
+                            @endforeach
+                        </x-input-field>
 
-                        <div class="mb-3">
-                            <label for="sub_category_id" class="form-label">Sub Category</label>
-                            <select class="form-select" name="sub_category_id" id="sub_category_id">
-                                <option value="">Select Sub Category</option>
-                                @foreach($subCategories as $subCategory)
-                                    <option value="{{ $subCategory->id }}" {{ $product->sub_category_id == $subCategory->id ? 'selected' : '' }}>{{ $subCategory->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
+                        <x-input-field 
+                            type="select" 
+                            name="sub_category_id" 
+                            label="Sub Category" 
+                            placeholder="Select Sub Category"
+                        >
+                            @foreach($subCategories as $subCategory)
+                                <option value="{{ $subCategory->id }}" {{ $product->sub_category_id == $subCategory->id ? 'selected' : '' }}>{{ $subCategory->name }}</option>
+                            @endforeach
+                        </x-input-field>
 
-                        <div class="mb-3">
-                            <label for="child_category_id" class="form-label">Child Category</label>
-                            <select class="form-select" name="child_category_id" id="child_category_id">
-                                <option value="">Select Child Category</option>
-                                @foreach($childCategories as $childCategory)
-                                    <option value="{{ $childCategory->id }}" {{ $product->child_category_id == $childCategory->id ? 'selected' : '' }}>{{ $childCategory->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
+                        <x-input-field 
+                            type="select" 
+                            name="child_category_id" 
+                            label="Child Category" 
+                            placeholder="Select Child Category"
+                        >
+                            @foreach($childCategories as $childCategory)
+                                <option value="{{ $childCategory->id }}" {{ $product->child_category_id == $childCategory->id ? 'selected' : '' }}>{{ $childCategory->name }}</option>
+                            @endforeach
+                        </x-input-field>
 
-                        <div class="mb-3">
-                            <label for="brand_id" class="form-label">Brand</label>
-                            <select class="form-select" name="brand_id" id="brand_id">
-                                <option value="">Select Brand</option>
-                                @foreach($brands as $brand)
-                                    <option value="{{ $brand->id }}" {{ ($product->brand_id ?? '') == $brand->id ? 'selected' : '' }}>{{ $brand->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
+                        <x-input-field 
+                            type="select" 
+                            name="brand_id" 
+                            label="Brand" 
+                            placeholder="Select Brand"
+                        >
+                            @foreach($brands as $brand)
+                                <option value="{{ $brand->id }}" {{ ($product->brand_id ?? '') == $brand->id ? 'selected' : '' }}>{{ $brand->name }}</option>
+                            @endforeach
+                        </x-input-field>
 
-                        <div class="mb-3">
-                            <label for="collection_id" class="form-label">Collection</label>
-                            <select class="form-select" name="collection_id" id="collection_id">
-                                <option value="">Select Collection</option>
-                                @foreach($collections as $collection)
-                                    <option value="{{ $collection->id }}" {{ ($product->collection_id ?? '') == $collection->id ? 'selected' : '' }}>{{ $collection->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
+                        <x-input-field 
+                            type="select" 
+                            name="collection_id" 
+                            label="Collection" 
+                            placeholder="Select Collection"
+                        >
+                            @foreach($collections as $collection)
+                                <option value="{{ $collection->id }}" {{ ($product->collection_id ?? '') == $collection->id ? 'selected' : '' }}>{{ $collection->name }}</option>
+                            @endforeach
+                        </x-input-field>
                     </div>
                 </div>
 
@@ -596,43 +680,51 @@
                         <h5 class="card-title mb-0">Product Status</h5>
                     </div>
                     <div class="card-body">
-                        <div class="mb-3">
-                            <label for="product_status" class="form-label">Product Status <span class="text-danger">*</span></label>
-                            <select class="form-select" name="product_status" id="product_status" required>
-                                <option value="draft" {{ ($product->product_status ?? 'draft') == 'draft' ? 'selected' : '' }}>Draft</option>
-                                <option value="pending" {{ ($product->product_status ?? '') == 'pending' ? 'selected' : '' }}>Pending</option>
-                                <option value="approved" {{ ($product->product_status ?? '') == 'approved' ? 'selected' : '' }}>Approved</option>
-                                <option value="rejected" {{ ($product->product_status ?? '') == 'rejected' ? 'selected' : '' }}>Rejected</option>
-                            </select>
-                        </div>
+                        <x-input-field 
+                            type="select" 
+                            name="product_status" 
+                            label="Product Status" 
+                            required
+                        >
+                            <option value="draft" {{ ($product->product_status ?? 'draft') == 'draft' ? 'selected' : '' }}>Draft</option>
+                            <option value="pending" {{ ($product->product_status ?? '') == 'pending' ? 'selected' : '' }}>Pending</option>
+                            <option value="approved" {{ ($product->product_status ?? '') == 'approved' ? 'selected' : '' }}>Approved</option>
+                            <option value="rejected" {{ ($product->product_status ?? '') == 'rejected' ? 'selected' : '' }}>Rejected</option>
+                        </x-input-field>
 
+                        <x-input-field 
+                            type="select" 
+                            name="is_active" 
+                            label="Active Status" 
+                            required
+                        >
+                            <option value="active" {{ $product->is_active === \App\Enums\Status::Active ? 'selected' : '' }}>Active</option>
+                            <option value="inactive" {{ $product->is_active === \App\Enums\Status::Inactive ? 'selected' : '' }}>Inactive</option>
+                        </x-input-field>
 
-                        <div class="mb-3">
-                            <label for="is_active" class="form-label">Active Status <span class="text-danger">*</span></label>
-                            <select class="form-select" name="is_active" id="is_active" required>
-                                <option value="active" {{ $product->is_active === \App\Enums\Status::Active ? 'selected' : '' }}>Active</option>
-                                <option value="inactive" {{ $product->is_active === \App\Enums\Status::Inactive ? 'selected' : '' }}>Inactive</option>
-                            </select>
-                        </div>
+                        <x-checkbox 
+                            name="is_featured" 
+                            value="1" 
+                            label="Featured Product"
+                            :checked="$product->is_featured ?? false"
+                        />
 
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="is_featured" name="is_featured" value="1" {{ ($product->is_featured ?? false) ? 'checked' : '' }}>
-                                <label class="form-check-label" for="is_featured">Featured Product</label>
-                            </div>
-                        </div>
+                        <x-checkbox 
+                            name="is_returnable" 
+                            value="1" 
+                            label="Returnable"
+                            :checked="$product->is_returnable ?? true"
+                        />
 
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="is_returnable" name="is_returnable" value="1" {{ ($product->is_returnable ?? true) ? 'checked' : '' }}>
-                                <label class="form-check-label" for="is_returnable">Returnable</label>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="return_days" class="form-label">Return Days</label>
-                            <input type="number" class="form-control" id="return_days" name="return_days" min="0" value="{{ $product->return_days ?? 7 }}">
-                        </div>
+                        <x-input-field 
+                            type="number" 
+                            name="return_days" 
+                            label="Return Days" 
+                            placeholder="7"
+                            min="0"
+                            value="{{ $product->return_days ?? 7 }}"
+                            help-text="Number of days for product return"
+                        />
                     </div>
                 </div>
 
