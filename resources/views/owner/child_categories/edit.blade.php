@@ -23,64 +23,69 @@
                         @method('PUT')
 
                         <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="category_id" class="form-label">Category <span class="text-danger">*</span></label>
-                                <select name="category_id" id="category_id" class="form-select @error('category_id') is-invalid @enderror" required>
-                                    <option value="">Select Category</option>
+                            <div class="col-md-6">
+                                <x-input-field 
+                                    type="select" 
+                                    name="category_id" 
+                                    label="Category" 
+                                    placeholder="Select Category"
+                                    required
+                                >
                                     @foreach($categories as $category)
                                         <option value="{{ $category->id }}" 
                                             {{ old('category_id', $childCategory->category_id) == $category->id ? 'selected' : '' }}>
                                             {{ $category->name }}
                                         </option>
                                     @endforeach
-                                </select>
-                                @error('category_id')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                                </x-input-field>
                             </div>
 
-                            <div class="col-md-6 mb-3">
-                                <label for="sub_category_id" class="form-label">Sub Category <span class="text-danger">*</span></label>
-                                <select name="sub_category_id" id="sub_category_id" class="form-select @error('sub_category_id') is-invalid @enderror" required>
-                                    <option value="">Select Sub Category</option>
+                            <div class="col-md-6">
+                                <x-input-field 
+                                    type="select" 
+                                    name="sub_category_id" 
+                                    label="Sub Category" 
+                                    placeholder="Select Sub Category"
+                                    required
+                                >
                                     @foreach($subCategories as $subCategory)
                                         <option value="{{ $subCategory->id }}" 
                                             {{ old('sub_category_id', $childCategory->sub_category_id) == $subCategory->id ? 'selected' : '' }}>
                                             {{ $subCategory->name }}
                                         </option>
                                     @endforeach
-                                </select>
-                                @error('sub_category_id')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                                </x-input-field>
                             </div>
 
-                            <div class="col-md-6 mb-3">
-                                <label for="name" class="form-label">Name <span class="text-danger">*</span></label>
-                                <input type="text" name="name" id="name" class="form-control @error('name') is-invalid @enderror" 
-                                    value="{{ old('name', $childCategory->name) }}" required>
-                                @error('name')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                            <div class="col-md-6">
+                                <x-input-field 
+                                    name="name" 
+                                    label="Name" 
+                                    placeholder="Enter child category name"
+                                    value="{{ old('name', $childCategory->name) }}"
+                                    required 
+                                />
                             </div>
 
-                            <div class="col-md-6 mb-3">
-                                <label for="status" class="form-label">Status <span class="text-danger">*</span></label>
-                                <select name="status" id="status" class="form-select @error('status') is-invalid @enderror" required>
+                            <div class="col-md-6">
+                                <x-input-field 
+                                    type="select" 
+                                    name="status" 
+                                    label="Status" 
+                                    required
+                                >
                                     <option value="active" {{ old('status', $childCategory->status->value) == 'active' ? 'selected' : '' }}>Active</option>
                                     <option value="inactive" {{ old('status', $childCategory->status->value) == 'inactive' ? 'selected' : '' }}>Inactive</option>
-                                </select>
-                                @error('status')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                                </x-input-field>
                             </div>
 
                             <div class="col-md-12 mb-3">
-                                <label for="image" class="form-label">Image</label>
-                                <input type="file" name="image" id="image" class="form-control @error('image') is-invalid @enderror" accept="image/*">
-                                @error('image')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                                <x-input-field 
+                                    type="file" 
+                                    name="image" 
+                                    label="Image" 
+                                    accept="image/*"
+                                />
                                 
                                 @if($childCategory->image)
                                     <div class="mt-2">

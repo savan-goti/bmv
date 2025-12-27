@@ -18,42 +18,49 @@
                     <form id="subCategoryEditForm" method="POST" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
-                        <div class="mb-3">
-                            <label for="category_id" class="form-label">Category</label>
-                            <select class="form-select" name="category_id" id="category_id" required>
-                                <option value="">Select Category</option>
-                                @foreach($categories as $category)
-                                    <option value="{{ $category->id }}" {{ $subCategory->category_id == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
-                                @endforeach
-                            </select>
-                            <label id="category_id-error" class="text-danger error" for="category_id" style="display: none"></label>
-                        </div>
+                        <x-input-field 
+                            type="select" 
+                            name="category_id" 
+                            label="Category" 
+                            placeholder="Select Category"
+                            required
+                        >
+                            @foreach($categories as $category)
+                                <option value="{{ $category->id }}" {{ $subCategory->category_id == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
+                            @endforeach
+                        </x-input-field>
+
+                        <x-input-field 
+                            name="name" 
+                            label="Name" 
+                            placeholder="Enter sub category name"
+                            value="{{ $subCategory->name }}"
+                            required 
+                        />
 
                         <div class="mb-3">
-                            <label for="name" class="form-label">Name</label>
-                            <input type="text" class="form-control" id="name" name="name" value="{{ $subCategory->name }}" required>
-                            <label id="name-error" class="text-danger error" for="name" style="display: none"></label>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="image" class="form-label">Image</label>
-                            <input type="file" class="form-control" id="image" name="image" accept="image/*">
+                            <x-input-field 
+                                type="file" 
+                                name="image" 
+                                label="Image" 
+                                accept="image/*"
+                            />
                             @if($subCategory->image)
                                 <div class="mt-2">
                                     <img src="{{ asset(\App\Http\Controllers\Owner\SubCategoryController::IMAGE_PATH . $subCategory->image) }}" alt="{{ $subCategory->name }}" width="100">
                                 </div>
                             @endif
-                            <label id="image-error" class="text-danger error" for="image" style="display: none"></label>
                         </div>
 
-                        <div class="mb-3">
-                            <label for="status" class="form-label">Status</label>
-                            <select class="form-select" name="status" required>
-                                <option value="active" {{ $subCategory->status === \App\Enums\Status::Active ? 'selected' : '' }}>Active</option>
-                                <option value="inactive" {{ $subCategory->status === \App\Enums\Status::Inactive ? 'selected' : '' }}>Inactive</option>
-                            </select>
-                            <label id="status-error" class="text-danger error" for="status" style="display: none"></label>
-                        </div>
+                        <x-input-field 
+                            type="select" 
+                            name="status" 
+                            label="Status" 
+                            required
+                        >
+                            <option value="active" {{ $subCategory->status === \App\Enums\Status::Active ? 'selected' : '' }}>Active</option>
+                            <option value="inactive" {{ $subCategory->status === \App\Enums\Status::Inactive ? 'selected' : '' }}>Inactive</option>
+                        </x-input-field>
 
                         <button type="submit" class="btn btn-primary" id="subCategoryEditButton">
                             <i class="bx bx-loader spinner me-2" style="display: none" id="subCategoryEditBtnSpinner"></i>Update Sub Category

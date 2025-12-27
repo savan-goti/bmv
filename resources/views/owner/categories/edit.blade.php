@@ -18,42 +18,49 @@
                     <form id="categoryEditForm" method="POST" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
-                        <div class="mb-3">
-                            <label for="name" class="form-label">Name</label>
-                            <input type="text" class="form-control" id="name" name="name" value="{{ $category->name }}" required>
-                            <label id="name-error" class="text-danger error" for="name" style="display: none"></label>
-                        </div>
+                        <x-input-field 
+                            name="name" 
+                            label="Name" 
+                            placeholder="Enter category name"
+                            value="{{ $category->name }}"
+                            required 
+                        />
+
+                        <x-input-field 
+                            type="select" 
+                            name="category_type" 
+                            label="Category Type" 
+                            placeholder="Select Category Type"
+                            required
+                        >
+                            @foreach($categoryTypes as $value => $label)
+                                <option value="{{ $value }}" {{ $category->category_type->value === $value ? 'selected' : '' }}>{{ $label }}</option>
+                            @endforeach
+                        </x-input-field>
 
                         <div class="mb-3">
-                            <label for="category_type" class="form-label">Category Type</label>
-                            <select class="form-select" name="category_type" id="category_type" required>
-                                <option value="">Select Category Type</option>
-                                @foreach($categoryTypes as $value => $label)
-                                    <option value="{{ $value }}" {{ $category->category_type->value === $value ? 'selected' : '' }}>{{ $label }}</option>
-                                @endforeach
-                            </select>
-                            <label id="category_type-error" class="text-danger error" for="category_type" style="display: none"></label>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="image" class="form-label">Image</label>
-                            <input type="file" class="form-control" id="image" name="image" accept="image/*">
+                            <x-input-field 
+                                type="file" 
+                                name="image" 
+                                label="Image" 
+                                accept="image/*"
+                            />
                             @if($category->image)
                                 <div class="mt-2">
                                     <img src="{{ asset(\App\Http\Controllers\Owner\CategoryController::IMAGE_PATH . $category->image) }}" alt="{{ $category->name }}" width="100">
                                 </div>
                             @endif
-                            <label id="image-error" class="text-danger error" for="image" style="display: none"></label>
                         </div>
 
-                        <div class="mb-3">
-                            <label for="status" class="form-label">Status</label>
-                            <select class="form-select" name="status" required>
-                                <option value="active" {{ $category->status === \App\Enums\Status::Active ? 'selected' : '' }}>Active</option>
-                                <option value="inactive" {{ $category->status === \App\Enums\Status::Inactive ? 'selected' : '' }}>Inactive</option>
-                            </select>
-                            <label id="status-error" class="text-danger error" for="status" style="display: none"></label>
-                        </div>
+                        <x-input-field 
+                            type="select" 
+                            name="status" 
+                            label="Status" 
+                            required
+                        >
+                            <option value="active" {{ $category->status === \App\Enums\Status::Active ? 'selected' : '' }}>Active</option>
+                            <option value="inactive" {{ $category->status === \App\Enums\Status::Inactive ? 'selected' : '' }}>Inactive</option>
+                        </x-input-field>
 
                         <button type="submit" class="btn btn-primary" id="categoryEditButton">
                             <i class="bx bx-loader spinner me-2" style="display: none" id="categoryEditBtnSpinner"></i>Update Category

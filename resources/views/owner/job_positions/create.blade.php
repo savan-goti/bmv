@@ -19,45 +19,25 @@
                         @csrf
                         <input type="hidden" name="owner_id" value="{{ Auth::user()->id }}">
                         
-                        <div class="mb-3">
-                            <label for="name" class="form-label">Position Name <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="name" name="name" required>
-                            <label id="name-error" class="text-danger error" for="name" style="display: none"></label>
-                        </div>
+                        <x-input-field name="name" label="Position Name" placeholder="Enter position name" required />
 
-                        <div class="mb-3">
-                            <label for="department" class="form-label">Department</label>
-                            <input type="text" class="form-control" id="department" name="department" placeholder="e.g., Sales, IT, HR">
-                            <label id="department-error" class="text-danger error" for="department" style="display: none"></label>
-                        </div>
+                        <x-input-field name="department" label="Department" placeholder="e.g., Sales, IT, HR" />
 
-                        <div class="mb-3">
-                            <label for="level" class="form-label">Level</label>
-                            <select class="form-select" id="level" name="level">
-                                <option value="" selected>Select Level</option>
-                                <option value="entry">Entry Level</option>
-                                <option value="mid">Mid Level</option>
-                                <option value="senior">Senior Level</option>
-                                <option value="executive">Executive</option>
-                                <option value="management">Management</option>
-                            </select>
-                            <label id="level-error" class="text-danger error" for="level" style="display: none"></label>
-                        </div>
+                        <x-input-field type="select" name="level" label="Level">
+                            <option value="">Select Level</option>
+                            <option value="entry">Entry Level</option>
+                            <option value="mid">Mid Level</option>
+                            <option value="senior">Senior Level</option>
+                            <option value="executive">Executive</option>
+                            <option value="management">Management</option>
+                        </x-input-field>
 
-                        <div class="mb-3">
-                            <label for="description" class="form-label">Description</label>
-                            <textarea class="form-control" id="description" name="description" rows="4" placeholder="Job position description, responsibilities, etc."></textarea>
-                            <label id="description-error" class="text-danger error" for="description" style="display: none"></label>
-                        </div>
+                        <x-input-field type="textarea" name="description" label="Description" rows="4" placeholder="Job position description, responsibilities, etc." />
 
-                        <div class="mb-3">
-                            <label for="status" class="form-label">Status <span class="text-danger">*</span></label>
-                            <select class="form-select" name="status" required>
-                                <option value="active" selected>Active</option>
-                                <option value="inactive">Inactive</option>
-                            </select>
-                            <label id="status-error" class="text-danger error" for="status" style="display: none"></label>
-                        </div>
+                        <x-input-field type="select" name="status" label="Status" required>
+                            <option value="active" selected>Active</option>
+                            <option value="inactive">Inactive</option>
+                        </x-input-field>
 
                         <button type="submit" class="btn btn-primary" id="jobPositionCreateButton">
                             <i class="bx bx-loader spinner me-2" style="display: none" id="jobPositionCreateBtnSpinner"></i>Create Job Position

@@ -33,130 +33,147 @@
 
                         <div class="row">
                             <div class="col-lg-6">
-                                <div class="mb-3">
-                                    <label for="site_name" class="form-label">Site Name</label>
-                                    <input type="text" class="form-control" id="site_name" name="site_name" value="{{  old('site_name', $settings->site_name ?? '') }}">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="site_phone" class="form-label">Phone</label>
-                                    <input type="text" class="form-control" id="site_phone" name="site_phone" value="{{ old('site_phone', $settings->site_phone ?? '') }}">
-                                </div>
+                                <x-input-field 
+                                    name="site_name" 
+                                    label="Site Name" 
+                                    value="{{ old('site_name', $settings->site_name ?? '') }}" 
+                                    required 
+                                />
                                 
-                                <div class="mb-3">
-                                    <label class="form-label">Facebook URL</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class='bx bxl-facebook'></i></span>
-                                        <input type="url" class="form-control" name="facebook_url"
-                                            value="{{ old('facebook_url', $settings->facebook_url ?? '') }}">
-                                    </div>
-                                </div>
+                                <x-input-field 
+                                    name="site_phone" 
+                                    label="Phone" 
+                                    value="{{ old('site_phone', $settings->site_phone ?? '') }}" 
+                                />
+                                
+                                <x-input-field 
+                                    type="url" 
+                                    name="facebook_url" 
+                                    label="Facebook URL" 
+                                    value="{{ old('facebook_url', $settings->facebook_url ?? '') }}" 
+                                    icon="bx bxl-facebook" 
+                                />
 
-                                <div class="mb-3">
-                                    <label class="form-label">Instagram URL</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class='bx bxl-instagram'></i></span>
-                                        <input type="url" class="form-control" name="instagram_url"
-                                            value="{{ old('instagram_url', $settings->instagram_url ?? '') }}">
-                                    </div>
-                                </div>
+                                <x-input-field 
+                                    type="url" 
+                                    name="instagram_url" 
+                                    label="Instagram URL" 
+                                    value="{{ old('instagram_url', $settings->instagram_url ?? '') }}" 
+                                    icon="bx bxl-instagram" 
+                                />
 
-                                <div class="mb-3">
-                                    <label class="form-label">Twitter URL</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class='bx bxl-twitter'></i></span>
-                                        <input type="url" class="form-control" name="twitter_url"
-                                            value="{{ old('twitter_url', $settings->twitter_url ?? '') }}">
-                                    </div>
-                                </div>
+                                <x-input-field 
+                                    type="url" 
+                                    name="twitter_url" 
+                                    label="Twitter URL" 
+                                    value="{{ old('twitter_url', $settings->twitter_url ?? '') }}" 
+                                    icon="bx bxl-twitter" 
+                                />
 
                                 <div class="mb-3">
                                     <label for="light_logo" class="form-label">Site Light Logo</label>
-                                    <input type="file" class="form-control" id="light_logo" name="light_logo">
+                                    <x-input-field 
+                                        type="file" 
+                                        name="light_logo" 
+                                        inputClass="form-control" 
+                                    />
                                     @if ($settings && $settings->light_logo)
-                                        <img src="{{ $settings->light_logo }}" alt="Site Light Logo" class="img-thumbnail mt-2" width="200">
+                                        <div class="mt-2">
+                                            <img src="{{ $settings->light_logo }}" alt="Site Light Logo" class="img-thumbnail" width="200">
+                                        </div>
                                     @endif
                                 </div>
+
                                 <div class="mb-3">
                                     <label for="dark_logo" class="form-label">Site Dark Logo</label>
-                                    <input type="file" class="form-control" id="dark_logo" name="dark_logo">
+                                    <x-input-field 
+                                        type="file" 
+                                        name="dark_logo" 
+                                        inputClass="form-control" 
+                                    />
                                     @if ($settings && $settings->dark_logo)
-                                        <img src="{{ $settings->dark_logo }}" alt="Site Dark Logo" class="img-thumbnail mt-2" width="200">
+                                        <div class="mt-2">
+                                            <img src="{{ $settings->dark_logo }}" alt="Site Dark Logo" class="img-thumbnail" width="200">
+                                        </div>
                                     @endif
                                 </div>
+
                                 <div class="mb-3">
                                     <label for="favicon" class="form-label">Favicon</label>
-                                    <input type="file" class="form-control" id="favicon" name="favicon">
+                                    <x-input-field 
+                                        type="file" 
+                                        name="favicon" 
+                                        inputClass="form-control" 
+                                    />
                                     @if ($settings && $settings->favicon)
-                                        <img src="{{ $settings->favicon }}" alt="Favicon" class="img-thumbnail mt-2" width="50">
+                                        <div class="mt-2">
+                                            <img src="{{ $settings->favicon }}" alt="Favicon" class="img-thumbnail" width="50">
+                                        </div>
                                     @endif
                                 </div>
 
                             </div>
                             <div class="col-lg-6">
-                                <div class="mb-3">
-                                    <label for="site_email" class="form-label">Site Email</label>
-                                    <input type="email" class="form-control" id="site_email" name="site_email" value="{{ old('site_email', $settings->site_email ?? '') }}">
-                                </div>
+                                <x-input-field 
+                                    type="email" 
+                                    name="site_email" 
+                                    label="Site Email" 
+                                    value="{{ old('site_email', $settings->site_email ?? '') }}" 
+                                />
 
-                                <div class="mb-3">
-                                    <label for="site_address" class="form-label">Address</label>
-                                    <input type="text" class="form-control" id="site_address" name="site_address" value="{{ old('site_address', $settings->site_address ?? '') }}">
-                                </div>
+                                <x-input-field 
+                                    name="site_address" 
+                                    label="Address" 
+                                    value="{{ old('site_address', $settings->site_address ?? '') }}" 
+                                />
 
-                                <div class="mb-3">
-                                    <label class="form-label">LinkedIn URL</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class='bx bxl-linkedin'></i></span>
-                                        <input type="url" class="form-control" name="linkedin_url"
-                                            value="{{ old('linkedin_url', $settings->linkedin_url ?? '') }}">
-                                    </div>
-                                </div>
+                                <x-input-field 
+                                    type="url" 
+                                    name="linkedin_url" 
+                                    label="LinkedIn URL" 
+                                    value="{{ old('linkedin_url', $settings->linkedin_url ?? '') }}" 
+                                    icon="bx bxl-linkedin" 
+                                />
 
-                                <div class="mb-3">
-                                    <label class="form-label">YouTube URL</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class='bx bxl-youtube'></i></span>
-                                        <input type="url" class="form-control" name="youtube_url"
-                                            value="{{ old('youtube_url', $settings->youtube_url ?? '') }}">
-                                    </div>
-                                </div>
+                                <x-input-field 
+                                    type="url" 
+                                    name="youtube_url" 
+                                    label="YouTube URL" 
+                                    value="{{ old('youtube_url', $settings->youtube_url ?? '') }}" 
+                                    icon="bx bxl-youtube" 
+                                />
 
-                                <div class="mb-3">
-                                    <label class="form-label">Pinterest URL</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class='bx bxl-pinterest'></i></span>
-                                        <input type="url" class="form-control" name="pinterest_url"
-                                            value="{{ old('pinterest_url', $settings->pinterest_url ?? '') }}">
-                                    </div>
-                                </div>
+                                <x-input-field 
+                                    type="url" 
+                                    name="pinterest_url" 
+                                    label="Pinterest URL" 
+                                    value="{{ old('pinterest_url', $settings->pinterest_url ?? '') }}" 
+                                    icon="bx bxl-pinterest" 
+                                />
 
-                                <div class="mb-3">
-                                    <label class="form-label">TikTok URL</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class='bx bxl-tiktok'></i></span>
-                                        <input type="url" class="form-control" name="tiktok_url"
-                                            value="{{ old('tiktok_url', $settings->tiktok_url ?? '') }}">
-                                    </div>
-                                </div>
+                                <x-input-field 
+                                    type="url" 
+                                    name="tiktok_url" 
+                                    label="TikTok URL" 
+                                    value="{{ old('tiktok_url', $settings->tiktok_url ?? '') }}" 
+                                    icon="bx bxl-tiktok" 
+                                />
 
-                                <div class="mb-3">
-                                    <label class="form-label">WhatsApp URL</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class='bx bxl-whatsapp'></i></span>
-                                        <input type="url" class="form-control" name="whatsapp_url"
-                                            value="{{ old('whatsapp_url', $settings->whatsapp_url ?? '') }}">
-                                    </div>
-                                </div>
+                                <x-input-field 
+                                    type="url" 
+                                    name="whatsapp_url" 
+                                    label="WhatsApp URL" 
+                                    value="{{ old('whatsapp_url', $settings->whatsapp_url ?? '') }}" 
+                                    icon="bx bxl-whatsapp" 
+                                />
 
-                                <div class="mb-3">
-                                    <label class="form-label">Telegram URL</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class='bx bxl-telegram'></i></span>
-                                        <input type="url" class="form-control" name="telegram_url"
-                                            value="{{ old('telegram_url', $settings->telegram_url ?? '') }}">
-                                    </div>
-                                </div>
-
+                                <x-input-field 
+                                    type="url" 
+                                    name="telegram_url" 
+                                    label="Telegram URL" 
+                                    value="{{ old('telegram_url', $settings->telegram_url ?? '') }}" 
+                                    icon="bx bxl-telegram" 
+                                />
 
                             </div>
 
@@ -164,7 +181,8 @@
 
                         <div class="form-group mb-0">
                             <div>
-                                <button type="submit" class="btn btn-primary waves-effect waves-light">
+                                <button type="submit" class="btn btn-primary waves-effect waves-light" id="submitButton">
+                                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true" style="display: none" id="submitBtnSpinner"></span>
                                     Update Settings
                                 </button>
                             </div>
@@ -176,6 +194,7 @@
     </div>
 </div>
 @endsection
+
 @section('script')
 <script>
     $(document).ready(function() {

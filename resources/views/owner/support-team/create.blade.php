@@ -18,62 +18,25 @@
                     <form id="supportTeamCreateForm" method="POST">
                         @csrf
                         <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="profile_image" class="form-label">Profile Image</label>
-                                    <input type="file" class="form-control" id="profile_image" name="profile_image">
-                                    <label id="profile_image-error" class="text-danger error" for="profile_image" style="display: none"></label>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="name" class="form-label">Name <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="name" name="name" required>
-                                    <label id="name-error" class="text-danger error" for="name" style="display: none"></label>
-                                </div>
-                            </div>
+                            <div class="col-md-6"><x-input-field type="file" name="profile_image" label="Profile Image" accept="image/*" /></div>
+                            <div class="col-md-6"><x-input-field name="name" label="Name" placeholder="Enter name" required /></div>
                         </div>
 
                         <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
-                                    <input type="email" class="form-control" id="email" name="email" required>
-                                    <label id="email-error" class="text-danger error" for="email" style="display: none"></label>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="phone" class="form-label">Phone</label>
-                                    <input type="text" class="form-control" id="phone" name="phone">
-                                    <label id="phone-error" class="text-danger error" for="phone" style="display: none"></label>
-                                </div>
-                            </div>
+                            <div class="col-md-6"><x-input-field type="email" name="email" label="Email" placeholder="Enter email" required /></div>
+                            <div class="col-md-6"><x-input-field name="phone" label="Phone" placeholder="Enter phone" /></div>
                         </div>
 
                         <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="role" class="form-label">Role <span class="text-danger">*</span></label>
-                                    <select class="form-select" id="role" name="role" required>
-                                        <option value="" selected disabled>Select Role</option>
-                                        @foreach($roles as $role)
-                                            <option value="{{ $role['value'] }}">{{ $role['label'] }}</option>
-                                        @endforeach
-                                    </select>
-                                    <label id="role-error" class="text-danger error" for="role" style="display: none"></label>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="status" class="form-label">Status <span class="text-danger">*</span></label>
-                                    <select class="form-select" name="status" required>
-                                        <option value="active">Active</option>
-                                        <option value="disabled">Disabled</option>
-                                    </select>
-                                    <label id="status-error" class="text-danger error" for="status" style="display: none"></label>
-                                </div>
-                            </div>
+                            <div class="col-md-6"><x-input-field type="select" name="role" label="Role" placeholder="Select Role" required>
+                                @foreach($roles as $role)
+                                    <option value="{{ $role['value'] }}">{{ $role['label'] }}</option>
+                                @endforeach
+                            </x-input-field></div>
+                            <div class="col-md-6"><x-input-field type="select" name="status" label="Status" required>
+                                <option value="active">Active</option>
+                                <option value="disabled">Disabled</option>
+                            </x-input-field></div>
                         </div>
 
                         <div class="row">
@@ -104,34 +67,16 @@
                         </div>
 
                         <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="notification_method" class="form-label">Notification Method <span class="text-danger">*</span></label>
-                                    <select class="form-select" id="notification_method" name="notification_method" required>
-                                        <option value="email">Email</option>
-                                        <option value="in_app">In-App</option>
-                                        <option value="both" selected>Both</option>
-                                    </select>
-                                    <label id="notification_method-error" class="text-danger error" for="notification_method" style="display: none"></label>
-                                </div>
-                            </div>
+                            <div class="col-md-6"><x-input-field type="select" name="notification_method" label="Notification Method" required>
+                                <option value="email">Email</option>
+                                <option value="in_app">In-App</option>
+                                <option value="both" selected>Both</option>
+                            </x-input-field></div>
                         </div>
 
                         <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="password" class="form-label">Password <span class="text-danger">*</span></label>
-                                    <input type="password" class="form-control" id="password" name="password" required>
-                                    <label id="password-error" class="text-danger error" for="password" style="display: none"></label>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="password_confirmation" class="form-label">Confirm Password <span class="text-danger">*</span></label>
-                                    <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" required>
-                                    <label id="password_confirmation-error" class="text-danger error" for="password_confirmation" style="display: none"></label>
-                                </div>
-                            </div>
+                            <div class="col-md-6"><x-input-field type="password" name="password" label="Password" placeholder="Enter password" required /></div>
+                            <div class="col-md-6"><x-input-field type="password" name="password_confirmation" label="Confirm Password" placeholder="Confirm password" required /></div>
                         </div>
 
                         <button type="submit" class="btn btn-primary" id="supportTeamCreateButton">

@@ -17,118 +17,132 @@
                 <div class="card-body">
                     <form id="staffCreateForm" method="POST">
                         @csrf
-                        <div class="mb-3">
-                            <label for="admin_id" class="form-label">Admin</label>
-                            <select class="form-select" id="admin_id" name="admin_id" required>
-                                <option value="" selected disabled>Select Admin</option>
-                                @foreach($admins as $admin)
-                                    <option value="{{ $admin->id }}">{{ $admin->name }}</option>
-                                @endforeach
-                            </select>
-                            <label id="admin_id-error" class="text-danger error" for="admin_id" style="display: none"></label>
-                        </div>
-                        <div class="mb-3">
-                            <label for="profile_image" class="form-label">Profile Image</label>
-                            <input type="file" class="form-control" id="profile_image" name="profile_image">
-                            <label id="profile_image-error" class="text-danger error" for="profile_image" style="display: none"></label>
-                        </div>
+                        <x-input-field 
+                            type="select" 
+                            name="admin_id" 
+                            label="Admin" 
+                            placeholder="Select Admin"
+                            required
+                        >
+                            @foreach($admins as $admin)
+                                <option value="{{ $admin->id }}">{{ $admin->name }}</option>
+                            @endforeach
+                        </x-input-field>
+                        
+                        <x-input-field 
+                            type="file" 
+                            name="profile_image" 
+                            label="Profile Image" 
+                        />
 
-                        <div class="mb-3">
-                            <label for="name" class="form-label">Name</label>
-                            <input type="text" class="form-control" id="name" name="name" required>
-                            <label id="name-error" class="text-danger error" for="name" style="display: none"></label>
-                        </div>
+                        <x-input-field 
+                            name="name" 
+                            label="Name" 
+                            placeholder="Enter staff name"
+                            required 
+                        />
 
-                        <div class="mb-3">
-                            <label for="father_name" class="form-label">Father Name</label>
-                            <input type="text" class="form-control" id="father_name" name="father_name">
-                            <label id="father_name-error" class="text-danger error" for="father_name" style="display: none"></label>
-                        </div>
+                        <x-input-field 
+                            name="father_name" 
+                            label="Father Name" 
+                            placeholder="Enter father name"
+                        />
 
-                        <div class="mb-3">
-                            <label for="email" class="form-label">Email</label>
-                            <input type="email" class="form-control" id="email" name="email" required>
-                            <label id="email-error" class="text-danger error" for="email" style="display: none"></label>
-                        </div>
+                        <x-input-field 
+                            type="email"
+                            name="email" 
+                            label="Email" 
+                            placeholder="Enter email address"
+                            required 
+                        />
 
-                        <div class="mb-3">
-                            <label for="date_of_birth" class="form-label">Date of Birth</label>
-                            <input type="date" class="form-control" id="date_of_birth" name="date_of_birth">
-                            <label id="date_of_birth-error" class="text-danger error" for="date_of_birth" style="display: none"></label>
-                        </div>
+                        <x-input-field 
+                            type="date"
+                            name="date_of_birth" 
+                            label="Date of Birth" 
+                        />
 
-                        <div class="mb-3">
-                            <label for="gender" class="form-label">Gender</label>
-                            <select class="form-select" id="gender" name="gender">
-                                <option value="" selected disabled>Select Gender</option>
-                                <option value="male">Male</option>
-                                <option value="female">Female</option>
-                                <option value="other">Other</option>
-                            </select>
-                            <label id="gender-error" class="text-danger error" for="gender" style="display: none"></label>
-                        </div>
+                        <x-input-field 
+                            type="select" 
+                            name="gender" 
+                            label="Gender" 
+                            placeholder="Select Gender"
+                        >
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                            <option value="other">Other</option>
+                        </x-input-field>
 
-                        <div class="mb-3">
-                            <label for="phone" class="form-label">Phone</label>
-                            <input type="text" class="form-control" id="phone" name="phone">
-                            <label id="phone-error" class="text-danger error" for="phone" style="display: none"></label>
-                        </div>
+                        <x-input-field 
+                            name="phone" 
+                            label="Phone" 
+                            placeholder="Enter phone number"
+                        />
 
-                        <div class="mb-3">
-                            <label for="assigned_role" class="form-label">Assigned Role</label>
-                            <select class="form-select" id="assigned_role" name="assigned_role" required>
-                                <option value="editor">Editor</option>
-                                <option value="viewer">Viewer</option>
-                                <option value="support">Support</option>
-                            </select>
-                            <label id="assigned_role-error" class="text-danger error" for="assigned_role" style="display: none"></label>
-                        </div>
+                        <x-input-field 
+                            type="select" 
+                            name="assigned_role" 
+                            label="Assigned Role" 
+                            required
+                        >
+                            <option value="editor">Editor</option>
+                            <option value="viewer">Viewer</option>
+                            <option value="support">Support</option>
+                        </x-input-field>
 
-                        <div class="mb-3">
-                            <label for="education" class="form-label">Education</label>
-                            <input type="text" class="form-control" id="education" name="education">
-                            <label id="education-error" class="text-danger error" for="education" style="display: none"></label>
-                        </div>
+                        <x-input-field 
+                            name="education" 
+                            label="Education" 
+                            placeholder="Enter education details"
+                        />
 
+                        <x-input-field 
+                            type="textarea"
+                            name="address" 
+                            label="Address" 
+                            placeholder="Enter address"
+                            rows="3"
+                        />
 
-                        <div class="mb-3">
-                            <label for="address" class="form-label">Address</label>
-                            <textarea class="form-control" id="address" name="address" rows="3"></textarea>
-                            <label id="address-error" class="text-danger error" for="address" style="display: none"></label>
-                        </div>
+                        <x-input-field 
+                            type="select" 
+                            name="status" 
+                            label="Status" 
+                            required
+                        >
+                            <option value="active" selected>Active</option>
+                            <option value="inactive">Inactive</option>
+                        </x-input-field>
 
-                        <div class="mb-3">
-                            <label for="status" class="form-label">Status</label>
-                            <select class="form-select" name="status" required>
-                                <option value="active">Active</option>
-                                <option value="inactive">Inactive</option>
-                            </select>
-                            <label id="status-error" class="text-danger error" for="status" style="display: none"></label>
-                        </div>
+                        <x-input-field 
+                            type="date"
+                            name="resignation_date" 
+                            label="Resignation Date" 
+                        />
 
-                        <div class="mb-3">
-                            <label for="resignation_date" class="form-label">Resignation Date</label>
-                            <input type="date" class="form-control" id="resignation_date" name="resignation_date">
-                            <label id="resignation_date-error" class="text-danger error" for="resignation_date" style="display: none"></label>
-                        </div>
+                        <x-input-field 
+                            type="textarea"
+                            name="purpose" 
+                            label="Purpose" 
+                            placeholder="Enter purpose"
+                            rows="3"
+                        />
 
-                        <div class="mb-3">
-                            <label for="purpose" class="form-label">Purpose</label>
-                            <textarea class="form-control" id="purpose" name="purpose" rows="3"></textarea>
-                            <label id="purpose-error" class="text-danger error" for="purpose" style="display: none"></label>
-                        </div>
+                        <x-input-field 
+                            type="password"
+                            name="password" 
+                            label="Password" 
+                            placeholder="Enter password"
+                            required 
+                        />
 
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Password</label>
-                            <input type="password" class="form-control" id="password" name="password" required>
-                            <label id="password-error" class="text-danger error" for="password" style="display: none"></label>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="password_confirmation" class="form-label">Confirm Password</label>
-                            <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" required>
-                            <label id="password_confirmation-error" class="text-danger error" for="password_confirmation" style="display: none"></label>
-                        </div>
+                        <x-input-field 
+                            type="password"
+                            name="password_confirmation" 
+                            label="Confirm Password" 
+                            placeholder="Confirm password"
+                            required 
+                        />
 
                         <button type="submit" class="btn btn-primary" id="staffCreateButton">
                             <i class="bx bx-loader spinner me-2" style="display: none" id="staffCreateBtnSpinner"></i>Create Staff
