@@ -90,8 +90,20 @@ if (!function_exists('uploadMultipleImages')) {
         }
 
         foreach ($files as $file) {
+            // Check if file is a string (FilePond encoded data)
+            if (is_string($file)) {
+                // Handle FilePond encoded file
+                $fileName = uploadFilepondEncodedFile($file, $folder, $prefix);
+                $paths[] = $fileName;
+                continue;
+            }
+            
+            // Handle regular file upload object
+            if (!is_object($file) || !method_exists($file, 'getClientOriginalExtension')) {
+                continue; // Skip invalid files
+            }
+            
             $fileName = fileName($file->getClientOriginalExtension(),$prefix);
-//            $file->move($destination, $fileName);
 
             if (!file_exists($destination)) {
                 mkdir($destination, 0755, true);
@@ -124,8 +136,20 @@ function slug($name){
 
 function uploadFilepondFile($file, $path, $prefix = "img_")
 {
-    // $extension = $file->getExtension() != "" ? $file->getExtension() : $file->getClientOriginalExtension();
-    $extension = pathinfo($file->getFilename(), PATHINFO_EXTENSION);
+    // Check if $file is a string (FilePond encoded data)
+    if (is_string($file)) {
+        // FilePond sends encoded file as JSON string
+        return uploadFilepondEncodedFile($file, $path, $prefix);
+    }
+    
+    // Handle regular file upload object
+    if (is_object($file) && method_exists($file, 'getExtension')) {
+        $extension = $file->getExtension() != "" ? $file->getExtension() : $file->getClientOriginalExtension();
+    } elseif (is_object($file) && method_exists($file, 'getClientOriginalExtension')) {
+        $extension = $file->getClientOriginalExtension();
+    } else {
+        throw new \Exception("Invalid file type provided to uploadFilepondFile");
+    }
 
     if (!$extension) {
         $extension = $file->getClientOriginalExtension();

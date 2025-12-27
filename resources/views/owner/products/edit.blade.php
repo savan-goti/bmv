@@ -369,41 +369,49 @@
                             <div class="tab-pane" id="media" role="tabpanel">
                                 <div class="mb-3">
                                     <label for="thumbnail_image" class="form-label">Thumbnail Image</label>
-                                    <input type="file" class="form-control" id="thumbnail_image" name="thumbnail_image" accept="image/*">
-                                    <small class="text-muted">Recommended size: 800x800px</small>
+                                    <input type="file" class="filepond-thumbnail-edit" id="thumbnail_image" name="thumbnail_image" accept="image/*">
+                                    <small class="text-muted">Recommended size: 800x800px. Max file size: 5MB</small>
                                     @if($product->thumbnail_image)
-                                        <div class="mt-2">
-                                            <img src="{{ asset(\App\Http\Controllers\Owner\ProductController::IMAGE_PATH . $product->thumbnail_image) }}" alt="{{ $product->product_name }}" width="150" class="img-thumbnail">
+                                        <div class="mt-3">
+                                            <p class="text-muted mb-2"><strong>Current Thumbnail:</strong></p>
+                                            <img src="{{ asset(PRODUCT_IMAGE_PATH . $product->thumbnail_image) }}" alt="{{ $product->product_name }}" width="150" class="img-thumbnail">
                                         </div>
                                     @endif
                                 </div>
 
                                 <div class="mb-3">
                                     <label for="image_alt_text" class="form-label">Image Alt Text</label>
-                                    <input type="text" class="form-control" id="image_alt_text" name="image_alt_text" value="{{ $product->image_alt_text ?? '' }}">
+                                    <input type="text" class="form-control" id="image_alt_text" name="image_alt_text" value="{{ $product->image_alt_text ?? '' }}" placeholder="Enter descriptive alt text for SEO">
                                 </div>
 
                                 <div class="mb-3">
                                     <label for="gallery_images" class="form-label">Gallery Images</label>
-                                    <input type="file" class="form-control" id="gallery_images" name="gallery_images[]" multiple accept="image/*">
-                                    <small class="text-muted">You can select multiple images</small>
-                                    <div class="row mt-2">
-                                        @foreach($product->productImages as $image)
-                                            <div class="col-md-3 mb-2" id="gallery-image-{{ $image->id }}">
-                                                <div class="position-relative">
-                                                    <img src="{{ asset(\App\Http\Controllers\Owner\ProductController::GALLERY_PATH . $image->image) }}" class="img-thumbnail w-100">
-                                                    <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 delete-gallery-image" data-id="{{ $image->id }}" data-url="{{ route('owner.products.image.delete', $image->id) }}">
-                                                        <i class="bx bx-trash"></i>
-                                                    </button>
-                                                </div>
+                                    <input type="file" class="filepond-gallery-edit" id="gallery_images" name="gallery_images[]" multiple accept="image/*">
+                                    <small class="text-muted">You can upload multiple images. Max 10 images, 5MB each</small>
+                                    
+                                    @if($product->productImages->count() > 0)
+                                        <div class="mt-3">
+                                            <p class="text-muted mb-2"><strong>Current Gallery Images:</strong></p>
+                                            <div class="row">
+                                                @foreach($product->productImages as $image)
+                                                    <div class="col-md-3 mb-2" id="gallery-image-{{ $image->id }}">
+                                                        <div class="position-relative">
+                                                            <img src="{{ asset(PRODUCT_GALLERY_PATH . $image->image) }}" class="img-thumbnail w-100">
+                                                            <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 delete-gallery-image" data-id="{{ $image->id }}" data-url="{{ route('owner.products.image.delete', $image->id) }}">
+                                                                <i class="bx bx-trash"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                @endforeach
                                             </div>
-                                        @endforeach
-                                    </div>
+                                        </div>
+                                    @endif
                                 </div>
 
                                 <div class="mb-3">
                                     <label for="video_url" class="form-label">Video URL</label>
                                     <input type="url" class="form-control" id="video_url" name="video_url" value="{{ $product->video_url ?? '' }}" placeholder="https://youtube.com/watch?v=...">
+                                    <small class="text-muted">Add a YouTube or Vimeo video URL</small>
                                 </div>
 
                                 <!-- Tab Navigation -->
@@ -886,8 +894,8 @@
         // Cascading Category Dropdowns
         $('#category_id').change(function() {
             var category_id = $(this).val();
-            $('#sub_category_id').html('<option value="">Select Sub Category</option>');
-            $('#child_category_id').html('<option value="">Select Child Category</option>');
+            $('#sub_category_id').html('<option value="">Select Sub Category</option>').trigger('change');
+            $('#child_category_id').html('<option value="">Select Child Category</option>').trigger('change');
             
             if (category_id) {
                 $.ajax({
@@ -898,6 +906,7 @@
                         $.each(data, function(key, value) {
                             $('#sub_category_id').append('<option value="' + value.id + '">' + value.name + '</option>');
                         });
+                        $('#sub_category_id').trigger('change'); // Trigger Select2 update
                     }
                 });
             }
@@ -905,7 +914,7 @@
 
         $('#sub_category_id').change(function() {
             var sub_category_id = $(this).val();
-            $('#child_category_id').html('<option value="">Select Child Category</option>');
+            $('#child_category_id').html('<option value="">Select Child Category</option>').trigger('change');
             
             if (sub_category_id) {
                 $.ajax({
@@ -916,6 +925,7 @@
                         $.each(data, function(key, value) {
                             $('#child_category_id').append('<option value="' + value.id + '">' + value.name + '</option>');
                         });
+                        $('#child_category_id').trigger('change'); // Trigger Select2 update
                     },
                     error: function() {
                         // If route doesn't exist, silently fail
@@ -987,7 +997,29 @@
                 stock_type: { required: true },
                 shipping_class: { required: true },
                 product_status: { required: true },
-                status: { required: true }
+                status: { required: true },
+                
+                // Media validation
+                thumbnail_image: {
+                    extension: "jpeg|jpg|png|gif|webp"
+                }
+            },
+            messages: {
+                product_name: { required: "Product name is required" },
+                category_id: { required: "Category is required" },
+                sell_price: { required: "Sell price is required", number: "Sell price must be a number", min: "Sell price must be greater than or equal to 0" },
+                total_stock: { required: "Total stock is required", number: "Total stock must be a number", min: "Total stock must be greater than or equal to 0" },
+                discount_type: { required: "Discount type is required" },
+                commission_type: { required: "Commission type is required" },
+                stock_type: { required: "Stock type is required" },
+                shipping_class: { required: "Shipping class is required" },
+                product_status: { required: "Product status is required" },
+                status: { required: "Status is required" },
+                
+                // Media validation messages
+                thumbnail_image: {
+                    extension: "Please upload a valid image file (jpeg, jpg, png, gif, or webp)"
+                }
             },
             errorPlacement: function (error, element) {
                 if (element.attr("type") == "radio" || element.attr("type") == "checkbox") {
@@ -1039,6 +1071,145 @@
                     },
                 });
             }
+        });
+        
+        // ========================================
+        // FilePond Initialization for Edit Form
+        // ========================================
+        
+        // Register FilePond plugins
+        FilePond.registerPlugin(
+            FilePondPluginImagePreview,
+            FilePondPluginFileValidateSize,
+            FilePondPluginImageExifOrientation,
+            FilePondPluginFileValidateType
+        );
+        
+        // Initialize FilePond for Thumbnail Image (Single Upload) - Edit Form
+        const thumbnailPondEdit = FilePond.create(document.querySelector('.filepond-thumbnail-edit'), {
+            acceptedFileTypes: ['image/*'],
+            maxFileSize: '5MB',
+            labelIdle: 'Drag & Drop your thumbnail image or <span class="filepond--label-action">Browse</span>',
+            labelFileTypeNotAllowed: 'Invalid file type',
+            fileValidateTypeLabelExpectedTypes: 'Expects image files',
+            labelMaxFileSizeExceeded: 'File is too large',
+            labelMaxFileSize: 'Maximum file size is {filesize}',
+            imagePreviewHeight: 170,
+            imageCropAspectRatio: '1:1',
+            imageResizeTargetWidth: 800,
+            imageResizeTargetHeight: 800,
+            imageResizeMode: 'contain',
+            imageResizeUpscale: false,
+            stylePanelLayout: 'compact',
+            styleLoadIndicatorPosition: 'center bottom',
+            styleProgressIndicatorPosition: 'right bottom',
+            styleButtonRemoveItemPosition: 'left bottom',
+            styleButtonProcessItemPosition: 'right bottom',
+        });
+        
+        // Handle thumbnail file errors
+        thumbnailPondEdit.on('addfile', (error, file) => {
+            if (error) {
+                sendError(error.main);
+                setTimeout(() => {
+                    thumbnailPondEdit.removeFile(file.id);
+                }, 2000);
+            }
+        });
+        
+        // Initialize FilePond for Gallery Images (Multiple Upload) - Edit Form
+        const galleryPondEdit = FilePond.create(document.querySelector('.filepond-gallery-edit'), {
+            allowMultiple: true,
+            maxFiles: 10,
+            acceptedFileTypes: ['image/*'],
+            maxFileSize: '5MB',
+            labelIdle: 'Drag & Drop your gallery images or <span class="filepond--label-action">Browse</span>',
+            labelFileTypeNotAllowed: 'Invalid file type',
+            fileValidateTypeLabelExpectedTypes: 'Expects image files',
+            labelMaxFileSizeExceeded: 'File is too large',
+            labelMaxFileSize: 'Maximum file size is {filesize}',
+            labelMaxTotalFileSizeExceeded: 'Maximum total size exceeded',
+            maxTotalFileSize: '50MB',
+            imagePreviewHeight: 120,
+            imageResizeTargetWidth: 1200,
+            imageResizeTargetHeight: 1200,
+            imageResizeMode: 'contain',
+            imageResizeUpscale: false,
+            allowReorder: true,
+            itemInsertLocation: 'after',
+        });
+        
+        // Handle gallery file errors
+        galleryPondEdit.on('addfile', (error, file) => {
+            if (error) {
+                sendError(error.main);
+                setTimeout(() => {
+                    galleryPondEdit.removeFile(file.id);
+                }, 2000);
+            }
+        });
+        
+        // Warning when max files reached
+        galleryPondEdit.on('warning', (error, file) => {
+            if (error.body === 'Max files') {
+                sendWarning('Maximum 10 images allowed in gallery');
+            }
+        });
+        
+        // ========================================
+        // Select2 Initialization
+        // ========================================
+        
+        // Initialize Select2 for all select fields
+        $('#category_id').select2({
+            placeholder: 'Select Category',
+            allowClear: true,
+            width: '100%'
+        });
+        
+        $('#sub_category_id').select2({
+            placeholder: 'Select Sub Category',
+            allowClear: true,
+            width: '100%'
+        });
+        
+        $('#child_category_id').select2({
+            placeholder: 'Select Child Category',
+            allowClear: true,
+            width: '100%'
+        });
+        
+        $('#brand_id').select2({
+            placeholder: 'Select Brand',
+            allowClear: true,
+            width: '100%'
+        });
+        
+        $('#collection_id').select2({
+            placeholder: 'Select Collection',
+            allowClear: true,
+            width: '100%'
+        });
+        
+        $('#product_status').select2({
+            placeholder: 'Select Product Status',
+            allowClear: false,
+            width: '100%',
+            minimumResultsForSearch: Infinity // Disable search for simple dropdown
+        });
+        
+        $('#is_active').select2({
+            placeholder: 'Select Active Status',
+            allowClear: false,
+            width: '100%',
+            minimumResultsForSearch: Infinity // Disable search for simple dropdown
+        });
+        
+        $('#shipping_class').select2({
+            placeholder: 'Select Shipping Class',
+            allowClear: false,
+            width: '100%',
+            minimumResultsForSearch: Infinity // Disable search for simple dropdown
         });
     });
 </script>
