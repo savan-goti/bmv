@@ -131,7 +131,7 @@
                     </a>
                 </li>
 
-                <!-- <li class="menu-title"><i class="ri-more-fill"></i> <span data-key="t-pages">Master Data</span></li>
+                <li class="menu-title"><i class="ri-more-fill"></i> <span data-key="t-pages">Master Data</span></li>
 
                 <li class="nav-item">
                     <a class="nav-link menu-link" href="#sidebarMasterData" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarMasterData">
@@ -156,7 +156,7 @@
                             </li>
                         </ul>
                     </div>
-                </li> -->
+                </li>
 
             </ul>
         </div>
