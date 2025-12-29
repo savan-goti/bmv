@@ -77,7 +77,7 @@ class CollectionController extends Controller
      */
     public function create()
     {
-        $products = Product::where('status', Status::Active)->get();
+        $products = Product::where('is_active', Status::Active)->get();
         return view('owner.collections.create', compact('products'));
     }
 
@@ -126,7 +126,7 @@ class CollectionController extends Controller
      */
     public function edit(Collection $collection)
     {
-        $products = Product::where('status', Status::Active)->get();
+        $products = Product::where('is_active', Status::Active)->get();
         $selectedProducts = $collection->products->pluck('id')->toArray();
         
         return view('owner.collections.edit', compact('collection', 'products', 'selectedProducts'));

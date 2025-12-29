@@ -131,6 +131,33 @@
                     </a>
                 </li>
 
+                <!-- <li class="menu-title"><i class="ri-more-fill"></i> <span data-key="t-pages">Master Data</span></li>
+
+                <li class="nav-item">
+                    <a class="nav-link menu-link" href="#sidebarMasterData" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarMasterData">
+                        <i class="ri-database-2-line"></i> <span data-key="t-master-data">Product Master</span>
+                    </a>
+                    <div class="collapse menu-dropdown {{ request()->routeIs('owner.master.*') ? 'show' : '' }}" id="sidebarMasterData">
+                        <ul class="nav nav-sm flex-column">
+                            <li class="nav-item">
+                                <a href="{{ route('owner.master.units.index') }}" class="nav-link {{ request()->routeIs('owner.master.units.*') ? 'active' : '' }}">Units</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('owner.master.hsn-sacs.index') }}" class="nav-link {{ request()->routeIs('owner.master.hsn-sacs.*') ? 'active' : '' }}">HSN/SAC</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('owner.master.colors.index') }}" class="nav-link {{ request()->routeIs('owner.master.colors.*') ? 'active' : '' }}">Colors</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('owner.master.sizes.index') }}" class="nav-link {{ request()->routeIs('owner.master.sizes.*') ? 'active' : '' }}">Sizes</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('owner.master.suppliers.index') }}" class="nav-link {{ request()->routeIs('owner.master.suppliers.*') ? 'active' : '' }}">Suppliers</a>
+                            </li>
+                        </ul>
+                    </div>
+                </li> -->
+
             </ul>
         </div>
         <!-- Sidebar -->

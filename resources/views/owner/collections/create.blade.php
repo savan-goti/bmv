@@ -95,14 +95,13 @@
 
                             <div class="col-md-12 mb-3">
                                 <label class="form-label">Select Products</label>
-                                <select name="products[]" id="products" class="form-select" multiple size="10">
+                                <select name="products[]" id="products" class="form-select select2" multiple data-placeholder="Select Products">
                                     @foreach($products as $product)
                                         <option value="{{ $product->id }}" {{ in_array($product->id, old('products', [])) ? 'selected' : '' }}>
-                                            {{ $product->name }}
+                                            {{ $product->product_name }}
                                         </option>
                                     @endforeach
                                 </select>
-                                <small class="text-muted">Hold Ctrl (Cmd on Mac) to select multiple products</small>
                             </div>
                         </div>
 
@@ -123,6 +122,13 @@
 @section('script')
 <script>
     $(document).ready(function() {
+        // Initialize Select2
+        $('.select2').select2({
+            width: '100%',
+            placeholder: $(this).data('placeholder'),
+            allowClear: true
+        });
+
         // Image preview
         $('#image').change(function() {
             var file = this.files[0];
