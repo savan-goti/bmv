@@ -20,6 +20,8 @@ class Product extends Model
         'barcode',
         'short_description',
         'full_description',
+        'warranty_value',
+        'warranty_unit',
         
         // Ownership & Audit
         'owner_id',
@@ -48,6 +50,10 @@ class Product extends Model
         'commission_type',
         'commission_value',
         
+        // Tax & Units
+        'hsn_sac_id',
+        'unit_id',
+        
         // Inventory
         'stock_type',
         'total_stock',
@@ -58,10 +64,13 @@ class Product extends Model
         
         // Variations
         'has_variation',
+        'color_id',
+        'size_id',
         
         // Media
         'thumbnail_image',
         'video_url',
+        'product_videos',
         'image_alt_text',
         
         // Shipping
@@ -79,6 +88,12 @@ class Product extends Model
         'is_featured',
         'is_returnable',
         'return_days',
+        
+        // Other Details
+        'supplier_id',
+        'packer_name',
+        'packer_address',
+        'packer_gst',
         
         // SEO
         'meta_title',
@@ -98,7 +113,33 @@ class Product extends Model
         'is_featured' => 'boolean',
         'is_returnable' => 'boolean',
         'schema_markup' => 'array',
+        'product_videos' => 'array',
     ];
+
+    public function hsnSac()
+    {
+        return $this->belongsTo(HsnSac::class, 'hsn_sac_id');
+    }
+
+    public function unit()
+    {
+        return $this->belongsTo(Unit::class);
+    }
+
+    public function color()
+    {
+        return $this->belongsTo(Color::class);
+    }
+
+    public function size()
+    {
+        return $this->belongsTo(Size::class);
+    }
+
+    public function supplier()
+    {
+        return $this->belongsTo(Supplier::class);
+    }
 
     public function category()
     {

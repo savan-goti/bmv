@@ -19,6 +19,11 @@ use App\Http\Controllers\Owner\BranchController;
 use App\Http\Controllers\Owner\BranchPositionController;
 use App\Http\Controllers\Owner\SupportTeamController;
 use App\Http\Controllers\Owner\ForgotPasswordController;
+use App\Http\Controllers\Owner\UnitController;
+use App\Http\Controllers\Owner\HsnSacController;
+use App\Http\Controllers\Owner\ColorController;
+use App\Http\Controllers\Owner\SizeController;
+use App\Http\Controllers\Owner\SupplierController;
     
 
 Route::middleware(['guest:owner'])->group(function () {
@@ -190,6 +195,44 @@ Route::middleware(['auth:owner', 'session.guard:owner'])->group(function () {
     Route::resource('support-team', SupportTeamController::class)->parameters([
         'support-team' => 'supportTeamMember'
     ]);
+
+    // Master Data Management
+    Route::prefix('master')->name('master.')->group(function () {
+        // Units
+        Route::controller(UnitController::class)->group(function () {
+            Route::get('units/ajax-data', 'ajaxData')->name('units.ajaxData');
+            Route::post('units/{unit}/status', 'status')->name('units.status');
+        });
+        Route::resource('units', UnitController::class);
+
+        // HSN/SAC
+        Route::controller(HsnSacController::class)->group(function () {
+            Route::get('hsn-sacs/ajax-data', 'ajaxData')->name('hsn-sacs.ajaxData');
+            Route::post('hsn-sacs/{hsnSac}/status', 'status')->name('hsn-sacs.status');
+        });
+        Route::resource('hsn-sacs', HsnSacController::class);
+
+        // Colors
+        Route::controller(ColorController::class)->group(function () {
+            Route::get('colors/ajax-data', 'ajaxData')->name('colors.ajaxData');
+            Route::post('colors/{color}/status', 'status')->name('colors.status');
+        });
+        Route::resource('colors', ColorController::class);
+
+        // Sizes
+        Route::controller(SizeController::class)->group(function () {
+            Route::get('sizes/ajax-data', 'ajaxData')->name('sizes.ajaxData');
+            Route::post('sizes/{size}/status', 'status')->name('sizes.status');
+        });
+        Route::resource('sizes', SizeController::class);
+
+        // Suppliers
+        Route::controller(SupplierController::class)->group(function () {
+            Route::get('suppliers/ajax-data', 'ajaxData')->name('suppliers.ajaxData');
+            Route::post('suppliers/{supplier}/status', 'status')->name('suppliers.status');
+        });
+        Route::resource('suppliers', SupplierController::class);
+    });
     
 });
 

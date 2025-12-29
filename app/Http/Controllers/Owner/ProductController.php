@@ -92,19 +92,34 @@ class ProductController extends Controller
         $categories = Category::where('status', Status::Active)->get();
         $brands = Brand::where('status', Status::Active)->get();
         $collections = Collection::where('status', Status::Active)->get();
-        return view('owner.products.create', compact('categories', 'brands', 'collections'));
+        $units = \App\Models\Unit::where('status', Status::Active)->get();
+        $hsnSacs = \App\Models\HsnSac::where('status', Status::Active)->get();
+        $colors = \App\Models\Color::where('status', Status::Active)->get();
+        $sizes = \App\Models\Size::where('status', Status::Active)->get();
+        $suppliers = \App\Models\Supplier::where('status', Status::Active)->get();
+
+        return view('owner.products.create', compact(
+            'categories', 
+            'brands', 
+            'collections', 
+            'units', 
+            'hsnSacs', 
+            'colors', 
+            'sizes', 
+            'suppliers'
+        ));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
             // Basic Info
-
             'product_name' => 'required|string|max:255',
-            'sku' => 'nullable|string|max:100|unique:products,sku',
-            'barcode' => 'nullable|string|max:100',
+            'sku' => 'required|string|max:100|unique:products,sku',
             'short_description' => 'nullable|string',
             'full_description' => 'nullable|string',
+            'warranty_value' => 'nullable|numeric|min:0',
+            'warranty_unit' => 'nullable|in:months,years',
             
             // Category & Brand
             'category_id' => 'required|exists:categories,id',
@@ -114,9 +129,9 @@ class ProductController extends Controller
             'collection_id' => 'nullable|exists:collections,id',
             
             // Pricing
-            'purchase_price' => 'nullable|numeric|min:0',
-            'original_price' => 'nullable|numeric|min:0',
-            'sell_price' => 'required|numeric|min:0',
+            'purchase_price' => 'required|numeric|min:0',
+            'original_price' => 'required|numeric|min:0',
+            'sell_price' => 'required|numeric|min:0|lte:original_price',
             'discount_type' => 'required|in:flat,percentage',
             'discount_value' => 'nullable|numeric|min:0',
             'gst_rate' => 'nullable|numeric|min:0|max:100',
@@ -124,26 +139,32 @@ class ProductController extends Controller
             'commission_type' => 'required|in:flat,percentage',
             'commission_value' => 'nullable|numeric|min:0',
             
+            // Tax & Units
+            'hsn_sac_id' => 'required|exists:hsn_sacs,id',
+            'unit_id' => 'required|exists:units,id',
+
             // Inventory
             'stock_type' => 'required|in:limited,unlimited',
-            'total_stock' => 'required|integer|min:0',
+            'total_stock' => 'required|integer|min:1',
             'low_stock_alert' => 'nullable|integer|min:0',
             'warehouse_location' => 'nullable|string|max:100',
             
             // Variations
             'has_variation' => 'nullable|boolean',
+            'color_id' => 'nullable|exists:colors,id',
+            'size_id' => 'nullable|exists:sizes,id',
             
             // Media
-            'thumbnail_image' => 'nullable',
-            'video_url' => 'nullable|url',
+            'thumbnail_image' => 'required',
             'image_alt_text' => 'nullable|string|max:255',
             'gallery_images.*' => 'nullable',
+            'product_videos.*' => 'nullable|file|mimes:mp4,webm|max:20480', // 20MB limit
             
             // Shipping
-            'weight' => 'nullable|numeric|min:0',
-            'length' => 'nullable|numeric|min:0',
-            'width' => 'nullable|numeric|min:0',
-            'height' => 'nullable|numeric|min:0',
+            'weight' => 'required|numeric|gt:0',
+            'length' => 'required|numeric|gt:0',
+            'width' => 'required|numeric|gt:0',
+            'height' => 'required|numeric|gt:0',
             'shipping_class' => 'required|in:normal,heavy',
             'free_shipping' => 'nullable|boolean',
             'cod_available' => 'nullable|boolean',
@@ -155,6 +176,12 @@ class ProductController extends Controller
             'is_returnable' => 'nullable|boolean',
             'return_days' => 'nullable|integer|min:0',
             
+            // Other Details
+            'supplier_id' => 'nullable|exists:suppliers,id',
+            'packer_name' => 'nullable|string|max:255',
+            'packer_address' => 'nullable|string',
+            'packer_gst' => 'nullable|string|max:20',
+
             // SEO
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string',
@@ -165,15 +192,19 @@ class ProductController extends Controller
         try {
             DB::beginTransaction();
 
+            // Auto-generate unique barcode
+            $barcode = $this->generateUniqueBarcode();
+
             $productData = [
                 // Basic Info
-
                 'product_name' => $request->product_name,
                 'slug' => Str::slug($request->product_name),
                 'sku' => $request->sku,
-                'barcode' => $request->barcode,
+                'barcode' => $barcode,
                 'short_description' => $request->short_description,
                 'full_description' => $request->full_description,
+                'warranty_value' => $request->warranty_value,
+                'warranty_unit' => $request->warranty_unit,
                 
                 // Ownership & Audit
                 'owner_id' => Auth::guard('owner')->id(),
@@ -198,6 +229,10 @@ class ProductController extends Controller
                 'commission_type' => $request->commission_type ?? 'percentage',
                 'commission_value' => $request->commission_value ?? 0,
                 
+                // Tax & Units
+                'hsn_sac_id' => $request->hsn_sac_id,
+                'unit_id' => $request->unit_id,
+
                 // Inventory
                 'stock_type' => $request->stock_type,
                 'total_stock' => $request->total_stock,
@@ -208,9 +243,10 @@ class ProductController extends Controller
                 
                 // Variations
                 'has_variation' => $request->has_variation ?? false,
+                'color_id' => $request->color_id,
+                'size_id' => $request->size_id,
                 
                 // Media
-                'video_url' => $request->video_url,
                 'image_alt_text' => $request->image_alt_text,
                 
                 // Shipping
@@ -229,6 +265,12 @@ class ProductController extends Controller
                 'is_returnable' => $request->is_returnable ?? true,
                 'return_days' => $request->return_days ?? 7,
                 
+                // Other Details
+                'supplier_id' => $request->supplier_id,
+                'packer_name' => $request->packer_name,
+                'packer_address' => $request->packer_address,
+                'packer_gst' => $request->packer_gst,
+
                 // SEO
                 'meta_title' => $request->meta_title,
                 'meta_description' => $request->meta_description,
@@ -238,6 +280,15 @@ class ProductController extends Controller
 
             if ($request->has('thumbnail_image')) {
                 $productData['thumbnail_image'] = uploadFilepondFile($request->thumbnail_image, PRODUCT_IMAGE_PATH);
+            }
+
+            // Handle multiple videos
+            if ($request->hasFile('product_videos')) {
+                $videoPaths = [];
+                foreach ($request->file('product_videos') as $video) {
+                    $videoPaths[] = uploadFile($video, PRODUCT_VIDEO_PATH);
+                }
+                $productData['product_videos'] = $videoPaths;
             }
 
             $product = Product::create($productData);
@@ -262,6 +313,14 @@ class ProductController extends Controller
         }
     }
 
+    private function generateUniqueBarcode()
+    {
+        do {
+            $barcode = mt_rand(1000000000, 9999999999);
+        } while (Product::where('barcode', $barcode)->exists());
+        return (string)$barcode;
+    }
+
     public function edit(Product $product)
     {
         $categories = Category::where('status', Status::Active)->get();
@@ -269,20 +328,40 @@ class ProductController extends Controller
         $childCategories = ChildCategory::where('sub_category_id', $product->sub_category_id)->where('status', Status::Active)->get();
         $brands = Brand::where('status', Status::Active)->get();
         $collections = Collection::where('status', Status::Active)->get();
+        
+        $units = \App\Models\Unit::where('status', Status::Active)->get();
+        $hsnSacs = \App\Models\HsnSac::where('status', Status::Active)->get();
+        $colors = \App\Models\Color::where('status', Status::Active)->get();
+        $sizes = \App\Models\Size::where('status', Status::Active)->get();
+        $suppliers = \App\Models\Supplier::where('status', Status::Active)->get();
+
         $product->load(['productImages', 'productInformation']);
-        return view('owner.products.edit', compact('product', 'categories', 'subCategories', 'childCategories', 'brands', 'collections'));
+        
+        return view('owner.products.edit', compact(
+            'product', 
+            'categories', 
+            'subCategories', 
+            'childCategories', 
+            'brands', 
+            'collections',
+            'units',
+            'hsnSacs',
+            'colors',
+            'sizes',
+            'suppliers'
+        ));
     }
 
     public function update(Request $request, Product $product)
     {
         $validated = $request->validate([
             // Basic Info
-
             'product_name' => 'required|string|max:255',
-            'sku' => 'nullable|string|max:100|unique:products,sku,'.$product->id,
-            'barcode' => 'nullable|string|max:100',
+            'sku' => 'required|string|max:100|unique:products,sku,'.$product->id,
             'short_description' => 'nullable|string',
             'full_description' => 'nullable|string',
+            'warranty_value' => 'nullable|numeric|min:0',
+            'warranty_unit' => 'nullable|in:months,years',
             
             // Category & Brand
             'category_id' => 'required|exists:categories,id',
@@ -292,9 +371,9 @@ class ProductController extends Controller
             'collection_id' => 'nullable|exists:collections,id',
             
             // Pricing
-            'purchase_price' => 'nullable|numeric|min:0',
-            'original_price' => 'nullable|numeric|min:0',
-            'sell_price' => 'required|numeric|min:0',
+            'purchase_price' => 'required|numeric|min:0',
+            'original_price' => 'required|numeric|min:0',
+            'sell_price' => 'required|numeric|min:0|lte:original_price',
             'discount_type' => 'required|in:flat,percentage',
             'discount_value' => 'nullable|numeric|min:0',
             'gst_rate' => 'nullable|numeric|min:0|max:100',
@@ -302,28 +381,32 @@ class ProductController extends Controller
             'commission_type' => 'required|in:flat,percentage',
             'commission_value' => 'nullable|numeric|min:0',
             
+            // Tax & Units
+            'hsn_sac_id' => 'required|exists:hsn_sacs,id',
+            'unit_id' => 'required|exists:units,id',
+
             // Inventory
             'stock_type' => 'required|in:limited,unlimited',
-            'total_stock' => 'required|integer|min:0',
+            'total_stock' => 'required|integer|min:1',
             'low_stock_alert' => 'nullable|integer|min:0',
             'warehouse_location' => 'nullable|string|max:100',
             
             // Variations
             'has_variation' => 'nullable|boolean',
+            'color_id' => 'nullable|exists:colors,id',
+            'size_id' => 'nullable|exists:sizes,id',
             
             // Media
             'thumbnail_image' => 'nullable',
-
-            'video_url' => 'nullable|string|max:255',
             'image_alt_text' => 'nullable|string|max:255',
-
             'gallery_images.*' => 'nullable',
+            'product_videos.*' => 'nullable|file|mimes:mp4,webm|max:20480',
             
             // Shipping
-            'weight' => 'nullable|numeric|min:0',
-            'length' => 'nullable|numeric|min:0',
-            'width' => 'nullable|numeric|min:0',
-            'height' => 'nullable|numeric|min:0',
+            'weight' => 'required|numeric|gt:0',
+            'length' => 'required|numeric|gt:0',
+            'width' => 'required|numeric|gt:0',
+            'height' => 'required|numeric|gt:0',
             'shipping_class' => 'required|in:normal,heavy',
             'free_shipping' => 'nullable|boolean',
             'cod_available' => 'nullable|boolean',
@@ -335,6 +418,12 @@ class ProductController extends Controller
             'is_returnable' => 'nullable|boolean',
             'return_days' => 'nullable|integer|min:0',
             
+            // Other Details
+            'supplier_id' => 'nullable|exists:suppliers,id',
+            'packer_name' => 'nullable|string|max:255',
+            'packer_address' => 'nullable|string',
+            'packer_gst' => 'nullable|string|max:20',
+
             // SEO
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string',
@@ -347,13 +436,13 @@ class ProductController extends Controller
 
             $productData = [
                 // Basic Info
-
                 'product_name' => $request->product_name,
                 'slug' => Str::slug($request->product_name),
                 'sku' => $request->sku,
-                'barcode' => $request->barcode,
                 'short_description' => $request->short_description,
                 'full_description' => $request->full_description,
+                'warranty_value' => $request->warranty_value,
+                'warranty_unit' => $request->warranty_unit,
                 
                 // Category & Brand
                 'category_id' => $request->category_id,
@@ -373,6 +462,10 @@ class ProductController extends Controller
                 'commission_type' => $request->commission_type ?? 'percentage',
                 'commission_value' => $request->commission_value ?? 0,
                 
+                // Tax & Units
+                'hsn_sac_id' => $request->hsn_sac_id,
+                'unit_id' => $request->unit_id,
+
                 // Inventory
                 'stock_type' => $request->stock_type,
                 'total_stock' => $request->total_stock,
@@ -382,9 +475,10 @@ class ProductController extends Controller
                 
                 // Variations
                 'has_variation' => $request->has_variation ?? false,
+                'color_id' => $request->color_id,
+                'size_id' => $request->size_id,
                 
                 // Media
-                'video_url' => $request->video_url,
                 'image_alt_text' => $request->image_alt_text,
                 
                 // Shipping
@@ -403,6 +497,12 @@ class ProductController extends Controller
                 'is_returnable' => $request->is_returnable ?? true,
                 'return_days' => $request->return_days ?? 7,
                 
+                // Other Details
+                'supplier_id' => $request->supplier_id,
+                'packer_name' => $request->packer_name,
+                'packer_address' => $request->packer_address,
+                'packer_gst' => $request->packer_gst,
+
                 // SEO
                 'meta_title' => $request->meta_title,
                 'meta_description' => $request->meta_description,
@@ -415,6 +515,15 @@ class ProductController extends Controller
                     deleteImgFile($product->thumbnail_image, PRODUCT_IMAGE_PATH);
                 }
                 $productData['thumbnail_image'] = uploadFilepondFile($request->thumbnail_image, PRODUCT_IMAGE_PATH);
+            }
+
+            // Handle multiple videos (appending to existing ones)
+            if ($request->hasFile('product_videos')) {
+                $videoPaths = $product->product_videos ?? [];
+                foreach ($request->file('product_videos') as $video) {
+                    $videoPaths[] = uploadFile($video, PRODUCT_VIDEO_PATH);
+                }
+                $productData['product_videos'] = $videoPaths;
             }
 
             $product->update($productData);

@@ -134,9 +134,9 @@
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" data-bs-toggle="tab" href="#inventory" role="tab">
-                                    <span class="d-block d-sm-none"><i class="fas fa-boxes"></i></span>
-                                    <span class="d-none d-sm-block">Inventory</span>
+                                <a class="nav-link" data-bs-toggle="tab" href="#tax-units" role="tab">
+                                    <span class="d-block d-sm-none"><i class="fas fa-percentage"></i></span>
+                                    <span class="d-none d-sm-block">Tax & Units</span>
                                 </a>
                             </li>
                             <li class="nav-item">
@@ -149,6 +149,18 @@
                                 <a class="nav-link" data-bs-toggle="tab" href="#shipping" role="tab">
                                     <span class="d-block d-sm-none"><i class="fas fa-shipping-fast"></i></span>
                                     <span class="d-none d-sm-block">Shipping</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-bs-toggle="tab" href="#variations" role="tab">
+                                    <span class="d-block d-sm-none"><i class="fas fa-tags"></i></span>
+                                    <span class="d-none d-sm-block">Variations</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-bs-toggle="tab" href="#other-details" role="tab">
+                                    <span class="d-block d-sm-none"><i class="fas fa-list"></i></span>
+                                    <span class="d-none d-sm-block">Other</span>
                                 </a>
                             </li>
                             <li class="nav-item">
@@ -174,17 +186,44 @@
                                     <div class="col-md-6">
                                         <x-input-field 
                                             name="sku" 
+                                            id="sku_input"
                                             label="SKU" 
-                                            placeholder="Enter SKU"
-                                            help-text="Stock Keeping Unit"
+                                            placeholder="Example: ms-32-red-puma"
+                                            help-text="Stock Keeping Unit (Auto-suggest format: ms-32-red-puma)"
+                                            required
                                         />
                                     </div>
                                     <div class="col-md-6">
                                         <x-input-field 
                                             name="barcode" 
                                             label="Barcode" 
-                                            placeholder="Enter barcode number"
+                                            placeholder="Auto-generated"
+                                            help-text="Barcode will be auto-generated in controller"
+                                            readonly
                                         />
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <x-input-field 
+                                            type="number"
+                                            name="warranty_value" 
+                                            label="Warranty" 
+                                            placeholder="Enter numeric value"
+                                            min="0"
+                                        />
+                                    </div>
+                                    <div class="col-md-6">
+                                        <x-input-field 
+                                            type="select"
+                                            name="warranty_unit" 
+                                            label="Warranty Unit"
+                                        >
+                                            <option value="">Select Unit</option>
+                                            <option value="months">Months</option>
+                                            <option value="years">Years</option>
+                                        </x-input-field>
                                     </div>
                                 </div>
 
@@ -223,27 +262,33 @@
                                             placeholder="0.00"
                                             step="0.01"
                                             min="0"
+                                            required
                                         />
                                     </div>
                                     <div class="col-md-4">
                                         <x-input-field 
                                             type="number" 
                                             name="original_price" 
-                                            label="Original Price" 
+                                            id="original_price"
+                                            label="Original Price (MRP)" 
                                             placeholder="0.00"
                                             step="0.01"
                                             min="0"
+                                            required
+                                            help-text="Must be ≥ Sell Price"
                                         />
                                     </div>
                                     <div class="col-md-4">
                                         <x-input-field 
                                             type="number" 
                                             name="sell_price" 
+                                            id="sell_price"
                                             label="Sell Price" 
                                             placeholder="0.00"
                                             step="0.01"
                                             min="0"
                                             required
+                                            help-text="Must be ≤ Original Price"
                                         />
                                     </div>
                                 </div>
@@ -328,8 +373,62 @@
                                 </div>
                             </div>
 
-                            <!-- Inventory Tab -->
-                            <div class="tab-pane" id="inventory" role="tabpanel">
+                            <!-- Tax & Units Tab -->
+                            <div class="tab-pane" id="tax-units" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">HSN/SAC Type</label>
+                                            <select class="form-select" id="hsn_sac_type">
+                                                <option value="product">Product (HSN)</option>
+                                                <option value="service">Service (SAC)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <x-input-field 
+                                            type="select" 
+                                            name="hsn_sac_id" 
+                                            label="HSN/SAC Code" 
+                                            placeholder="Select HSN/SAC"
+                                            required
+                                            class="select2"
+                                        >
+                                            @foreach($hsnSacs as $hsn)
+                                                <option value="{{ $hsn->id }}" data-type="{{ $hsn->type }}">{{ $hsn->code }} - {{ $hsn->description }}</option>
+                                            @endforeach
+                                        </x-input-field>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <x-input-field 
+                                            type="number" 
+                                            name="total_stock" 
+                                            label="Quantity (Total Stock)" 
+                                            placeholder="1"
+                                            min="1"
+                                            value="1"
+                                            required
+                                        />
+                                    </div>
+                                    <div class="col-md-6">
+                                        <x-input-field 
+                                            type="select" 
+                                            name="unit_id" 
+                                            label="Unit" 
+                                            placeholder="Select Unit"
+                                            required
+                                            class="select2"
+                                        >
+                                            @foreach($units as $unit)
+                                                <option value="{{ $unit->id }}" data-type="{{ $unit->type }}">{{ $unit->name }} ({{ $unit->short_name }})</option>
+                                            @endforeach
+                                        </x-input-field>
+                                    </div>
+                                </div>
+
                                 <div class="row">
                                     <div class="col-md-6">
                                         <x-radio-group 
@@ -343,41 +442,19 @@
                                     <div class="col-md-6">
                                         <x-input-field 
                                             type="number" 
-                                            name="total_stock" 
-                                            label="Total Stock" 
-                                            placeholder="0"
-                                            min="0"
-                                            value="0"
-                                            required
-                                        />
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <x-input-field 
-                                            type="number" 
                                             name="low_stock_alert" 
                                             label="Low Stock Alert" 
                                             placeholder="10"
                                             min="0"
                                             value="10"
-                                            help-text="Alert when stock falls below this number"
-                                        />
-                                    </div>
-                                    <div class="col-md-6">
-                                        <x-input-field 
-                                            name="warehouse_location" 
-                                            label="Warehouse Location" 
-                                            placeholder="Enter warehouse location"
                                         />
                                     </div>
                                 </div>
 
-                                <x-checkbox 
-                                    name="has_variation" 
-                                    value="1" 
-                                    label="This product has variations"
+                                <x-input-field 
+                                    name="warehouse_location" 
+                                    label="Warehouse Location" 
+                                    placeholder="Enter warehouse location"
                                 />
 
                                 <!-- Tab Navigation -->
@@ -394,9 +471,9 @@
                             <!-- Media Tab -->
                             <div class="tab-pane" id="media" role="tabpanel">
                                 <div class="mb-3">
-                                    <label for="thumbnail_image" class="form-label">Thumbnail Image</label>
-                                    <input type="file" class="filepond-thumbnail" id="thumbnail_image" name="thumbnail_image" accept="image/*">
-                                    <small class="text-muted">Recommended size: 800x800px. Max file size: 5MB</small>
+                                    <label for="thumbnail_image" class="form-label">Thumbnail Image <span class="text-danger">*</span></label>
+                                    <input type="file" class="filepond-thumbnail" id="thumbnail_image" name="thumbnail_image" accept="image/jpeg,image/png,image/webp" required>
+                                    <small class="text-muted">Required. JPG, PNG, WEBP only. Max 5MB.</small>
                                 </div>
 
                                 <x-input-field 
@@ -409,17 +486,117 @@
                                 <div class="mb-3">
                                     <label for="gallery_images" class="form-label">Gallery Images</label>
                                     <input type="file" class="filepond-gallery" id="gallery_images" name="gallery_images[]" multiple accept="image/*">
-                                    <small class="text-muted">You can upload multiple images. Max 10 images, 5MB each</small>
-                                    <label id="gallery_images-error" class="text-danger error" for="gallery_images" style="display: none;"></label>
+                                    <small class="text-muted">Optional. You can upload multiple images. Max 10 images, 5MB each</small>
                                 </div>
 
-                                <x-input-field 
-                                    type="url" 
-                                    name="video_url" 
-                                    label="Video URL" 
-                                    placeholder="https://youtube.com/watch?v=..."
-                                    help-text="Add a YouTube or Vimeo video URL"
+                                <div class="mb-3">
+                                    <label for="product_videos" class="form-label">Product Videos</label>
+                                    <input type="file" class="filepond-videos" id="product_videos" name="product_videos[]" multiple accept="video/mp4,video/webm">
+                                    <small class="text-muted">Optional. MP4, WEBM only. Max 20MB per video.</small>
+                                </div>
+
+                                <!-- Tab Navigation -->
+                                <div class="d-flex justify-content-between mt-4">
+                                    <button type="button" class="btn btn-secondary prev-tab">
+                                        <i class="bx bx-chevron-left"></i> Previous
+                                    </button>
+                                    <button type="button" class="btn btn-primary next-tab">
+                                        Next <i class="bx bx-chevron-right"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Variations Tab -->
+                            <div class="tab-pane" id="variations" role="tabpanel">
+                                <x-checkbox 
+                                    name="has_variation" 
+                                    value="1" 
+                                    label="This product has variations"
                                 />
+
+                                <div class="variation-fields mt-3" style="display: none;">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <x-input-field 
+                                                type="select" 
+                                                name="color_id" 
+                                                label="Color" 
+                                                placeholder="Select Color"
+                                                class="select2"
+                                            >
+                                                <option value="">No Color</option>
+                                                @foreach($colors as $color)
+                                                    <option value="{{ $color->id }}">{{ $color->name }}</option>
+                                                @endforeach
+                                            </x-input-field>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <x-input-field 
+                                                type="select" 
+                                                name="size_id" 
+                                                label="Size" 
+                                                placeholder="Select Size"
+                                                class="select2"
+                                            >
+                                                <option value="">No Size</option>
+                                                @foreach($sizes as $size)
+                                                    <option value="{{ $size->id }}">{{ $size->name }}</option>
+                                                @endforeach
+                                            </x-input-field>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Tab Navigation -->
+                                <div class="d-flex justify-content-between mt-4">
+                                    <button type="button" class="btn btn-secondary prev-tab">
+                                        <i class="bx bx-chevron-left"></i> Previous
+                                    </button>
+                                    <button type="button" class="btn btn-primary next-tab">
+                                        Next <i class="bx bx-chevron-right"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Other Details Tab -->
+                            <div class="tab-pane" id="other-details" role="tabpanel">
+                                <x-input-field 
+                                    type="select" 
+                                    name="supplier_id" 
+                                    label="Supplier" 
+                                    placeholder="Select Supplier"
+                                    class="select2"
+                                >
+                                    <option value="">Select Supplier</option>
+                                    @foreach($suppliers as $supplier)
+                                        <option value="{{ $supplier->id }}">{{ $supplier->name }}</option>
+                                    @endforeach
+                                </x-input-field>
+
+                                <div class="card mt-3">
+                                    <div class="card-header bg-light">
+                                        <h5 class="card-title mb-0">Packer Details</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <x-input-field 
+                                            name="packer_name" 
+                                            label="Packer Name" 
+                                            placeholder="Enter packer name"
+                                        />
+                                        <x-input-field 
+                                            type="textarea"
+                                            name="packer_address" 
+                                            label="Packer Address" 
+                                            placeholder="Enter packer address"
+                                            rows="2"
+                                        />
+                                        <x-input-field 
+                                            name="packer_gst" 
+                                            label="Packer GST Number" 
+                                            placeholder="Enter packer GST (Optional)"
+                                        />
+                                    </div>
+                                </div>
 
                                 <!-- Tab Navigation -->
                                 <div class="d-flex justify-content-between mt-4">
@@ -440,9 +617,11 @@
                                             type="number" 
                                             name="weight" 
                                             label="Weight (kg)" 
-                                            placeholder="0.00"
+                                            placeholder="0.01"
                                             step="0.01"
-                                            min="0"
+                                            min="0.01"
+                                            required
+                                            help-text="Numeric value > 0"
                                         />
                                     </div>
                                     <div class="col-md-6">
@@ -464,9 +643,11 @@
                                             type="number" 
                                             name="length" 
                                             label="Length (cm)" 
-                                            placeholder="0.00"
+                                            placeholder="0.01"
                                             step="0.01"
-                                            min="0"
+                                            min="0.01"
+                                            required
+                                            help-text="Numeric value > 0"
                                         />
                                     </div>
                                     <div class="col-md-4">
@@ -474,9 +655,11 @@
                                             type="number" 
                                             name="width" 
                                             label="Width (cm)" 
-                                            placeholder="0.00"
+                                            placeholder="0.01"
                                             step="0.01"
-                                            min="0"
+                                            min="0.01"
+                                            required
+                                            help-text="Numeric value > 0"
                                         />
                                     </div>
                                     <div class="col-md-4">
@@ -484,9 +667,11 @@
                                             type="number" 
                                             name="height" 
                                             label="Height (cm)" 
-                                            placeholder="0.00"
+                                            placeholder="0.01"
                                             step="0.01"
-                                            min="0"
+                                            min="0.01"
+                                            required
+                                            help-text="Numeric value > 0"
                                         />
                                     </div>
                                 </div>
@@ -747,12 +932,9 @@
         
         // Function to update tab header states (progressive unlock)
         function updateTabStates() {
-            var tabs = ['#basic-info', '#pricing', '#inventory', '#media', '#shipping', '#seo'];
+            var tabs = ['#basic-info', '#pricing', '#tax-units', '#media', '#shipping', '#variations', '#other-details', '#seo'];
             var currentTab = $('.tab-pane.active').attr('id');
             var currentIndex = tabs.indexOf('#' + currentTab);
-            
-            // Product type field removed - no longer checking for digital products
-            var isDigital = false;
             
             // Check if current tab is valid
             var isCurrentValid = validateCurrentTab($('.tab-pane.active'));
@@ -760,11 +942,6 @@
             // If current tab is valid and not already unlocked, unlock the next tab
             if (isCurrentValid && currentIndex < tabs.length - 1) {
                 var nextTab = tabs[currentIndex + 1];
-                
-                // Skip shipping tab for digital products
-                if (isDigital && nextTab === '#shipping') {
-                    nextTab = '#seo'; // Jump directly to SEO
-                }
                 
                 if (unlockedTabs.indexOf(nextTab) === -1) {
                     unlockedTabs.push(nextTab);
@@ -774,14 +951,6 @@
             // Update each tab link based on unlocked status
             $('.nav-tabs .nav-link').each(function() {
                 var tabHref = $(this).attr('href');
-                var tabIndex = tabs.indexOf(tabHref);
-                
-                // Hide shipping tab for digital products
-                if (isDigital && tabHref === '#shipping') {
-                    $(this).parent().hide();
-                } else {
-                    $(this).parent().show();
-                }
                 
                 // Lock tabs that haven't been unlocked yet
                 if (unlockedTabs.indexOf(tabHref) === -1) {
@@ -816,7 +985,7 @@
             }
             
             // Get tab indices to determine direction
-            var tabs = ['#basic-info', '#pricing', '#inventory', '#media', '#shipping', '#seo'];
+            var tabs = ['#basic-info', '#pricing', '#tax-units', '#media', '#shipping', '#variations', '#other-details', '#seo'];
             var currentIndex = tabs.indexOf(currentTab);
             var targetIndex = tabs.indexOf(targetTab);
             
@@ -900,15 +1069,6 @@
             var currentTab = $('.nav-tabs .nav-link.active');
             var nextTab = currentTab.parent().next('li').find('a');
             
-            // Product type field removed - no longer checking for digital products
-            var isDigital = false;
-            var currentTabId = currentTab.attr('href');
-            
-            // Skip shipping tab for digital products
-            if (isDigital && currentTabId === '#media') {
-                nextTab = $('.nav-link[href="#seo"]'); // Jump to SEO
-            }
-            
             if (nextTab.length) {
                 nextTab.tab('show');
                 // Scroll to top of tab content
@@ -927,6 +1087,84 @@
                 $('html, body').animate({
                     scrollTop: $('.tab-content').offset().top - 100
                 }, 300);
+            }
+        });
+
+        // SKU Auto-suggestion
+        function generateSKU() {
+            let name = $('#product_name').val().toLowerCase().replace(/[^a-z0-9]/g, '-');
+            let color = $('#color_id option:selected').text().toLowerCase().trim();
+            let size = $('#size_id option:selected').text().toLowerCase().trim();
+            
+            let parts = [];
+            if (name) parts.push(name);
+            if (size && size !== 'no size' && size !== 'select size') parts.push(size);
+            if (color && color !== 'no color' && color !== 'select color') parts.push(color);
+            
+            let sku = parts.join('-');
+            // Only update if SKU is empty or was previously auto-generated
+            if (!$('#sku_input').val() || $('#sku_input').data('is-auto')) {
+                $('#sku_input').val(sku).data('is-auto', true);
+            }
+        }
+
+        $('#product_name, #color_id, #size_id').on('input change', function() {
+            generateSKU();
+        });
+
+        $('#sku_input').on('input', function() {
+            $(this).data('is-auto', false);
+        });
+
+        // HSN/SAC & Unit Filtering
+        $('#hsn_sac_type').change(function() {
+            let type = $(this).val();
+            $('#hsn_sac_id option').each(function() {
+                if ($(this).val() === "" || $(this).data('type') === type) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            });
+            $('#hsn_sac_id').val('').trigger('change');
+        });
+
+        // Sync Unit type with HSN/SAC type
+        $('#hsn_sac_type').on('change', function() {
+            let type = $(this).val();
+            $('#unit_id option').each(function() {
+                if ($(this).val() === "" || $(this).data('type') === type) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            });
+            $('#unit_id').val('').trigger('change');
+        });
+
+        // Variation Toggle
+        $('#has_variation').change(function() {
+            if ($(this).is(':checked')) {
+                $('.variation-fields').slideDown();
+            } else {
+                $('.variation-fields').slideUp();
+                $('#color_id, #size_id').val('').trigger('change');
+            }
+        });
+
+        // Pricing Validation (MRP >= Sell Price)
+        $('#original_price, #sell_price').on('input', function() {
+            let originalPrice = parseFloat($('#original_price').val()) || 0;
+            let sellPrice = parseFloat($('#sell_price').val()) || 0;
+            
+            if (sellPrice > originalPrice && originalPrice > 0) {
+                $('#sell_price').addClass('is-invalid');
+                if (!$('#sell_price_error').length) {
+                    $('#sell_price').after('<div id="sell_price_error" class="text-danger small">Sell Price cannot be greater than Original Price (MRP)</div>');
+                }
+            } else {
+                $('#sell_price').removeClass('is-invalid');
+                $('#sell_price_error').remove();
             }
         });
 
@@ -974,14 +1212,12 @@
             }
         });
 
-
-
         // Stock Type Toggle
         $('input[name="stock_type"]').change(function() {
             if ($(this).val() === 'unlimited') {
                 $('#total_stock').val(999999).prop('readonly', true);
             } else {
-                $('#total_stock').val(0).prop('readonly', false);
+                $('#total_stock').val(1).prop('readonly', false);
             }
         });
 
@@ -989,42 +1225,47 @@
         $("#productCreateForm").validate({
             rules: {
                 product_name: { required: true },
-
+                sku: { required: true },
+                hsn_sac_id: { required: true },
+                unit_id: { required: true },
                 category_id: { required: true },
-                sell_price: { required: true, number: true, min: 0 },
-                total_stock: { required: true, number: true, min: 0 },
+                purchase_price: { required: true, number: true, min: 0 },
+                original_price: { required: true, number: true, min: 0 },
+                sell_price: { 
+                    required: true, 
+                    number: true, 
+                    min: 0,
+                    max: function() {
+                        return parseFloat($('#original_price').val()) || Infinity;
+                    }
+                },
+                total_stock: { required: true, number: true, min: 1 },
+                weight: { required: true, number: true, min: 0.01 },
+                length: { required: true, number: true, min: 0.01 },
+                width: { required: true, number: true, min: 0.01 },
+                height: { required: true, number: true, min: 0.01 },
                 discount_type: { required: true },
                 commission_type: { required: true },
                 stock_type: { required: true },
                 shipping_class: { required: true },
                 product_status: { required: true },
                 is_active: { required: true },
-                
-                // Media validation
-                thumbnail_image: {
-                    extension: "jpeg|jpg|png|gif|webp"
-                }
             },
             messages: {
-                product_name: { required: 'Product name is required' },
-                category_id: { required: 'Category is required' },
-                sell_price: { required: 'Sell price is required', number: 'Sell price must be a number', min: 'Sell price must be greater than or equal to 0' },
-                total_stock: { required: 'Total stock is required', number: 'Total stock must be a number', min: 'Total stock must be greater than or equal to 0' },
-                discount_type: { required: 'Discount type is required' },
-                commission_type: { required: 'Commission type is required' },
-                stock_type: { required: 'Stock type is required' },
-                shipping_class: { required: 'Shipping class is required' },
-                product_status: { required: 'Product status is required' },
-                is_active: { required: 'Active status is required' },
-                
-                // Media validation messages
-                thumbnail_image: {
-                    extension: "Please upload a valid image file (jpeg, jpg, png, gif, or webp)"
-                }
+                sell_price: {
+                    max: "Sell price cannot exceed original price (MRP)"
+                },
+                total_stock: { min: "Quantity must be at least 1" },
+                weight: { min: "Weight must be greater than 0" },
+                length: { min: "Length must be greater than 0" },
+                width: { min: "Width must be greater than 0" },
+                height: { min: "Height must be greater than 0" }
             },
             errorPlacement: function (error, element) {
                 if (element.attr("type") == "radio" || element.attr("type") == "checkbox") {
                     error.insertAfter(element.parent());
+                } else if (element.hasClass('select2-hidden-accessible')) {
+                    error.insertAfter(element.next('.select2-container'));
                 } else {
                     error.insertAfter(element);
                 }
@@ -1088,11 +1329,12 @@
         
         // Initialize FilePond for Thumbnail Image (Single Upload)
         const thumbnailPond = FilePond.create(document.querySelector('.filepond-thumbnail'), {
-            acceptedFileTypes: ['image/*'],
+            acceptedFileTypes: ['image/jpeg', 'image/png', 'image/webp'],
             maxFileSize: '5MB',
             labelIdle: 'Drag & Drop your thumbnail image or <span class="filepond--label-action">Browse</span>',
+            required: true,
             labelFileTypeNotAllowed: 'Invalid file type',
-            fileValidateTypeLabelExpectedTypes: 'Expects image files',
+            fileValidateTypeLabelExpectedTypes: 'Expects JPG, PNG or WEBP',
             labelMaxFileSizeExceeded: 'File is too large',
             labelMaxFileSize: 'Maximum file size is {filesize}',
             imagePreviewHeight: 170,
@@ -1155,11 +1397,32 @@
             }
         });
         
+        // Initialize FilePond for Product Videos
+        FilePond.create(document.querySelector('.filepond-videos'), {
+            allowMultiple: true,
+            maxFiles: 5,
+            acceptedFileTypes: ['video/mp4', 'video/webm'],
+            maxFileSize: '20MB',
+            labelIdle: 'Drag & Drop your videos or <span class="filepond--label-action">Browse</span>',
+            labelFileTypeNotAllowed: 'Invalid file type',
+            fileValidateTypeLabelExpectedTypes: 'Expects MP4 or WEBM',
+            labelMaxFileSizeExceeded: 'File is too large',
+            labelMaxFileSize: 'Maximum file size is {filesize}',
+        });
+
         // ========================================
         // Select2 Initialization
         // ========================================
         
         // Initialize Select2 for all select fields
+        $('.select2').each(function() {
+            $(this).select2({
+                placeholder: $(this).attr('placeholder'),
+                allowClear: true,
+                width: '100%'
+            });
+        });
+
         $('#category_id').select2({
             placeholder: 'Select Category',
             allowClear: true,
@@ -1194,22 +1457,25 @@
             placeholder: 'Select Product Status',
             allowClear: false,
             width: '100%',
-            minimumResultsForSearch: Infinity // Disable search for simple dropdown
+            minimumResultsForSearch: Infinity
         });
         
         $('#is_active').select2({
             placeholder: 'Select Active Status',
             allowClear: false,
             width: '100%',
-            minimumResultsForSearch: Infinity // Disable search for simple dropdown
+            minimumResultsForSearch: Infinity 
         });
         
         $('#shipping_class').select2({
             placeholder: 'Select Shipping Class',
             allowClear: false,
             width: '100%',
-            minimumResultsForSearch: Infinity // Disable search for simple dropdown
+            minimumResultsForSearch: Infinity
         });
+
+        // Initialize filtering
+        $('#hsn_sac_type').trigger('change');
     });
 </script>
 @endsection
