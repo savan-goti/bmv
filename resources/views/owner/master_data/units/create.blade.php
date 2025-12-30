@@ -65,12 +65,12 @@
                     },
                     success: function (result) {
                         if(result.status){
-                             toastr.success(result.message);
+                             sendSuccess(result.message);
                              setTimeout(function() {
                                 window.location.href = "{{ route('owner.master.units.index') }}";
                              }, 1000);
                         }else{
-                             toastr.error(result.message);
+                             sendError(result.message);
                         }
                     },
                     complete: function () {

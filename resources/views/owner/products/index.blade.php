@@ -128,27 +128,14 @@
                         },
                         success: function(response) {
                             if (response.status || response.success) {
-                                Swal.fire(
-                                    'Deleted!',
-                                    response.message,
-                                    'success'
-                                ).then(() => {
-                                    table.draw();
-                                });
+                                sendSuccess(response.message);
+                                setTimeout(function() { table.draw(); }, 1000);
                             } else {
-                                Swal.fire(
-                                    'Error!',
-                                    response.message,
-                                    'error'
-                                );
+                                sendError(response.message);
                             }
                         },
                         error: function(xhr) {
-                            Swal.fire(
-                                'Error!',
-                                'Something went wrong.',
-                                'error'
-                            );
+                            sendError('Something went wrong.');
                         }
                     });
                 }
@@ -166,14 +153,14 @@
                     status: status
                 },
                 success: function(response) {
-                    if (response.success) {
-                        toastr.success(response.message);
+                    if (response.status) {
+                        sendSuccess(response.message);
                     } else {
-                        toastr.error('Something went wrong.');
+                        sendError('Something went wrong.');
                     }
                 },
                 error: function(xhr) {
-                    toastr.error('Something went wrong.');
+                    sendError('Something went wrong.');
                 }
             });
         });

@@ -40,6 +40,9 @@ class HsnSacController extends Controller
                                 data-id="' . $row->id . '" ' . $checked . ' data-url="'.route('owner.master.hsn-sacs.status', $row->id).'">
                         </div>';
             })
+            ->editColumn('type', function($row){
+                return strtoupper($row->type);
+            })
             ->rawColumns(['action', 'status'])
             ->make(true);
     }
@@ -55,12 +58,13 @@ class HsnSacController extends Controller
             'code' => 'required|string|max:20|unique:hsn_sacs,code',
             'description' => 'required|string',
             'type' => 'required|in:hsn,sac',
+            'gst' => 'required|numeric|min:0|max:100',
             'status' => 'required|in:active,inactive',
         ]);
 
         try {
             HsnSac::create($request->all());
-            return $this->sendResponse('HSN/SAC created successfully.');
+            return $this->sendSuccess('HSN/SAC created successfully.');
         } catch (Exception $e) {
             return $this->sendError($e->getMessage());
         }
@@ -77,12 +81,13 @@ class HsnSacController extends Controller
             'code' => 'required|string|max:20|unique:hsn_sacs,code,'.$hsnSac->id,
             'description' => 'required|string',
             'type' => 'required|in:hsn,sac',
+            'gst' => 'required|numeric|min:0|max:100',
             'status' => 'required|in:active,inactive',
         ]);
 
         try {
             $hsnSac->update($request->all());
-            return $this->sendResponse('HSN/SAC updated successfully.');
+            return $this->sendSuccess('HSN/SAC updated successfully.');
         } catch (Exception $e) {
             return $this->sendError($e->getMessage());
         }

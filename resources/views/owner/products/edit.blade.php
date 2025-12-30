@@ -1213,15 +1213,15 @@
                             _token: '{{ csrf_token() }}'
                         },
                         success: function(response) {
-                            if (response.success) {
+                            if (response.status) {
                                 element.remove();
-                                toastr.success(response.message);
+                                sendSuccess(response.message);
                             } else {
-                                toastr.error('Something went wrong.');
+                                sendError('Something went wrong.');
                             }
                         },
                         error: function(xhr) {
-                            toastr.error('Something went wrong.');
+                            sendError('Something went wrong.');
                         }
                     });
                 }

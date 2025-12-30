@@ -24,6 +24,7 @@
                                 <option value="hsn" {{ $hsnSac->type == 'hsn' ? 'selected' : '' }}>HSN (Goods)</option>
                                 <option value="sac" {{ $hsnSac->type == 'sac' ? 'selected' : '' }}>SAC (Services)</option>
                             </x-input-field></div>
+                            <div class="col-md-6"><x-input-field type="number" name="gst" label="GST (%)" placeholder="Enter GST percentage" min="0" max="100" step="0.01" value="{{ $hsnSac->gst }}" required /></div>
                             <div class="col-md-6"><x-input-field type="select" name="status" label="Status" required>
                                 <option value="active" {{ $hsnSac->status->value == 'active' ? 'selected' : '' }}>Active</option>
                                 <option value="inactive" {{ $hsnSac->status->value == 'inactive' ? 'selected' : '' }}>Inactive</option>
@@ -50,6 +51,7 @@
             rules: {
                 code: { required: true },
                 type: { required: true },
+                gst: { required: true, number: true, min: 0, max: 100 },
                 description: { required: true },
                 status: { required: true }
             },
@@ -65,12 +67,12 @@
                     },
                     success: function (result) {
                         if(result.status){
-                             toastr.success(result.message);
+                             sendSuccess(result.message);
                              setTimeout(function() {
                                 window.location.href = "{{ route('owner.master.hsn-sacs.index') }}";
                              }, 1000);
                         }else{
-                             toastr.error(result.message);
+                             sendError(result.message);
                         }
                     },
                     complete: function () {
