@@ -3,14 +3,14 @@ namespace App\Http\Traits;
 use Yajra\DataTables\Facades\DataTables;
 trait ResponseTrait
 {
-    function sendResponse($message,$data,$code = 200){
+    function sendResponse($message, $data = [], $code = 200){
         return response()->json([
             'status'  => true,
             'message' => $message,
             'data'    => $data
         ],$code);
     }
-    function sendErrorResponse($message,$data,$code = 400){
+    function sendErrorResponse($message, $data = [], $code = 400){
         return response()->json([
             'status'  => false,
             'message' => $message,

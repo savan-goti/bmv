@@ -1143,7 +1143,7 @@
         });
 
         // Variation Toggle
-        $('#has_variation').change(function() {
+        $('#has_variation_1').change(function() {
             if ($(this).is(':checked')) {
                 $('.variation-fields').slideDown();
             } else {
@@ -1205,8 +1205,7 @@
                         $('#child_category_id').trigger('change'); // Trigger Select2 update
                     },
                     error: function() {
-                        // If route doesn't exist, silently fail
-                        console.log('Child category route not available');
+                        sendError('Child category route not available');
                     }
                 });
             }

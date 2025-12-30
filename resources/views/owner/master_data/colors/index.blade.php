@@ -55,8 +55,8 @@
                 type: 'POST',
                 data: { _token: '{{ csrf_token() }}', status: status },
                 success: function(response) {
-                    if (response.success) toastr.success(response.message);
-                    else toastr.error(response.message);
+                    if (response.status) sendSuccess(response.message);
+                    else sendError(response.message);
                 }
             });
         });
@@ -78,9 +78,10 @@
                         type: 'DELETE',
                         data: { _token: '{{ csrf_token() }}' },
                         success: function(response) {
-                            if (response.status || response.success) {
-                                Swal.fire('Deleted!', response.message, 'success').then(() => { table.draw(); });
-                            } else { Swal.fire('Error!', response.message, 'error'); }
+                            if (response.status) {
+                                sendSuccess(response.message);
+                                setTimeout(function() { table.draw(); }, 1000);
+                            } else { sendError(response.message); }
                         }
                     });
                 }

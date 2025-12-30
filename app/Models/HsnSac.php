@@ -12,7 +12,7 @@ class HsnSac extends Model
 
     protected $table = 'hsn_sacs';
 
-    protected $fillable = ['code', 'description', 'type', 'status'];
+    protected $fillable = ['code', 'description', 'type', 'gst', 'status'];
 
     protected $casts = [
         'status' => \App\Enums\Status::class,

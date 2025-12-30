@@ -61,7 +61,7 @@
                     status: status
                 },
                 success: function(response) {
-                    if (response.success) {
+                    if (response.status) {
                         sendToast(response.message, 'success');
                     } else {
                         sendToast(response.message, 'danger');
@@ -89,13 +89,10 @@
                             _token: '{{ csrf_token() }}'
                         },
                         success: function(response) {
-                            if (response.status || response.success) {
-                                Swal.fire('Deleted!', response.message, 'success').then(() => {
-                                    table.draw();
-                                });
-                            } else {
-                                Swal.fire('Error!', response.message, 'error');
-                            }
+                            if (response.status) {
+                                sendSuccess(response.message);
+                                setTimeout(function() { table.draw(); }, 1000);
+                            } else { sendError(response.message); }
                         }
                     });
                 }

@@ -60,7 +60,7 @@ class UnitController extends Controller
 
         try {
             Unit::create($request->all());
-            return $this->sendResponse('Unit created successfully.');
+            return $this->sendSuccess('Unit created successfully.');
         } catch (Exception $e) {
             return $this->sendError($e->getMessage());
         }
@@ -82,7 +82,7 @@ class UnitController extends Controller
 
         try {
             $unit->update($request->all());
-            return $this->sendResponse('Unit updated successfully.');
+            return $this->sendSuccess('Unit updated successfully.');
         } catch (Exception $e) {
             return $this->sendError($e->getMessage());
         }
