@@ -328,18 +328,6 @@
 
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <x-input-field 
-                                            type="number" 
-                                            name="gst_rate" 
-                                            label="GST Rate (%)" 
-                                            placeholder="0"
-                                            step="0.01"
-                                            min="0"
-                                            max="100"
-                                            value="{{ $product->gst_rate }}"
-                                        />
-                                    </div>
-                                    <div class="col-md-6">
                                         <x-checkbox 
                                             name="tax_included" 
                                             value="1" 
@@ -387,7 +375,7 @@
                             <!-- Tax & Units Tab -->
                             <div class="tab-pane" id="tax-units" role="tabpanel">
                                 <div class="row">
-                                    <div class="col-md-6">
+                                    <div class="col-md-4">
                                         <div class="mb-3">
                                             <label class="form-label">HSN/SAC Type</label>
                                             <select class="form-select" id="hsn_sac_type">
@@ -396,7 +384,7 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-md-6">
+                                    <div class="col-md-4">
                                         <x-input-field 
                                             type="select" 
                                             name="hsn_sac_id" 
@@ -406,9 +394,23 @@
                                             class="select2"
                                         >
                                             @foreach($hsnSacs as $hsn)
-                                                <option value="{{ $hsn->id }}" data-type="{{ $hsn->type }}" {{ $product->hsn_sac_id == $hsn->id ? 'selected' : '' }}>{{ $hsn->code }} - {{ $hsn->description }}</option>
+                                                <option value="{{ $hsn->id }}" data-type="{{ $hsn->type }}" data-gst="{{ $hsn->gst }}" {{ $product->hsn_sac_id == $hsn->id ? 'selected' : '' }}>{{ $hsn->code }} - {{ $hsn->description }}</option>
                                             @endforeach
                                         </x-input-field>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <x-input-field 
+                                            type="number" 
+                                            name="gst_rate" 
+                                            id="gst_rate_input"
+                                            label="GST Rate (%)" 
+                                            placeholder="0"
+                                            step="0.01"
+                                            min="0"
+                                            max="100"
+                                            value="{{ $product->gst_rate }}"
+                                            readonly
+                                        />
                                     </div>
                                 </div>
 
@@ -1175,6 +1177,13 @@
         $('#hsn_sac_type').on('change', function() {
             $('#hsn_sac_id, #unit_id').val('').trigger('change');
             filterHsnAndUnits();
+        });
+
+        // Update GST Rate when HSN/SAC is selected
+        $('#hsn_sac_id').on('change', function() {
+            let selectedOption = $(this).find('option:selected');
+            let gst = selectedOption.data('gst') || 0;
+            $('#gst_rate_input').val(gst);
         });
 
         // Variation toggle
