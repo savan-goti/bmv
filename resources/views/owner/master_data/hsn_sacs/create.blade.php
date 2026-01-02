@@ -20,6 +20,7 @@
                         <div class="row">
                             <div class="col-md-6"><x-input-field name="code" label="Code" placeholder="Enter HSN/SAC code" required /></div>
                             <div class="col-md-6"><x-input-field type="select" name="type" label="Type" required>
+                                <option value="">Select Type</option>
                                 <option value="hsn">HSN (Goods)</option>
                                 <option value="sac">SAC (Services)</option>
                             </x-input-field></div>
