@@ -10,7 +10,7 @@ class Unit extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = ['name', 'short_name', 'type', 'status'];
+    protected $fillable = ['name', 'short_name', 'category', 'status'];
 
     protected $casts = [
         'status' => \App\Enums\Status::class,

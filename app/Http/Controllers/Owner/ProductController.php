@@ -10,6 +10,11 @@ use App\Models\ProductImage;
 use App\Models\ChildCategory;
 use App\Models\Brand;
 use App\Models\Collection;
+use App\Models\Unit;
+use App\Models\HsnSac;
+use App\Models\Color;
+use App\Models\Size;
+use App\Models\Supplier;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 use App\Http\Traits\ResponseTrait;
@@ -29,7 +34,7 @@ class ProductController extends Controller
 
     public function ajaxData(Request $request)
     {
-        $result = Product::with(['category', 'subCategory', 'brand', 'collection']);
+        $result = Product::with(['category', 'subCategory', 'brand', 'collection', 'unit']);
         
         // Apply filters
         if ($request->has('is_active') && $request->is_active != '') {
@@ -92,11 +97,11 @@ class ProductController extends Controller
         $categories = Category::where('status', Status::Active)->get();
         $brands = Brand::where('status', Status::Active)->get();
         $collections = Collection::where('status', Status::Active)->get();
-        $units = \App\Models\Unit::where('status', Status::Active)->get();
-        $hsnSacs = \App\Models\HsnSac::where('status', Status::Active)->get();
-        $colors = \App\Models\Color::where('status', Status::Active)->get();
-        $sizes = \App\Models\Size::where('status', Status::Active)->get();
-        $suppliers = \App\Models\Supplier::where('status', Status::Active)->get();
+        $units = Unit::where('status', Status::Active)->where('category', 'product')->get();
+        $hsnSacs = HsnSac::where('status', Status::Active)->get();
+        $colors = Color::where('status', Status::Active)->get();
+        $sizes = Size::where('status', Status::Active)->get();
+        $suppliers = Supplier::where('status', Status::Active)->get();
 
         return view('owner.products.create', compact(
             'categories', 
@@ -153,6 +158,8 @@ class ProductController extends Controller
             'has_variation' => 'nullable|boolean',
             'color_id' => 'nullable|exists:colors,id',
             'size_id' => 'nullable|exists:sizes,id',
+            'product_weight' => 'nullable|numeric|min:0',
+            'shipping_weight' => 'nullable|numeric|min:0',
             
             // Media
             'thumbnail_image' => 'required',
@@ -245,6 +252,8 @@ class ProductController extends Controller
                 'has_variation' => $request->has_variation ?? false,
                 'color_id' => $request->color_id,
                 'size_id' => $request->size_id,
+                'product_weight' => $request->product_weight,
+                'shipping_weight' => $request->shipping_weight,
                 
                 // Media
                 'image_alt_text' => $request->image_alt_text,
@@ -329,11 +338,11 @@ class ProductController extends Controller
         $brands = Brand::where('status', Status::Active)->get();
         $collections = Collection::where('status', Status::Active)->get();
         
-        $units = \App\Models\Unit::where('status', Status::Active)->get();
-        $hsnSacs = \App\Models\HsnSac::where('status', Status::Active)->get();
-        $colors = \App\Models\Color::where('status', Status::Active)->get();
-        $sizes = \App\Models\Size::where('status', Status::Active)->get();
-        $suppliers = \App\Models\Supplier::where('status', Status::Active)->get();
+        $units = Unit::where('status', Status::Active)->where('category', 'product')->get();
+        $hsnSacs = HsnSac::where('status', Status::Active)->get();
+        $colors = Color::where('status', Status::Active)->get();
+        $sizes = Size::where('status', Status::Active)->get();
+        $suppliers = Supplier::where('status', Status::Active)->get();
 
         $product->load(['productImages', 'productInformation']);
         
@@ -395,6 +404,8 @@ class ProductController extends Controller
             'has_variation' => 'nullable|boolean',
             'color_id' => 'nullable|exists:colors,id',
             'size_id' => 'nullable|exists:sizes,id',
+            'product_weight' => 'nullable|numeric|min:0',
+            'shipping_weight' => 'nullable|numeric|min:0',
             
             // Media
             'thumbnail_image' => 'nullable',
@@ -477,6 +488,8 @@ class ProductController extends Controller
                 'has_variation' => $request->has_variation ?? false,
                 'color_id' => $request->color_id,
                 'size_id' => $request->size_id,
+                'product_weight' => $request->product_weight,
+                'shipping_weight' => $request->shipping_weight,
                 
                 // Media
                 'image_alt_text' => $request->image_alt_text,

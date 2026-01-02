@@ -20,10 +20,9 @@
                         <div class="row">
                             <div class="col-md-6"><x-input-field name="name" label="Name" placeholder="Enter name" required /></div>
                             <div class="col-md-6"><x-input-field name="short_name" label="Short Name" placeholder="Enter short name (e.g. Kg, Pcs)" required /></div>
-                            <div class="col-md-6"><x-input-field type="select" name="type" label="Type" required>
-                                <option value="unit">Unit (Pcs, Box)</option>
-                                <option value="weight">Weight (Kg, Gm)</option>
-                                <option value="dimension">Dimension (Cm, In)</option>
+                            <div class="col-md-6"><x-input-field type="select" name="category" label="Category" required>
+                                <option value="product">Product</option>
+                                <option value="service">Service</option>
                             </x-input-field></div>
                             <div class="col-md-6"><x-input-field type="select" name="status" label="Status" required>
                                 <option value="active">Active</option>
@@ -50,7 +49,7 @@
             rules: {
                 name: { required: true },
                 short_name: { required: true },
-                type: { required: true },
+                category: { required: true },
                 status: { required: true }
             },
             submitHandler: function (form, e) {

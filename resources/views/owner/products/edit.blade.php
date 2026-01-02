@@ -436,7 +436,7 @@
                                             class="select2"
                                         >
                                             @foreach($units as $unit)
-                                                <option value="{{ $unit->id }}" data-type="{{ $unit->type }}" {{ $product->unit_id == $unit->id ? 'selected' : '' }}>{{ $unit->name }} ({{ $unit->short_name }})</option>
+                                                <option value="{{ $unit->id }}" data-category="{{ $unit->category }}" {{ $product->unit_id == $unit->id ? 'selected' : '' }}>{{ $unit->name }} ({{ $unit->short_name }})</option>
                                             @endforeach
                                         </x-input-field>
                                     </div>
@@ -711,6 +711,34 @@
                                             </x-input-field>
                                         </div>
                                     </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <x-input-field 
+                                                type="number" 
+                                                name="product_weight" 
+                                                label="Product Weight (kg)" 
+                                                placeholder="0.00"
+                                                step="0.01"
+                                                min="0"
+                                                value="{{ $product->product_weight }}"
+                                                help-text="Actual weight of the product"
+                                            />
+                                        </div>
+                                        <div class="col-md-6">
+                                            <x-input-field 
+                                                type="number" 
+                                                name="shipping_weight" 
+                                                label="Shipping Weight (kg)" 
+                                                placeholder="0.00"
+                                                step="0.01"
+                                                min="0"
+                                                value="{{ $product->shipping_weight }}"
+                                                help-text="Weight including packaging"
+                                            />
+                                        </div>
+                                    </div>
+
                                     <div class="alert alert-info py-2 mt-2" role="alert">
                                         <i class="fas fa-info-circle me-1"></i> These selections will be used for auto-generating the SKU for each variation.
                                     </div>

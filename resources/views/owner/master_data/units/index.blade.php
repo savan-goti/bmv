@@ -42,7 +42,7 @@
                 { data: 'id', name: 'id', title: 'ID' },
                 { data: 'name', name: 'name', title: 'Name' },
                 { data: 'short_name', name: 'short_name', title: 'Short Name' },
-                { data: 'type', name: 'type', title: 'Type' },
+                { data: 'category', name: 'category', title: 'Category' },
                 { data: 'status', name: 'status', title: 'Status', orderable: false, searchable: false },
                 { data: 'action', name: 'action', title: 'Action', orderable: false, searchable: false },
             ]

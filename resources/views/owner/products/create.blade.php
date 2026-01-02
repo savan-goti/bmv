@@ -425,7 +425,7 @@
                                             class="select2"
                                         >
                                             @foreach($units as $unit)
-                                                <option value="{{ $unit->id }}" data-type="{{ $unit->type }}">{{ $unit->name }} ({{ $unit->short_name }})</option>
+                                                <option value="{{ $unit->id }}" data-category="{{ $unit->category }}">{{ $unit->name }} ({{ $unit->short_name }})</option>
                                             @endforeach
                                         </x-input-field>
                                     </div>
@@ -545,6 +545,31 @@
                                                     <option value="{{ $size->id }}">{{ $size->name }}</option>
                                                 @endforeach
                                             </x-input-field>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <x-input-field 
+                                                type="number" 
+                                                name="product_weight" 
+                                                label="Product Weight (kg)" 
+                                                placeholder="0.00"
+                                                step="0.01"
+                                                min="0"
+                                                help-text="Actual weight of the product"
+                                            />
+                                        </div>
+                                        <div class="col-md-6">
+                                            <x-input-field 
+                                                type="number" 
+                                                name="shipping_weight" 
+                                                label="Shipping Weight (kg)" 
+                                                placeholder="0.00"
+                                                step="0.01"
+                                                min="0"
+                                                help-text="Weight including packaging"
+                                            />
                                         </div>
                                     </div>
                                 </div>
