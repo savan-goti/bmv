@@ -54,7 +54,7 @@ class UnitController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'short_name' => 'required|string|max:10',
-            'type' => 'required|in:unit,weight,dimension',
+            'category' => 'required|in:product,service',
             'status' => 'required|in:active,inactive',
         ]);
 
@@ -76,7 +76,7 @@ class UnitController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'short_name' => 'required|string|max:10',
-            'type' => 'required|in:unit,weight,dimension',
+            'category' => 'required|in:product,service',
             'status' => 'required|in:active,inactive',
         ]);
 

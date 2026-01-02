@@ -66,6 +66,8 @@ class Product extends Model
         'has_variation',
         'color_id',
         'size_id',
+        'product_weight',
+        'shipping_weight',
         
         // Media
         'thumbnail_image',

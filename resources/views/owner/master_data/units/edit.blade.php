@@ -21,10 +21,9 @@
                         <div class="row">
                             <div class="col-md-6"><x-input-field name="name" label="Name" placeholder="Enter name" value="{{ $unit->name }}" required /></div>
                             <div class="col-md-6"><x-input-field name="short_name" label="Short Name" placeholder="Enter short name" value="{{ $unit->short_name }}" required /></div>
-                            <div class="col-md-6"><x-input-field type="select" name="type" label="Type" required>
-                                <option value="unit" {{ $unit->type == 'unit' ? 'selected' : '' }}>Unit (Pcs, Box)</option>
-                                <option value="weight" {{ $unit->type == 'weight' ? 'selected' : '' }}>Weight (Kg, Gm)</option>
-                                <option value="dimension" {{ $unit->type == 'dimension' ? 'selected' : '' }}>Dimension (Cm, In)</option>
+                            <div class="col-md-6"><x-input-field type="select" name="category" label="Category" required>
+                                <option value="product" {{ $unit->category == 'product' ? 'selected' : '' }}>Product</option>
+                                <option value="service" {{ $unit->category == 'service' ? 'selected' : '' }}>Service</option>
                             </x-input-field></div>
                             <div class="col-md-6"><x-input-field type="select" name="status" label="Status" required>
                                 <option value="active" {{ $unit->status->value == 'active' ? 'selected' : '' }}>Active</option>
@@ -51,7 +50,7 @@
             rules: {
                 name: { required: true },
                 short_name: { required: true },
-                type: { required: true },
+                category: { required: true },
                 status: { required: true }
             },
             submitHandler: function (form, e) {

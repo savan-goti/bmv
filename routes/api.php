@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CustomerController;
 
 /*
 |--------------------------------------------------------------------------
@@ -33,10 +34,37 @@ Route::prefix('v1')->group(function () {
 
     // Protected API routes
     Route::middleware('auth:api')->group(function () {
-        // Add your protected API routes here
-        // Example:
-        // Route::get('products', [ProductController::class, 'index']);
-        // Route::get('products/{id}', [ProductController::class, 'show']);
+        // Customer Info Routes
+        Route::prefix('customer')->group(function () {
+            // Profile Management
+            Route::get('profile', [CustomerController::class, 'getProfile']);
+            Route::put('profile', [CustomerController::class, 'updateProfile']);
+            Route::post('profile', [CustomerController::class, 'updateProfile']); // For multipart/form-data
+            
+            // Password Management
+            Route::put('password', [CustomerController::class, 'updatePassword']);
+            Route::post('password', [CustomerController::class, 'updatePassword']);
+            
+            // Profile Image Management
+            Route::post('profile-image', [CustomerController::class, 'updateProfileImage']);
+            Route::delete('profile-image', [CustomerController::class, 'deleteProfileImage']);
+            
+            // Location Management
+            Route::put('location', [CustomerController::class, 'updateLocation']);
+            Route::post('location', [CustomerController::class, 'updateLocation']);
+            
+            // Social Links Management
+            Route::put('social-links', [CustomerController::class, 'updateSocialLinks']);
+            Route::post('social-links', [CustomerController::class, 'updateSocialLinks']);
+            
+            // Account Deletion
+            Route::delete('account', [CustomerController::class, 'deleteAccount']);
+            Route::post('account/delete', [CustomerController::class, 'deleteAccount']);
+        });
+        
+        // Public Customer Profile Routes (requires authentication to view)
+        Route::get('customers/{id}', [CustomerController::class, 'show']);
+        Route::get('customers/username/{username}', [CustomerController::class, 'showByUsername']);
     });
 });
 

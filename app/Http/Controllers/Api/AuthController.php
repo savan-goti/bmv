@@ -155,20 +155,49 @@ class AuthController extends Controller
      */
     public function login(Request $request)
     {
+        // Validate type field
         $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
+            'type' => 'required|in:email,phone',
+            'identifier' => 'required|string',
             'password' => 'required|string|min:8',
+        ], [
+            'type.required' => 'Login type is required',
+            'type.in' => 'Login type must be either email or phone',
+            'identifier.required' => 'Email or phone number is required',
+            'password.required' => 'Password is required',
+            'password.min' => 'Password must be at least 8 characters',
         ]);
 
         if ($validator->fails()) {
             return $this->sendValidationError($validator->errors());
         }
 
-        $credentials = $request->only('email', 'password');
+        // Additional validation based on type
+        $type = $request->type;
+        $identifier = $request->identifier;
+
+        if ($type === 'email') {
+            // Validate email format
+            if (!filter_var($identifier, FILTER_VALIDATE_EMAIL)) {
+                return $this->sendError('Please provide a valid email address', 422);
+            }
+            $credentials = [
+                'email' => strtolower(trim($identifier)),
+                'password' => $request->password
+            ];
+        } else {
+            // Phone login
+            // Remove any spaces or special characters from phone
+            $phone = preg_replace('/[^0-9+]/', '', $identifier);
+            $credentials = [
+                'phone' => $phone,
+                'password' => $request->password
+            ];
+        }
 
         try {
             if (!$token = auth('api')->attempt($credentials)) {
-                return $this->sendError('Invalid credentials', 401);
+                return $this->sendError('Invalid credentials. Please check your ' . $type . ' and password.', 401);
             }
 
             // Check if customer is active
