@@ -40,6 +40,7 @@
                                 label="Email" 
                                 value="{{ $staff->email }}" 
                                 required 
+                                readonly 
                             />
 
                             <x-input-field 

@@ -38,7 +38,6 @@ class ProfileController extends Controller
 
             $validator = Validator::make($request->all(), [
                 'full_name'  => 'required|string|max:255',
-                'email' => 'required|email|max:150|unique:owners,email,' . $owner->id,
                 'phone' => 'nullable|string|max:15|unique:owners,phone,' . $owner->id,
                 'dob' => 'nullable|date',
                 'gender' => 'nullable|in:male,female,other',
@@ -51,7 +50,6 @@ class ProfileController extends Controller
 
             $saveData = [
                 'full_name' => $request->full_name,
-                'email' => $request->email,
                 'phone' => $request->phone??null,
                 'dob' => $request->dob??null,
                 'gender' => $request->gender??null,

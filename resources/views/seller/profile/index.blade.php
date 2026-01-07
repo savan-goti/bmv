@@ -48,6 +48,7 @@
                                 label="Email" 
                                 value="{{ $seller->email }}" 
                                 required 
+                                readonly 
                             />
 
                             <x-input-field 

@@ -41,6 +41,7 @@
                                 label="Email" 
                                 value="{{ $admin->email }}" 
                                 required 
+                                readonly 
                             />
 
                             <x-input-field 
