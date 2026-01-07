@@ -922,6 +922,17 @@
                                 <option value="{{ $collection->id }}" {{ ($product->collection_id ?? '') == $collection->id ? 'selected' : '' }}>{{ $collection->name }}</option>
                             @endforeach
                         </x-input-field>
+
+                        <x-input-field 
+                            type="select" 
+                            name="branch_id" 
+                            label="Branch" 
+                            placeholder="Select Branch"
+                        >
+                            @foreach($branches as $branch)
+                                <option value="{{ $branch->id }}" {{ ($product->branch_id ?? '') == $branch->id ? 'selected' : '' }}>{{ $branch->name }}</option>
+                            @endforeach
+                        </x-input-field>
                     </div>
                 </div>
 

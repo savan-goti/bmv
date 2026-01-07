@@ -15,6 +15,7 @@ use App\Models\HsnSac;
 use App\Models\Color;
 use App\Models\Size;
 use App\Models\Supplier;
+use App\Models\Branch;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 use App\Http\Traits\ResponseTrait;
@@ -102,6 +103,7 @@ class ProductController extends Controller
         $colors = Color::where('status', Status::Active)->get();
         $sizes = Size::where('status', Status::Active)->get();
         $suppliers = Supplier::where('status', Status::Active)->get();
+        $branches = Branch::where('status', Status::Active)->get();
 
         return view('owner.products.create', compact(
             'categories', 
@@ -111,7 +113,8 @@ class ProductController extends Controller
             'hsnSacs', 
             'colors', 
             'sizes', 
-            'suppliers'
+            'suppliers',
+            'branches'
         ));
     }
 
@@ -132,6 +135,7 @@ class ProductController extends Controller
             'child_category_id' => 'nullable|exists:child_categories,id',
             'brand_id' => 'nullable|exists:brands,id',
             'collection_id' => 'nullable|exists:collections,id',
+            'branch_id' => 'nullable|exists:branches,id',
             
             // Pricing
             'purchase_price' => 'required|numeric|min:0',
@@ -224,6 +228,7 @@ class ProductController extends Controller
                 'child_category_id' => $request->child_category_id,
                 'brand_id' => $request->brand_id,
                 'collection_id' => $request->collection_id,
+                'branch_id' => $request->branch_id,
                 
                 // Pricing
                 'purchase_price' => $request->purchase_price,
@@ -343,6 +348,7 @@ class ProductController extends Controller
         $colors = Color::where('status', Status::Active)->get();
         $sizes = Size::where('status', Status::Active)->get();
         $suppliers = Supplier::where('status', Status::Active)->get();
+        $branches = Branch::where('status', Status::Active)->get();
 
         $product->load(['productImages', 'productInformation']);
         
@@ -357,7 +363,8 @@ class ProductController extends Controller
             'hsnSacs',
             'colors',
             'sizes',
-            'suppliers'
+            'suppliers',
+            'branches'
         ));
     }
 
@@ -378,6 +385,7 @@ class ProductController extends Controller
             'child_category_id' => 'nullable|exists:child_categories,id',
             'brand_id' => 'nullable|exists:brands,id',
             'collection_id' => 'nullable|exists:collections,id',
+            'branch_id' => 'nullable|exists:branches,id',
             
             // Pricing
             'purchase_price' => 'required|numeric|min:0',
@@ -461,6 +469,7 @@ class ProductController extends Controller
                 'child_category_id' => $request->child_category_id,
                 'brand_id' => $request->brand_id,
                 'collection_id' => $request->collection_id,
+                'branch_id' => $request->branch_id,
                 
                 // Pricing
                 'purchase_price' => $request->purchase_price,
