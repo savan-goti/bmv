@@ -24,6 +24,7 @@ use App\Http\Controllers\Owner\HsnSacController;
 use App\Http\Controllers\Owner\ColorController;
 use App\Http\Controllers\Owner\SizeController;
 use App\Http\Controllers\Owner\SupplierController;
+use App\Http\Controllers\Owner\KeywordController;
     
 
 Route::middleware(['guest:owner'])->group(function () {
@@ -232,6 +233,14 @@ Route::middleware(['auth:owner', 'session.guard:owner'])->group(function () {
             Route::post('suppliers/{supplier}/status', 'status')->name('suppliers.status');
         });
         Route::resource('suppliers', SupplierController::class);
+
+        // Keywords
+        Route::controller(KeywordController::class)->group(function () {
+            Route::get('keywords/ajax-data', 'ajaxData')->name('keywords.ajaxData');
+            Route::post('keywords/save/{id?}', 'save')->name('keywords.save');
+            Route::post('keywords/{keyword}/status', 'status')->name('keywords.status');
+        });
+        Route::resource('keywords', KeywordController::class);
     });
     
 });

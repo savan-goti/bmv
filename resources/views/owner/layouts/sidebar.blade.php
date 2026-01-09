@@ -154,6 +154,9 @@
                             <li class="nav-item">
                                 <a href="{{ route('owner.master.suppliers.index') }}" class="nav-link {{ request()->routeIs('owner.master.suppliers.*') ? 'active' : '' }}">Suppliers</a>
                             </li>
+                            <li class="nav-item">
+                                <a href="{{ route('owner.master.keywords.index') }}" class="nav-link {{ request()->routeIs('owner.master.keywords.*') ? 'active' : '' }}">Keywords</a>
+                            </li>
                         </ul>
                     </div>
                 </li>
