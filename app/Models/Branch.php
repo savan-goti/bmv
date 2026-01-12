@@ -14,6 +14,9 @@ class Branch extends Model
         'owner_id',
         'name',
         'code',
+        'type',
+        'username',
+        'branch_link',
         'email',
         'phone',
         'address',
@@ -23,8 +26,14 @@ class Branch extends Model
         'postal_code',
         'manager_name',
         'manager_phone',
+        'social_media',
         'opening_date',
         'status',
+    ];
+
+    protected $casts = [
+        'social_media' => 'array',
+        'opening_date' => 'date',
     ];
 
     /**

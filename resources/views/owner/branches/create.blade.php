@@ -24,6 +24,11 @@
                             <div class="col-md-6"><x-input-field name="code" label="Branch Code" placeholder="e.g., BR001" required /></div>
                         </div>
 
+                        <x-input-field type="select" name="type" label="Branch Type" required>
+                            <option value="product" selected>Product</option>
+                            <option value="service">Service</option>
+                        </x-input-field>
+
                         <div class="row">
                             <div class="col-md-6"><x-input-field type="email" name="email" label="Email" placeholder="Enter email" /></div>
                             <div class="col-md-6"><x-input-field name="phone" label="Phone" placeholder="Enter phone" /></div>
@@ -46,6 +51,49 @@
                             <div class="col-md-6"><x-input-field name="manager_name" label="Manager Name" placeholder="Enter manager name" /></div>
                             <div class="col-md-6"><x-input-field name="manager_phone" label="Manager Phone" placeholder="Enter manager phone" /></div>
                         </div>
+
+                        <hr class="my-4">
+                        <h5 class="mb-3">Social Media Links</h5>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <x-input-field type="url" name="social_media[facebook_url]" label="Facebook URL" placeholder="https://facebook.com/..." icon="bx bxl-facebook" />
+                            </div>
+                            <div class="col-md-6">
+                                <x-input-field type="url" name="social_media[instagram_url]" label="Instagram URL" placeholder="https://instagram.com/..." icon="bx bxl-instagram" />
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <x-input-field type="url" name="social_media[twitter_url]" label="Twitter URL" placeholder="https://twitter.com/..." icon="bx bxl-twitter" />
+                            </div>
+                            <div class="col-md-6">
+                                <x-input-field type="url" name="social_media[linkedin_url]" label="LinkedIn URL" placeholder="https://linkedin.com/..." icon="bx bxl-linkedin" />
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <x-input-field type="url" name="social_media[youtube_url]" label="YouTube URL" placeholder="https://youtube.com/..." icon="bx bxl-youtube" />
+                            </div>
+                            <div class="col-md-6">
+                                <x-input-field type="url" name="social_media[pinterest_url]" label="Pinterest URL" placeholder="https://pinterest.com/..." icon="bx bxl-pinterest" />
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <x-input-field type="url" name="social_media[tiktok_url]" label="TikTok URL" placeholder="https://tiktok.com/..." icon="bx bxl-tiktok" />
+                            </div>
+                            <div class="col-md-6">
+                                <x-input-field type="url" name="social_media[whatsapp_url]" label="WhatsApp URL" placeholder="https://wa.me/..." icon="bx bxl-whatsapp" />
+                            </div>
+                        </div>
+
+                        <x-input-field type="url" name="social_media[telegram_url]" label="Telegram URL" placeholder="https://t.me/..." icon="bx bxl-telegram" />
+
+                        <hr class="my-4">
 
                         <x-input-field type="select" name="status" label="Status" required>
                             <option value="active" selected>Active</option>

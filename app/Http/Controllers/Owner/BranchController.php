@@ -58,6 +58,7 @@ class BranchController extends Controller
                 'owner_id' => 'required',
                 'name' => 'required|string|max:255',
                 'code' => 'required|string|max:255|unique:branches,code',
+                'type' => 'required|in:product,service',
                 'email' => 'nullable|email|max:255',
                 'phone' => 'nullable|string|max:20',
                 'address' => 'nullable|string',
@@ -69,6 +70,15 @@ class BranchController extends Controller
                 'manager_phone' => 'nullable|string|max:20',
                 'opening_date' => 'nullable|date',
                 'status' => 'required|in:active,inactive',
+                'social_media.facebook_url' => 'nullable|url',
+                'social_media.instagram_url' => 'nullable|url',
+                'social_media.twitter_url' => 'nullable|url',
+                'social_media.linkedin_url' => 'nullable|url',
+                'social_media.youtube_url' => 'nullable|url',
+                'social_media.pinterest_url' => 'nullable|url',
+                'social_media.tiktok_url' => 'nullable|url',
+                'social_media.whatsapp_url' => 'nullable|url',
+                'social_media.telegram_url' => 'nullable|url',
             ]);
 
             if ($validator->fails()) {
@@ -76,6 +86,18 @@ class BranchController extends Controller
             }
 
             $validated = $validator->validated();
+
+            // Auto-generate username from branch name
+            $username = $this->generateUsername($validated['name']);
+            $validated['username'] = $username;
+
+            // Auto-generate branch link
+            $validated['branch_link'] = 'https://shop.indstary.com/branch/' . $username;
+
+            // Handle social media as JSON
+            if ($request->has('social_media')) {
+                $validated['social_media'] = $request->input('social_media');
+            }
 
             $branch = Branch::create($validated);
 
@@ -86,6 +108,39 @@ class BranchController extends Controller
             DB::rollBack();
             return $this->sendError($e->getMessage());
         }
+    }
+
+    /**
+     * Generate unique username from branch name
+     */
+    private function generateUsername($name, $excludeId = null)
+    {
+        // Convert to lowercase and replace spaces with underscores
+        $username = strtolower(str_replace(' ', '_', $name));
+        
+        // Remove special characters, keep only alphanumeric and underscores
+        $username = preg_replace('/[^a-z0-9_]/', '', $username);
+        
+        // Check if username exists
+        $originalUsername = $username;
+        $counter = 1;
+        
+        while (true) {
+            $query = Branch::where('username', $username);
+            
+            if ($excludeId) {
+                $query->where('id', '!=', $excludeId);
+            }
+            
+            if (!$query->exists()) {
+                break;
+            }
+            
+            $username = $originalUsername . '_' . $counter;
+            $counter++;
+        }
+        
+        return $username;
     }
 
     public function show(Branch $branch)
@@ -107,6 +162,7 @@ class BranchController extends Controller
             $validator = Validator::make($request->all(), [
                 'name' => 'required|string|max:255',
                 'code' => ['required', 'string', 'max:255', Rule::unique('branches')->ignore($branch->id)],
+                'type' => 'required|in:product,service',
                 'email' => 'nullable|email|max:255',
                 'phone' => 'nullable|string|max:20',
                 'address' => 'nullable|string',
@@ -118,6 +174,15 @@ class BranchController extends Controller
                 'manager_phone' => 'nullable|string|max:20',
                 'opening_date' => 'nullable|date',
                 'status' => 'required|in:active,inactive',
+                'social_media.facebook_url' => 'nullable|url',
+                'social_media.instagram_url' => 'nullable|url',
+                'social_media.twitter_url' => 'nullable|url',
+                'social_media.linkedin_url' => 'nullable|url',
+                'social_media.youtube_url' => 'nullable|url',
+                'social_media.pinterest_url' => 'nullable|url',
+                'social_media.tiktok_url' => 'nullable|url',
+                'social_media.whatsapp_url' => 'nullable|url',
+                'social_media.telegram_url' => 'nullable|url',
             ]);
 
             if ($validator->fails()) {
@@ -125,6 +190,18 @@ class BranchController extends Controller
             }
 
             $validated = $validator->validated();
+
+            // If name changed, regenerate username and branch_link
+            if ($validated['name'] !== $branch->name) {
+                $username = $this->generateUsername($validated['name'], $branch->id);
+                $validated['username'] = $username;
+                $validated['branch_link'] = 'https://shop.indstary.com/branch/' . $username;
+            }
+
+            // Handle social media as JSON
+            if ($request->has('social_media')) {
+                $validated['social_media'] = $request->input('social_media');
+            }
 
             $branch->update($validated);
 

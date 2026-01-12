@@ -24,6 +24,11 @@
                             <div class="col-md-6"><x-input-field name="code" label="Branch Code" placeholder="e.g., BR001" value="{{ $branch->code }}" required /></div>
                         </div>
 
+                        <x-input-field type="select" name="type" label="Branch Type" required>
+                            <option value="product" {{ $branch->type == 'product' ? 'selected' : '' }}>Product</option>
+                            <option value="service" {{ $branch->type == 'service' ? 'selected' : '' }}>Service</option>
+                        </x-input-field>
+
                         <div class="row">
                             <div class="col-md-6"><x-input-field type="email" name="email" label="Email" placeholder="Enter email" value="{{ $branch->email }}" /></div>
                             <div class="col-md-6"><x-input-field name="phone" label="Phone" placeholder="Enter phone" value="{{ $branch->phone }}" /></div>
@@ -46,6 +51,49 @@
                             <div class="col-md-6"><x-input-field name="manager_name" label="Manager Name" placeholder="Enter manager name" value="{{ $branch->manager_name }}" /></div>
                             <div class="col-md-6"><x-input-field name="manager_phone" label="Manager Phone" placeholder="Enter manager phone" value="{{ $branch->manager_phone }}" /></div>
                         </div>
+
+                        <hr class="my-4">
+                        <h5 class="mb-3">Social Media Links</h5>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <x-input-field type="url" name="social_media[facebook_url]" label="Facebook URL" placeholder="https://facebook.com/..." value="{{ $branch->social_media['facebook_url'] ?? '' }}" icon="bx bxl-facebook" />
+                            </div>
+                            <div class="col-md-6">
+                                <x-input-field type="url" name="social_media[instagram_url]" label="Instagram URL" placeholder="https://instagram.com/..." value="{{ $branch->social_media['instagram_url'] ?? '' }}" icon="bx bxl-instagram" />
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <x-input-field type="url" name="social_media[twitter_url]" label="Twitter URL" placeholder="https://twitter.com/..." value="{{ $branch->social_media['twitter_url'] ?? '' }}" icon="bx bxl-twitter" />
+                            </div>
+                            <div class="col-md-6">
+                                <x-input-field type="url" name="social_media[linkedin_url]" label="LinkedIn URL" placeholder="https://linkedin.com/..." value="{{ $branch->social_media['linkedin_url'] ?? '' }}" icon="bx bxl-linkedin" />
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <x-input-field type="url" name="social_media[youtube_url]" label="YouTube URL" placeholder="https://youtube.com/..." value="{{ $branch->social_media['youtube_url'] ?? '' }}" icon="bx bxl-youtube" />
+                            </div>
+                            <div class="col-md-6">
+                                <x-input-field type="url" name="social_media[pinterest_url]" label="Pinterest URL" placeholder="https://pinterest.com/..." value="{{ $branch->social_media['pinterest_url'] ?? '' }}" icon="bx bxl-pinterest" />
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <x-input-field type="url" name="social_media[tiktok_url]" label="TikTok URL" placeholder="https://tiktok.com/..." value="{{ $branch->social_media['tiktok_url'] ?? '' }}" icon="bx bxl-tiktok" />
+                            </div>
+                            <div class="col-md-6">
+                                <x-input-field type="url" name="social_media[whatsapp_url]" label="WhatsApp URL" placeholder="https://wa.me/..." value="{{ $branch->social_media['whatsapp_url'] ?? '' }}" icon="bx bxl-whatsapp" />
+                            </div>
+                        </div>
+
+                        <x-input-field type="url" name="social_media[telegram_url]" label="Telegram URL" placeholder="https://t.me/..." value="{{ $branch->social_media['telegram_url'] ?? '' }}" icon="bx bxl-telegram" />
+
+                        <hr class="my-4">
 
                         <x-input-field type="select" name="status" label="Status" required>
                             <option value="active" {{ $branch->status == 'active' ? 'selected' : '' }}>Active</option>

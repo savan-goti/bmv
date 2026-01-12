@@ -41,6 +41,31 @@
                                     <td class="text-muted"><span class="badge bg-primary">{{ $branch->code }}</span></td>
                                 </tr>
                                 <tr>
+                                    <th class="ps-0" scope="row">Branch Type:</th>
+                                    <td class="text-muted">
+                                        <span class="badge bg-{{ $branch->type == 'product' ? 'info' : 'warning' }}">
+                                            {{ ucfirst($branch->type) }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="ps-0" scope="row">Username:</th>
+                                    <td class="text-muted"><code>{{ $branch->username ?? 'N/A' }}</code></td>
+                                </tr>
+                                <tr>
+                                    <th class="ps-0" scope="row">Branch Link:</th>
+                                    <td class="text-muted">
+                                        @if($branch->branch_link)
+                                            <a href="{{ $branch->branch_link }}" target="_blank" class="text-primary">
+                                                {{ $branch->branch_link }}
+                                                <i class="bx bx-link-external"></i>
+                                            </a>
+                                        @else
+                                            N/A
+                                        @endif
+                                    </td>
+                                </tr>
+                                <tr>
                                     <th class="ps-0" scope="row">Email:</th>
                                     <td class="text-muted">{{ $branch->email ?? 'N/A' }}</td>
                                 </tr>
@@ -124,6 +149,120 @@
                 </div>
             </div>
 
+            @if($branch->social_media && count(array_filter($branch->social_media)) > 0)
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Social Media Links</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-borderless mb-0">
+                            <tbody>
+                                @if(!empty($branch->social_media['facebook_url']))
+                                <tr>
+                                    <th class="ps-0" scope="row" style="width: 200px;"><i class="bx bxl-facebook text-primary"></i> Facebook:</th>
+                                    <td class="text-muted">
+                                        <a href="{{ $branch->social_media['facebook_url'] }}" target="_blank" class="text-primary">
+                                            {{ $branch->social_media['facebook_url'] }}
+                                        </a>
+                                    </td>
+                                </tr>
+                                @endif
+
+                                @if(!empty($branch->social_media['instagram_url']))
+                                <tr>
+                                    <th class="ps-0" scope="row"><i class="bx bxl-instagram text-danger"></i> Instagram:</th>
+                                    <td class="text-muted">
+                                        <a href="{{ $branch->social_media['instagram_url'] }}" target="_blank" class="text-primary">
+                                            {{ $branch->social_media['instagram_url'] }}
+                                        </a>
+                                    </td>
+                                </tr>
+                                @endif
+
+                                @if(!empty($branch->social_media['twitter_url']))
+                                <tr>
+                                    <th class="ps-0" scope="row"><i class="bx bxl-twitter text-info"></i> Twitter:</th>
+                                    <td class="text-muted">
+                                        <a href="{{ $branch->social_media['twitter_url'] }}" target="_blank" class="text-primary">
+                                            {{ $branch->social_media['twitter_url'] }}
+                                        </a>
+                                    </td>
+                                </tr>
+                                @endif
+
+                                @if(!empty($branch->social_media['linkedin_url']))
+                                <tr>
+                                    <th class="ps-0" scope="row"><i class="bx bxl-linkedin text-primary"></i> LinkedIn:</th>
+                                    <td class="text-muted">
+                                        <a href="{{ $branch->social_media['linkedin_url'] }}" target="_blank" class="text-primary">
+                                            {{ $branch->social_media['linkedin_url'] }}
+                                        </a>
+                                    </td>
+                                </tr>
+                                @endif
+
+                                @if(!empty($branch->social_media['youtube_url']))
+                                <tr>
+                                    <th class="ps-0" scope="row"><i class="bx bxl-youtube text-danger"></i> YouTube:</th>
+                                    <td class="text-muted">
+                                        <a href="{{ $branch->social_media['youtube_url'] }}" target="_blank" class="text-primary">
+                                            {{ $branch->social_media['youtube_url'] }}
+                                        </a>
+                                    </td>
+                                </tr>
+                                @endif
+
+                                @if(!empty($branch->social_media['pinterest_url']))
+                                <tr>
+                                    <th class="ps-0" scope="row"><i class="bx bxl-pinterest text-danger"></i> Pinterest:</th>
+                                    <td class="text-muted">
+                                        <a href="{{ $branch->social_media['pinterest_url'] }}" target="_blank" class="text-primary">
+                                            {{ $branch->social_media['pinterest_url'] }}
+                                        </a>
+                                    </td>
+                                </tr>
+                                @endif
+
+                                @if(!empty($branch->social_media['tiktok_url']))
+                                <tr>
+                                    <th class="ps-0" scope="row"><i class="bx bxl-tiktok text-dark"></i> TikTok:</th>
+                                    <td class="text-muted">
+                                        <a href="{{ $branch->social_media['tiktok_url'] }}" target="_blank" class="text-primary">
+                                            {{ $branch->social_media['tiktok_url'] }}
+                                        </a>
+                                    </td>
+                                </tr>
+                                @endif
+
+                                @if(!empty($branch->social_media['whatsapp_url']))
+                                <tr>
+                                    <th class="ps-0" scope="row"><i class="bx bxl-whatsapp text-success"></i> WhatsApp:</th>
+                                    <td class="text-muted">
+                                        <a href="{{ $branch->social_media['whatsapp_url'] }}" target="_blank" class="text-primary">
+                                            {{ $branch->social_media['whatsapp_url'] }}
+                                        </a>
+                                    </td>
+                                </tr>
+                                @endif
+
+                                @if(!empty($branch->social_media['telegram_url']))
+                                <tr>
+                                    <th class="ps-0" scope="row"><i class="bx bxl-telegram text-info"></i> Telegram:</th>
+                                    <td class="text-muted">
+                                        <a href="{{ $branch->social_media['telegram_url'] }}" target="_blank" class="text-primary">
+                                            {{ $branch->social_media['telegram_url'] }}
+                                        </a>
+                                    </td>
+                                </tr>
+                                @endif
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            @endif
+
             @if($branch->positions && $branch->positions->count() > 0)
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
@@ -167,6 +306,21 @@
         </div>
 
         <div class="col-lg-4">
+            @if($branch->branch_link)
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Branch QR Code</h5>
+                </div>
+                <div class="card-body text-center">
+                    <div id="qrcode" class="mb-3"></div>
+                    <p class="text-muted mb-2">Scan to visit branch page</p>
+                    <a href="{{ $branch->branch_link }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                        <i class="bx bx-link-external"></i> Visit Branch Page
+                    </a>
+                </div>
+            </div>
+            @endif
+
             <div class="card">
                 <div class="card-header">
                     <h5 class="card-title mb-0">Quick Actions</h5>
@@ -275,6 +429,22 @@
                 }
             });
         });
+
+        // Generate QR Code for branch link
+        @if($branch->branch_link)
+        var qrcode = new QRCode(document.getElementById("qrcode"), {
+            text: "{{ $branch->branch_link }}",
+            width: 200,
+            height: 200,
+            colorDark : "#000000",
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.H
+        });
+        @endif
     });
 </script>
+
+<!-- QR Code Library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
 @endsection
