@@ -8,6 +8,7 @@ enum CategoryType: string
     case Service = 'service';
     case Digital = 'digital';
     case Mixed = 'mixed';
+    case Business = 'business';
 
     public function label(): string
     {
@@ -16,6 +17,7 @@ enum CategoryType: string
             self::Service => 'Service',
             self::Digital => 'Digital',
             self::Mixed => 'Mixed',
+            self::Business => 'Business',
         };
     }
 

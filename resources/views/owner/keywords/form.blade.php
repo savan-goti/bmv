@@ -42,6 +42,7 @@
                                     <option value="">Select Type</option>
                                     <option value="product" {{ old('type', $keyword->type ?? '') == 'product' ? 'selected' : '' }}>Product</option>
                                     <option value="service" {{ old('type', $keyword->type ?? '') == 'service' ? 'selected' : '' }}>Service</option>
+                                    <option value="business" {{ old('type', $keyword->type ?? '') == 'business' ? 'selected' : '' }}>Business</option>
                                 </x-input-field>
                             </div>
 
