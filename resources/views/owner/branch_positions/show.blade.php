@@ -42,25 +42,6 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th class="ps-0" scope="row">Person Type:</th>
-                                    <td class="text-muted">
-                                        <span class="badge bg-info">{{ class_basename($branchPosition->positionable_type) }}</span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th class="ps-0" scope="row">Person Name:</th>
-                                    <td class="text-muted">
-                                        @if($branchPosition->positionable)
-                                            {{ $branchPosition->positionable->name }}
-                                            @if($branchPosition->positionable->email)
-                                                <br><small class="text-muted">{{ $branchPosition->positionable->email }}</small>
-                                            @endif
-                                        @else
-                                            N/A
-                                        @endif
-                                    </td>
-                                </tr>
-                                <tr>
                                     <th class="ps-0" scope="row">Job Position:</th>
                                     <td class="text-muted">
                                         @if($branchPosition->jobPosition)
@@ -87,58 +68,7 @@
                 </div>
             </div>
 
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">Employment Details</h5>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-borderless mb-0">
-                            <tbody>
-                                <tr>
-                                    <th class="ps-0" scope="row" style="width: 200px;">Start Date:</th>
-                                    <td class="text-muted">
-                                        {{ $branchPosition->start_date ? \Carbon\Carbon::parse($branchPosition->start_date)->format('M d, Y') : 'N/A' }}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th class="ps-0" scope="row">End Date:</th>
-                                    <td class="text-muted">
-                                        {{ $branchPosition->end_date ? \Carbon\Carbon::parse($branchPosition->end_date)->format('M d, Y') : 'N/A' }}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th class="ps-0" scope="row">Duration:</th>
-                                    <td class="text-muted">
-                                        @if($branchPosition->start_date)
-                                            @php
-                                                $start = \Carbon\Carbon::parse($branchPosition->start_date);
-                                                $end = $branchPosition->end_date ? \Carbon\Carbon::parse($branchPosition->end_date) : \Carbon\Carbon::now();
-                                                $diff = $start->diff($end);
-                                            @endphp
-                                            @if($diff->y > 0) {{ $diff->y }} year{{ $diff->y > 1 ? 's' : '' }} @endif
-                                            @if($diff->m > 0) {{ $diff->m }} month{{ $diff->m > 1 ? 's' : '' }} @endif
-                                            @if($diff->d > 0) {{ $diff->d }} day{{ $diff->d > 1 ? 's' : '' }} @endif
-                                        @else
-                                            N/A
-                                        @endif
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th class="ps-0" scope="row">Salary:</th>
-                                    <td class="text-muted">
-                                        @if($branchPosition->salary)
-                                            <strong>${{ number_format($branchPosition->salary, 2) }}</strong>
-                                        @else
-                                            N/A
-                                        @endif
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+
 
             @if($branchPosition->notes)
             <div class="card">
@@ -208,19 +138,12 @@
                             </div>
                         </div>
                         <h5 class="mb-1">
-                            @if($branchPosition->positionable)
-                                {{ $branchPosition->positionable->name }}
-                            @else
-                                N/A
-                            @endif
-                        </h5>
-                        <p class="text-muted mb-0">
                             @if($branchPosition->jobPosition)
                                 {{ $branchPosition->jobPosition->name }}
                             @else
                                 No Position
                             @endif
-                        </p>
+                        </h5>
                         <p class="text-muted">
                             @if($branchPosition->branch)
                                 at {{ $branchPosition->branch->name }}
@@ -230,21 +153,11 @@
                     
                     <div class="border-top pt-3">
                         <div class="d-flex justify-content-between mb-2">
-                            <span class="text-muted">Type:</span>
-                            <span class="badge bg-info">{{ class_basename($branchPosition->positionable_type) }}</span>
-                        </div>
-                        <div class="d-flex justify-content-between mb-2">
                             <span class="text-muted">Status:</span>
                             <span class="badge bg-{{ $branchPosition->is_active ? 'success' : 'danger' }}">
                                 {{ $branchPosition->is_active ? 'Active' : 'Inactive' }}
                             </span>
                         </div>
-                        @if($branchPosition->salary)
-                        <div class="d-flex justify-content-between">
-                            <span class="text-muted">Salary:</span>
-                            <strong>${{ number_format($branchPosition->salary, 2) }}</strong>
-                        </div>
-                        @endif
                     </div>
                 </div>
             </div>

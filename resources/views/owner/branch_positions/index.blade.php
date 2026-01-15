@@ -27,11 +27,7 @@
                                 <tr>
                                     <th>ID</th>
                                     @if(!$branch)<th>Branch</th>@endif
-                                    <th>Person</th>
-                                    <th>Type</th>
                                     <th>Job Position</th>
-                                    <th>Start Date</th>
-                                    <th>Salary</th>
                                     <th>Status</th>
                                     <th>Action</th>
                                 </tr>
@@ -53,11 +49,7 @@
             @if(!$branch)
             { data: 'branch_name', name: 'branch.name', title: 'Branch' },
             @endif
-            { data: 'person_name', name: 'person_name', title: 'Person', orderable: false },
-            { data: 'person_type', name: 'person_type', title: 'Type', orderable: false },
             { data: 'job_position_name', name: 'jobPosition.name', title: 'Job Position' },
-            { data: 'start_date', name: 'start_date', title: 'Start Date' },
-            { data: 'salary', name: 'salary', title: 'Salary' },
             { data: 'is_active', name: 'is_active', title: 'Status' },
             { data: 'action', name: 'action', title: 'Action', orderable: false, searchable: false },
         ];
