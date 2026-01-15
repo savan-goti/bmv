@@ -11,7 +11,10 @@ class Branch extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'owner_id',
+        'created_by',
+        'created_by_role',
+        'updated_by',
+        'updated_by_role',
         'name',
         'code',
         'type',
@@ -36,13 +39,7 @@ class Branch extends Model
         'opening_date' => 'date',
     ];
 
-    /**
-     * Get the owner that owns the branch.
-     */
-    public function owner()
-    {
-        return $this->belongsTo(Owner::class);
-    }
+
 
     /**
      * Get the positions for the branch.

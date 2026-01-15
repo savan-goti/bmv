@@ -10,6 +10,7 @@ use Yajra\DataTables\Facades\DataTables;
 use App\Http\Traits\ResponseTrait;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
 use Exception;
 
 class BranchController extends Controller
@@ -40,6 +41,18 @@ class BranchController extends Controller
                 $badgeClass = $row->status == 'active' ? 'success' : 'danger';
                 return '<span class="badge bg-'.$badgeClass.'">'.$status.'</span>';
             })
+            ->addColumn('created_by', function($row){
+                return $row->created_by ?? 'N/A';
+            })
+            ->addColumn('created_by_role', function($row){
+                return $row->created_by_role ? ucfirst($row->created_by_role) : 'N/A';
+            })
+            ->addColumn('updated_by', function($row){
+                return $row->updated_by ?? 'N/A';
+            })
+            ->addColumn('updated_by_role', function($row){
+                return $row->updated_by_role ? ucfirst($row->updated_by_role) : 'N/A';
+            })
             ->rawColumns(['action', 'status'])
             ->make(true);
     }
@@ -55,7 +68,6 @@ class BranchController extends Controller
             DB::beginTransaction();
 
             $validator = Validator::make($request->all(), [
-                'owner_id' => 'required',
                 'name' => 'required|string|max:255',
                 'code' => 'required|string|max:255|unique:branches,code',
                 'type' => 'required|in:product,service',
@@ -98,6 +110,10 @@ class BranchController extends Controller
             if ($request->has('social_media')) {
                 $validated['social_media'] = $request->input('social_media');
             }
+
+            // Set created_by and created_by_role
+            $validated['created_by'] = Auth::guard('owner')->user()->id;
+            $validated['created_by_role'] = 'owner';
 
             $branch = Branch::create($validated);
 
@@ -202,6 +218,10 @@ class BranchController extends Controller
             if ($request->has('social_media')) {
                 $validated['social_media'] = $request->input('social_media');
             }
+
+            // Set updated_by and updated_by_role
+            $validated['updated_by'] = Auth::guard('owner')->user()->id;
+            $validated['updated_by_role'] = 'owner';
 
             $branch->update($validated);
 

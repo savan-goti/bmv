@@ -17,7 +17,6 @@
                 <div class="card-body">
                     <form id="branchCreateForm" method="POST">
                         @csrf
-                        <input type="hidden" name="owner_id" value="{{ Auth::user()->id }}">
                         
                         <div class="row">
                             <div class="col-md-6"><x-input-field name="name" label="Branch Name" placeholder="Enter branch name" required /></div>

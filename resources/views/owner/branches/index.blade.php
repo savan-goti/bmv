@@ -30,17 +30,6 @@
 
                     <div class="table-responsive">
                         <table id="ajax-datatables" class="table table-bordered table-striped">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Code</th>
-                                    <th>Name</th>
-                                    <th>City</th>
-                                    <th>Phone</th>
-                                    <th>Status</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
                         </table>
                     </div>
                 </div>
@@ -68,6 +57,10 @@
                 { data: 'name', name: 'name', title: 'Name' },
                 { data: 'city', name: 'city', title: 'City' },
                 { data: 'phone', name: 'phone', title: 'Phone' },
+                { data: 'created_by', name: 'created_by', title: 'Created By' },
+                { data: 'created_by_role', name: 'created_by_role', title: 'Created By Role' },
+                { data: 'updated_by', name: 'updated_by', title: 'Updated By' },
+                { data: 'updated_by_role', name: 'updated_by_role', title: 'Updated By Role' },
                 { data: 'status', name: 'status', title: 'Status' },
                 { data: 'action', name: 'action', title: 'Action', orderable: false, searchable: false },
             ],

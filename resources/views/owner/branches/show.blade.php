@@ -372,8 +372,24 @@
                 </div>
                 <div class="card-body">
                     <div class="mb-3">
+                        <p class="text-muted mb-1">Created By</p>
+                        <h6 class="mb-0">{{ $branch->created_by ?? 'N/A' }}</h6>
+                    </div>
+                    <div class="mb-3">
+                        <p class="text-muted mb-1">Created By Role</p>
+                        <h6 class="mb-0">{{ $branch->created_by_role ? ucfirst($branch->created_by_role) : 'N/A' }}</h6>
+                    </div>
+                    <div class="mb-3">
                         <p class="text-muted mb-1">Created</p>
                         <h6 class="mb-0">{{ $branch->created_at->format('M d, Y h:i A') }}</h6>
+                    </div>
+                    <div class="mb-3">
+                        <p class="text-muted mb-1">Updated By</p>
+                        <h6 class="mb-0">{{ $branch->updated_by ?? 'N/A' }}</h6>
+                    </div>
+                    <div class="mb-3">
+                        <p class="text-muted mb-1">Updated By Role</p>
+                        <h6 class="mb-0">{{ $branch->updated_by_role ? ucfirst($branch->updated_by_role) : 'N/A' }}</h6>
                     </div>
                     <div>
                         <p class="text-muted mb-1">Last Updated</p>
