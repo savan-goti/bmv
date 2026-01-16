@@ -45,38 +45,7 @@ class JobPositionController extends Controller
 
     public function create()
     {
-        return view('owner.job_positions.create');
-    }
-
-    public function store(Request $request)
-    {
-        try {
-            DB::beginTransaction();
-
-            $validator = Validator::make($request->all(), [
-                'owner_id' => 'required',
-                'name' => 'required|string|max:255',
-                'description' => 'nullable|string',
-                'department' => 'nullable|string|max:255',
-                'level' => 'nullable|string|max:255',
-                'status' => 'required|in:active,inactive',
-            ]);
-
-            if ($validator->fails()) {
-                return $this->sendValidationError($validator->errors());
-            }
-
-            $validated = $validator->validated();
-
-            $jobPosition = JobPosition::create($validated);
-
-            DB::commit();
-            return $this->sendResponse('Job Position created successfully.', $jobPosition);
-
-        } catch (Exception $e) {
-            DB::rollBack();
-            return $this->sendError($e->getMessage());
-        }
+        return view('owner.job_positions.form');
     }
 
     public function show(JobPosition $jobPosition)
@@ -86,21 +55,32 @@ class JobPositionController extends Controller
 
     public function edit(JobPosition $jobPosition)
     {
-        return view('owner.job_positions.edit', compact('jobPosition'));
+        return view('owner.job_positions.form', compact('jobPosition'));
     }
 
-    public function update(Request $request, JobPosition $jobPosition)
+    /**
+     * Save job position (create or update) via AJAX
+     */
+    public function save(Request $request, $id = null)
     {
         try {
             DB::beginTransaction();
 
-            $validator = Validator::make($request->all(), [
+            // Build validation rules
+            $rules = [
                 'name' => 'required|string|max:255',
                 'description' => 'nullable|string',
                 'department' => 'nullable|string|max:255',
                 'level' => 'nullable|string|max:255',
                 'status' => 'required|in:active,inactive',
-            ]);
+            ];
+
+            if (!$id) {
+                // Create validation rules
+                $rules['owner_id'] = 'required';
+            }
+
+            $validator = Validator::make($request->all(), $rules);
 
             if ($validator->fails()) {
                 return $this->sendValidationError($validator->errors());
@@ -108,10 +88,19 @@ class JobPositionController extends Controller
 
             $validated = $validator->validated();
 
-            $jobPosition->update($validated);
+            if ($id) {
+                // Update existing job position
+                $jobPosition = JobPosition::findOrFail($id);
+                $jobPosition->update($validated);
+                $message = 'Job Position updated successfully.';
+            } else {
+                // Create new job position
+                $jobPosition = JobPosition::create($validated);
+                $message = 'Job Position created successfully.';
+            }
 
             DB::commit();
-            return $this->sendResponse('Job Position updated successfully.', $jobPosition);
+            return $this->sendSuccess($message);
 
         } catch (Exception $e) {
             DB::rollBack();

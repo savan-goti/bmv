@@ -93,6 +93,7 @@ Route::middleware(['auth:owner', 'session.guard:owner'])->group(function () {
     // Admin Management
     Route::controller(AdminController::class)->group(function () {
         Route::get('admins/ajax-data', 'ajaxData')->name('admins.ajaxData');
+        Route::post('admins/save/{id?}', 'save')->name('admins.save');
         Route::post('admins/{admin}/status', 'status')->name('admins.status');
     });
     Route::resource('admins', AdminController::class);
@@ -170,6 +171,7 @@ Route::middleware(['auth:owner', 'session.guard:owner'])->group(function () {
     // Job Position Management
     Route::controller(JobPositionController::class)->group(function () {
         Route::get('job-positions/ajax-data', 'ajaxData')->name('job-positions.ajaxData');
+        Route::post('job-positions/save/{id?}', 'save')->name('job-positions.save');
         Route::post('job-positions/{jobPosition}/status', 'status')->name('job-positions.status');
     });
     Route::resource('job-positions', JobPositionController::class);
@@ -177,6 +179,7 @@ Route::middleware(['auth:owner', 'session.guard:owner'])->group(function () {
     // Branch Management
     Route::controller(BranchController::class)->group(function () {
         Route::get('branches/ajax-data', 'ajaxData')->name('branches.ajaxData');
+        Route::post('branches/save/{id?}', 'save')->name('branches.save');
         Route::post('branches/{branch}/status', 'status')->name('branches.status');
     });
     Route::resource('branches', BranchController::class);
@@ -184,6 +187,7 @@ Route::middleware(['auth:owner', 'session.guard:owner'])->group(function () {
     // Branch Position Management
     Route::controller(BranchPositionController::class)->group(function () {
         Route::get('branch-positions/ajax-data', 'ajaxData')->name('branch-positions.ajaxData');
+        Route::post('branch-positions/save/{id?}', 'save')->name('branch-positions.save');
         Route::post('branch-positions/{branchPosition}/status', 'status')->name('branch-positions.status');
     });
     Route::resource('branch-positions', BranchPositionController::class);

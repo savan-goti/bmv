@@ -75,41 +75,7 @@ class BranchPositionController extends Controller
         $branches = Branch::where('status', 'active')->get();
         $jobPositions = JobPosition::where('status', 'active')->get();
         
-        return view('owner.branch_positions.create', compact('branches', 'jobPositions', 'branch'));
-    }
-
-    public function store(Request $request)
-    {
-        try {
-            DB::beginTransaction();
-
-            $validator = Validator::make($request->all(), [
-                'branch_id' => 'required|exists:branches,id',
-                'job_position_id' => 'required|exists:job_positions,id',
-                'is_active' => 'required|boolean',
-                'notes' => 'nullable|string',
-            ]);
-
-            if ($validator->fails()) {
-                return $this->sendValidationError($validator->errors());
-            }
-
-            $validated = $validator->validated();
-
-            $branchPosition = BranchPosition::create([
-                'branch_id' => $validated['branch_id'],
-                'job_position_id' => $validated['job_position_id'],
-                'is_active' => $validated['is_active'],
-                'notes' => $validated['notes'] ?? null,
-            ]);
-
-            DB::commit();
-            return $this->sendResponse('Branch Position created successfully.', $branchPosition);
-
-        } catch (Exception $e) {
-            DB::rollBack();
-            return $this->sendError($e->getMessage());
-        }
+        return view('owner.branch_positions.form', compact('branches', 'jobPositions', 'branch'));
     }
 
     public function show(BranchPosition $branchPosition)
@@ -124,11 +90,15 @@ class BranchPositionController extends Controller
         
         $branches = Branch::where('status', 'active')->get();
         $jobPositions = JobPosition::where('status', 'active')->get();
+        $branch = null; // No specific branch context when editing
         
-        return view('owner.branch_positions.edit', compact('branchPosition', 'branches', 'jobPositions'));
+        return view('owner.branch_positions.form', compact('branchPosition', 'branches', 'jobPositions', 'branch'));
     }
 
-    public function update(Request $request, BranchPosition $branchPosition)
+    /**
+     * Save branch position (create or update) via AJAX
+     */
+    public function save(Request $request, $id = null)
     {
         try {
             DB::beginTransaction();
@@ -146,15 +116,19 @@ class BranchPositionController extends Controller
 
             $validated = $validator->validated();
 
-            $branchPosition->update([
-                'branch_id' => $validated['branch_id'],
-                'job_position_id' => $validated['job_position_id'],
-                'is_active' => $validated['is_active'],
-                'notes' => $validated['notes'] ?? null,
-            ]);
+            if ($id) {
+                // Update existing branch position
+                $branchPosition = BranchPosition::findOrFail($id);
+                $branchPosition->update($validated);
+                $message = 'Branch Position updated successfully.';
+            } else {
+                // Create new branch position
+                $branchPosition = BranchPosition::create($validated);
+                $message = 'Branch Position created successfully.';
+            }
 
             DB::commit();
-            return $this->sendResponse('Branch Position updated successfully.', $branchPosition);
+            return $this->sendSuccess($message);
 
         } catch (Exception $e) {
             DB::rollBack();

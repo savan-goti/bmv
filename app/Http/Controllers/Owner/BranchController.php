@@ -59,17 +59,31 @@ class BranchController extends Controller
 
     public function create()
     {
-        return view('owner.branches.create');
+        return view('owner.branches.form');
     }
 
-    public function store(Request $request)
+    public function show(Branch $branch)
+    {
+        $branch->load('positions.positionable', 'positions.jobPosition');
+        return view('owner.branches.show', compact('branch'));
+    }
+
+    public function edit(Branch $branch)
+    {
+        return view('owner.branches.form', compact('branch'));
+    }
+
+    /**
+     * Save branch (create or update) via AJAX
+     */
+    public function save(Request $request, $id = null)
     {
         try {
             DB::beginTransaction();
 
-            $validator = Validator::make($request->all(), [
+            // Build validation rules
+            $rules = [
                 'name' => 'required|string|max:255',
-                'code' => 'required|string|max:255|unique:branches,code',
                 'type' => 'required|in:product,service',
                 'email' => 'nullable|email|max:255',
                 'phone' => 'nullable|string|max:20',
@@ -91,7 +105,18 @@ class BranchController extends Controller
                 'social_media.tiktok_url' => 'nullable|url',
                 'social_media.whatsapp_url' => 'nullable|url',
                 'social_media.telegram_url' => 'nullable|url',
-            ]);
+            ];
+
+            if ($id) {
+                // Update validation rules
+                $branch = Branch::findOrFail($id);
+                $rules['code'] = ['required', 'string', 'max:255', Rule::unique('branches')->ignore($branch->id)];
+            } else {
+                // Create validation rules
+                $rules['code'] = 'required|string|max:255|unique:branches,code';
+            }
+
+            $validator = Validator::make($request->all(), $rules);
 
             if ($validator->fails()) {
                 return $this->sendValidationError($validator->errors());
@@ -99,26 +124,45 @@ class BranchController extends Controller
 
             $validated = $validator->validated();
 
-            // Auto-generate username from branch name
-            $username = $this->generateUsername($validated['name']);
-            $validated['username'] = $username;
-
-            // Auto-generate branch link
-            $validated['branch_link'] = 'https://shop.indstary.com/branch/' . $username;
-
             // Handle social media as JSON
             if ($request->has('social_media')) {
                 $validated['social_media'] = $request->input('social_media');
             }
 
-            // Set created_by and created_by_role
-            $validated['created_by'] = Auth::guard('owner')->user()->id;
-            $validated['created_by_role'] = 'owner';
+            if ($id) {
+                // Update existing branch
+                // If name changed, regenerate username and branch_link
+                if ($validated['name'] !== $branch->name) {
+                    $username = $this->generateUsername($validated['name'], $branch->id);
+                    $validated['username'] = $username;
+                    $validated['branch_link'] = 'https://shop.indstary.com/branch/' . $username;
+                }
 
-            $branch = Branch::create($validated);
+                // Set updated_by and updated_by_role
+                $validated['updated_by'] = Auth::guard('owner')->user()->id;
+                $validated['updated_by_role'] = 'owner';
+
+                $branch->update($validated);
+                $message = 'Branch updated successfully.';
+            } else {
+                // Create new branch
+                // Auto-generate username from branch name
+                $username = $this->generateUsername($validated['name']);
+                $validated['username'] = $username;
+
+                // Auto-generate branch link
+                $validated['branch_link'] = 'https://shop.indstary.com/branch/' . $username;
+
+                // Set created_by and created_by_role
+                $validated['created_by'] = Auth::guard('owner')->user()->id;
+                $validated['created_by_role'] = 'owner';
+
+                $branch = Branch::create($validated);
+                $message = 'Branch created successfully.';
+            }
 
             DB::commit();
-            return $this->sendResponse('Branch created successfully.', $branch);
+            return $this->sendSuccess($message);
 
         } catch (Exception $e) {
             DB::rollBack();
@@ -157,81 +201,6 @@ class BranchController extends Controller
         }
         
         return $username;
-    }
-
-    public function show(Branch $branch)
-    {
-        $branch->load('positions.positionable', 'positions.jobPosition');
-        return view('owner.branches.show', compact('branch'));
-    }
-
-    public function edit(Branch $branch)
-    {
-        return view('owner.branches.edit', compact('branch'));
-    }
-
-    public function update(Request $request, Branch $branch)
-    {
-        try {
-            DB::beginTransaction();
-
-            $validator = Validator::make($request->all(), [
-                'name' => 'required|string|max:255',
-                'code' => ['required', 'string', 'max:255', Rule::unique('branches')->ignore($branch->id)],
-                'type' => 'required|in:product,service',
-                'email' => 'nullable|email|max:255',
-                'phone' => 'nullable|string|max:20',
-                'address' => 'nullable|string',
-                'city' => 'nullable|string|max:255',
-                'state' => 'nullable|string|max:255',
-                'country' => 'nullable|string|max:255',
-                'postal_code' => 'nullable|string|max:20',
-                'manager_name' => 'nullable|string|max:255',
-                'manager_phone' => 'nullable|string|max:20',
-                'opening_date' => 'nullable|date',
-                'status' => 'required|in:active,inactive',
-                'social_media.facebook_url' => 'nullable|url',
-                'social_media.instagram_url' => 'nullable|url',
-                'social_media.twitter_url' => 'nullable|url',
-                'social_media.linkedin_url' => 'nullable|url',
-                'social_media.youtube_url' => 'nullable|url',
-                'social_media.pinterest_url' => 'nullable|url',
-                'social_media.tiktok_url' => 'nullable|url',
-                'social_media.whatsapp_url' => 'nullable|url',
-                'social_media.telegram_url' => 'nullable|url',
-            ]);
-
-            if ($validator->fails()) {
-                return $this->sendValidationError($validator->errors());
-            }
-
-            $validated = $validator->validated();
-
-            // If name changed, regenerate username and branch_link
-            if ($validated['name'] !== $branch->name) {
-                $username = $this->generateUsername($validated['name'], $branch->id);
-                $validated['username'] = $username;
-                $validated['branch_link'] = 'https://shop.indstary.com/branch/' . $username;
-            }
-
-            // Handle social media as JSON
-            if ($request->has('social_media')) {
-                $validated['social_media'] = $request->input('social_media');
-            }
-
-            // Set updated_by and updated_by_role
-            $validated['updated_by'] = Auth::guard('owner')->user()->id;
-            $validated['updated_by_role'] = 'owner';
-
-            $branch->update($validated);
-
-            DB::commit();
-            return $this->sendResponse('Branch updated successfully.', $branch);
-
-        } catch (Exception $e) {
-            DB::rollBack();
-            return $this->sendError($e->getMessage());
-        }
     }
 
     public function destroy(Branch $branch)
