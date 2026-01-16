@@ -75,7 +75,7 @@ class AdminController extends Controller
                 'gender' => 'nullable|in:male,female,other',
                 'phone' => 'nullable|string|max:20',
                 'password' => 'required|string|min:8|confirmed',
-                'role' => 'required|string',
+
                 'education' => 'nullable|string|max:255',
                 'position_id' => 'nullable|exists:job_positions,id',
                 'address' => 'nullable|string',
@@ -126,7 +126,7 @@ class AdminController extends Controller
                 'date_of_birth' => 'nullable|date',
                 'gender' => 'nullable|in:male,female,other',
                 'phone' => 'nullable|string|max:20',
-                'role' => 'required|string',
+
                 'education' => 'nullable|string|max:255',
                 'position_id' => 'nullable|exists:job_positions,id',
                 'address' => 'nullable|string',

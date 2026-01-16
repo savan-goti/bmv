@@ -69,16 +69,6 @@
                             placeholder="Enter phone number"
                         />
 
-                        <x-input-field 
-                            type="select" 
-                            name="role" 
-                            label="Role" 
-                            required
-                        >
-                            <option value="admin">Admin</option>
-                            <option value="manager">Manager</option>
-                            <option value="super_admin">Super Admin</option>
-                        </x-input-field>
 
                         <x-input-field 
                             name="education" 
@@ -153,7 +143,6 @@
             rules: {
                 name: { required: true },
                 email: { required: true, email: true },
-                role: { required: true },
                 status: { required: true },
                 password: { required: true, minlength: 8 },
                 password_confirmation: { required: true, equalTo: "#password" }
@@ -161,7 +150,6 @@
             messages: {
                 name: { required: "The name field is required" },
                 email: { required: "The email field is required", email: "Please enter a valid email address" },
-                role: { required: "The role field is required" },
                 status: { required: "The status field is required" },
                 password: { required: "The password field is required", minlength: "Password must be at least 8 characters long" },
                 password_confirmation: { required: "The confirm password field is required", equalTo: "Passwords do not match" }
@@ -204,7 +192,7 @@
                              if (data.error.hasOwnProperty('date_of_birth')) $("#date_of_birth-error").html(data.error.date_of_birth).show();
                              if (data.error.hasOwnProperty('gender')) $("#gender-error").html(data.error.gender).show();
                              if (data.error.hasOwnProperty('phone')) $("#phone-error").html(data.error.phone).show();
-                             if (data.error.hasOwnProperty('role')) $("#role-error").html(data.error.role).show();
+
                              if (data.error.hasOwnProperty('education')) $("#education-error").html(data.error.education).show();
                              if (data.error.hasOwnProperty('position_id')) $("#position_id-error").html(data.error.position_id).show();
                              if (data.error.hasOwnProperty('address')) $("#address-error").html(data.error.address).show();

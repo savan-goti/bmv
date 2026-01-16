@@ -77,7 +77,7 @@ class StaffController extends Controller
                 'date_of_birth' => 'nullable|date',
                 'gender' => 'nullable|in:male,female,other',
                 'password' => 'required|string|min:8|confirmed',
-                'assigned_role' => 'required|string',
+
                 'permissions' => 'nullable|array',
                 'education' => 'nullable|string|max:255',
                 'position_id' => 'nullable|exists:job_positions,id',
@@ -131,7 +131,7 @@ class StaffController extends Controller
                 'phone' => ['nullable', 'string', Rule::unique('staffs')->ignore($staff->id)],
                 'date_of_birth' => 'nullable|date',
                 'gender' => 'nullable|in:male,female,other',
-                'assigned_role' => 'required|string',
+
                 'permissions' => 'nullable|array',
                 'education' => 'nullable|string|max:255',
                 'position_id' => 'nullable|exists:job_positions,id',

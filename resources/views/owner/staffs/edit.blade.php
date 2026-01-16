@@ -54,11 +54,6 @@
 
                         <x-input-field name="phone" label="Phone" placeholder="Enter phone" value="{{ $staff->phone }}" />
 
-                        <x-input-field type="select" name="assigned_role" label="Assigned Role" required>
-                            <option value="editor" {{ $staff->assigned_role == 'editor' ? 'selected' : '' }}>Editor</option>
-                            <option value="viewer" {{ $staff->assigned_role == 'viewer' ? 'selected' : '' }}>Viewer</option>
-                            <option value="support" {{ $staff->assigned_role == 'support' ? 'selected' : '' }}>Support</option>
-                        </x-input-field>
 
                         <x-input-field name="education" label="Education" placeholder="Enter education" value="{{ $staff->education }}" />
                         <x-input-field type="textarea" name="address" label="Address" placeholder="Enter address" value="{{ $staff->address }}" rows="3" />
@@ -93,7 +88,6 @@
                 name: { required: true },
                 admin_id: { required: true },
                 email: { required: true, email: true },
-                assigned_role: { required: true },
                 status: { required: true },
                 password: { minlength: 8 },
                 password_confirmation: { equalTo: "#password" }
@@ -102,7 +96,6 @@
                 name: { required: "The name field is required" },
                 admin_id: { required: "The admin field is required" },
                 email: { required: "The email field is required", email: "Please enter a valid email address" },
-                assigned_role: { required: "The assigned role field is required" },
                 status: { required: "The status field is required" },
                 password: { minlength: "Password must be at least 8 characters long" },
                 password_confirmation: { equalTo: "Passwords do not match" }
@@ -146,7 +139,7 @@
                              if (data.error.hasOwnProperty('date_of_birth')) $("#date_of_birth-error").html(data.error.date_of_birth).show();
                              if (data.error.hasOwnProperty('gender')) $("#gender-error").html(data.error.gender).show();
                              if (data.error.hasOwnProperty('phone')) $("#phone-error").html(data.error.phone).show();
-                             if (data.error.hasOwnProperty('assigned_role')) $("#assigned_role-error").html(data.error.assigned_role).show();
+
                              if (data.error.hasOwnProperty('education')) $("#education-error").html(data.error.education).show();
                              if (data.error.hasOwnProperty('position_id')) $("#position_id-error").html(data.error.position_id).show();
                              if (data.error.hasOwnProperty('address')) $("#address-error").html(data.error.address).show();
