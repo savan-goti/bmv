@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CustomerController;
+use App\Http\Controllers\Api\CategoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -65,7 +66,18 @@ Route::prefix('v1')->group(function () {
         // Public Customer Profile Routes (requires authentication to view)
         Route::get('customers/{id}', [CustomerController::class, 'show']);
         Route::get('customers/username/{username}', [CustomerController::class, 'showByUsername']);
+        
     });
+
+    // Category Routes
+    Route::get('category-types', [CategoryController::class, 'getCategoryTypes']);
+    Route::get('categories', [CategoryController::class, 'getCategories']);
+    
+    // Sub-Category Routes
+    Route::get('subcategories', [CategoryController::class, 'getSubCategories']);
+    
+    // Child Category Routes
+    Route::get('child-categories', [CategoryController::class, 'getChildCategories']);
 });
 
 // Health check endpoint

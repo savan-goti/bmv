@@ -28,9 +28,8 @@ class AuthController extends Controller
             'name' => 'required|string|min:2|max:255',
             'email' => 'required|string|email|max:255|unique:customers,email',
             'password' => 'required|string|min:8|confirmed',
-            'phone' => 'nullable|string|min:10|max:20|unique:customers,phone',
-            'country_code' => 'nullable|string|max:5',
-            'username' => 'nullable|string|min:3|max:50|unique:customers,username|regex:/^[a-zA-Z0-9_]+$/',
+            'phone' => 'required|string|min:10|max:20|unique:customers,phone',
+            'country_code' => 'required|string|max:5',
             'gender' => 'nullable|in:male,female,other',
             'dob' => 'nullable|date|before:today',
         ], [
@@ -44,9 +43,6 @@ class AuthController extends Controller
             'password.confirmed' => 'Password confirmation does not match',
             'phone.unique' => 'This phone number is already registered',
             'phone.min' => 'Phone number must be at least 10 digits',
-            'username.unique' => 'This username is already taken',
-            'username.regex' => 'Username can only contain letters, numbers, and underscores',
-            'username.min' => 'Username must be at least 3 characters',
             'dob.before' => 'Date of birth must be in the past',
         ]);
 
@@ -56,10 +52,7 @@ class AuthController extends Controller
 
         try {
             // Generate username if not provided
-            $username = $request->username;
-            if (!$username) {
-                $username = $this->generateUniqueUsername($request->name);
-            }
+            $username = $this->generateUniqueUsername($request->name);
 
             // Generate canonical (unique identifier)
             $canonical = $this->generateCanonical($request->email);
