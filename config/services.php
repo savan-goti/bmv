@@ -44,4 +44,11 @@ return [
         ],
     ],
 
+    'twilio' => [
+        'sid' => env('TWILIO_SID'),
+        'token' => env('TWILIO_AUTH_TOKEN'),
+        'from' => env('TWILIO_PHONE_NUMBER'),
+        'otp_expiration' => env('TWILIO_OTP_EXPIRATION', 10), // minutes
+    ],
+
 ];

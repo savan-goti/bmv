@@ -7,9 +7,12 @@ use App\Models\Customer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use App\Http\Traits\ResponseTrait;
+use App\Services\TwilioService;
 
 
 class AuthController extends Controller
@@ -260,6 +263,226 @@ class AuthController extends Controller
                 'success' => false,
                 'message' => 'Could not refresh token'
             ], 500);
+        }
+    }
+
+    /**
+     * Send OTP to customer's phone
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function sendOTP(Request $request)
+    {
+        // Validate request
+        $validator = Validator::make($request->all(), [
+            'phone' => 'required|string|exists:customers,phone',
+            'country_code' => 'required|string|max:5',
+        ], [
+            'phone.required' => 'Phone number is required',
+            'phone.exists' => 'Phone number not registered',
+            'country_code.required' => 'Country code is required',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->sendValidationError($validator->errors());
+        }
+
+        try {
+            // Find customer
+            $customer = Customer::where('phone', $request->phone)->first();
+
+            if (!$customer) {
+                return $this->sendError('Customer not found', 404);
+            }
+
+            // Check if phone is already verified
+            if ($customer->phone_validate) {
+                return $this->sendError('Phone number is already verified', 400);
+            }
+
+            // Generate OTP
+            $otp = TwilioService::generateOTP(6);
+            $expirationMinutes = (int) TwilioService::getOTPExpirationMinutes();
+            
+            // Save OTP to database
+            $customer->phone_otp = $otp;
+            $customer->otp_expired_at = Carbon::now()->addMinutes($expirationMinutes);
+            $customer->save();
+            
+            // Send OTP via Twilio
+            // $twilioService = new TwilioService();
+            // Fix phone number format - country_code should already have +
+            $phoneNumber = '+' . $request->country_code . $request->phone;
+            $sent = TwilioService::sendOTP($phoneNumber, $otp);
+            dd($sent);
+            if (!$sent) {
+                // Log the error but still return success for development
+                Log::warning('OTP not sent via SMS, but saved to database', [
+                    'phone' => $phoneNumber,
+                    'otp' => $otp // Remove this in production
+                ]);
+                
+                // For development: return success with OTP in response
+                if (config('app.debug')) {
+                    return $this->sendResponse('OTP generated (SMS failed, check logs)', [
+                        'phone' => $request->phone,
+                        'expires_in_minutes' => $expirationMinutes,
+                        'otp_for_testing' => $otp // Only in debug mode
+                    ]);
+                }
+                
+                return $this->sendError('Failed to send OTP. Please try again.', 500);
+            }
+
+            return $this->sendResponse('OTP sent successfully to your phone', [
+                'phone' => $request->phone,
+                'expires_in_minutes' => $expirationMinutes
+            ]);
+
+        } catch (\Exception $e) {
+            return $this->sendError('Failed to send OTP: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Verify OTP
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function verifyOTP(Request $request)
+    {
+        // Validate request
+        $validator = Validator::make($request->all(), [
+            'phone' => 'required|string|exists:customers,phone',
+            'otp' => 'required|string|size:6',
+        ], [
+            'phone.required' => 'Phone number is required',
+            'phone.exists' => 'Phone number not registered',
+            'otp.required' => 'OTP is required',
+            'otp.size' => 'OTP must be 6 digits',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->sendValidationError($validator->errors());
+        }
+
+        try {
+            // Find customer
+            $customer = Customer::where('phone', $request->phone)->first();
+
+            if (!$customer) {
+                return $this->sendError('Customer not found', 404);
+            }
+
+            // Check if phone is already verified
+            if ($customer->phone_validate) {
+                return $this->sendError('Phone number is already verified', 400);
+            }
+
+            // Check if OTP exists
+            if (!$customer->phone_otp) {
+                return $this->sendError('No OTP found. Please request a new OTP.', 400);
+            }
+
+            // Check if OTP is expired
+            if (Carbon::now()->isAfter($customer->otp_expired_at)) {
+                return $this->sendError('OTP has expired. Please request a new OTP.', 400);
+            }
+
+            // Verify OTP
+            if ($customer->phone_otp !== $request->otp) {
+                return $this->sendError('Invalid OTP. Please try again.', 400);
+            }
+
+            // Mark phone as verified
+            $customer->phone_validate = true;
+            $customer->phone_otp = null;
+            $customer->otp_expired_at = null;
+            $customer->save();
+
+            // Generate JWT token
+            $token = JWTAuth::fromUser($customer);
+
+            return $this->sendResponse('Phone verified successfully', [
+                'customer' => $customer->makeHidden(['password', 'phone_otp', 'remember_token']),
+                'access_token' => $token,
+                'token_type' => 'bearer',
+                'expires_in' => auth('api')->factory()->getTTL() * 60
+            ]);
+
+        } catch (\Exception $e) {
+            return $this->sendError('Failed to verify OTP: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Resend OTP
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function resendOTP(Request $request)
+    {
+        // Validate request
+        $validator = Validator::make($request->all(), [
+            'phone' => 'required|string|exists:customers,phone',
+            'country_code' => 'required|string|max:5',
+        ], [
+            'phone.required' => 'Phone number is required',
+            'phone.exists' => 'Phone number not registered',
+            'country_code.required' => 'Country code is required',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->sendValidationError($validator->errors());
+        }
+
+        try {
+            // Find customer
+            $customer = Customer::where('phone', $request->phone)->first();
+
+            if (!$customer) {
+                return $this->sendError('Customer not found', 404);
+            }
+
+            // Check if phone is already verified
+            if ($customer->phone_validate) {
+                return $this->sendError('Phone number is already verified', 400);
+            }
+
+            // Check rate limiting (prevent spam)
+            if ($customer->otp_expired_at && Carbon::now()->isBefore($customer->otp_expired_at->subMinutes(9))) {
+                $waitTime = Carbon::now()->diffInSeconds($customer->otp_expired_at->subMinutes(9));
+                return $this->sendError("Please wait {$waitTime} seconds before requesting a new OTP", 429);
+            }
+
+            // Generate new OTP
+            $otp = \App\Services\TwilioService::generateOTP(6);
+            $expirationMinutes = \App\Services\TwilioService::getOTPExpirationMinutes();
+
+            // Save OTP to database
+            $customer->phone_otp = $otp;
+            $customer->otp_expired_at = Carbon::now()->addMinutes($expirationMinutes);
+            $customer->save();
+
+            // Send OTP via Twilio
+            $twilioService = new \App\Services\TwilioService();
+            $phoneNumber = $request->country_code . $request->phone;
+            $sent = $twilioService->sendOTP($phoneNumber, $otp);
+
+            if (!$sent) {
+                return $this->sendError('Failed to send OTP. Please try again.', 500);
+            }
+
+            return $this->sendResponse('OTP resent successfully to your phone', [
+                'phone' => $request->phone,
+                'expires_in_minutes' => $expirationMinutes
+            ]);
+
+        } catch (\Exception $e) {
+            return $this->sendError('Failed to resend OTP: ' . $e->getMessage(), 500);
         }
     }
 
