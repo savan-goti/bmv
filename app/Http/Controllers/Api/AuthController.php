@@ -311,11 +311,11 @@ class AuthController extends Controller
             $customer->save();
             
             // Send OTP via Twilio
-            // $twilioService = new TwilioService();
-            // Fix phone number format - country_code should already have +
-            $phoneNumber = '+' . $request->country_code . $request->phone;
-            $sent = TwilioService::sendOTP($phoneNumber, $otp);
-            dd($sent);
+            $twilioService = new TwilioService();
+            // Format phone number - ensure country code has + prefix
+            $countryCode = ltrim($request->country_code, '+');
+            $phoneNumber = '+' . $countryCode . $request->phone;
+            $sent = $twilioService->sendOTP($phoneNumber, $otp);
             if (!$sent) {
                 // Log the error but still return success for development
                 Log::warning('OTP not sent via SMS, but saved to database', [
@@ -469,7 +469,9 @@ class AuthController extends Controller
 
             // Send OTP via Twilio
             $twilioService = new \App\Services\TwilioService();
-            $phoneNumber = $request->country_code . $request->phone;
+            // Format phone number - ensure country code has + prefix
+            $countryCode = ltrim($request->country_code, '+');
+            $phoneNumber = '+' . $countryCode . $request->phone;
             $sent = $twilioService->sendOTP($phoneNumber, $otp);
 
             if (!$sent) {

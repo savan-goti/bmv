@@ -33,7 +33,7 @@ class TwilioService
      * @param string $otp OTP code
      * @return bool
      */
-    public static function sendOTP($to, $otp)
+    public function sendOTP($to, $otp)
     {
         try {
             $message = "Your BMV verification code is: {$otp}. This code will expire in 10 minutes. Do not share this code with anyone.";
@@ -50,7 +50,6 @@ class TwilioService
             return true;
 
         } catch (\Exception $e) {
-        dd($e->getMessage());
             Log::error('Failed to send OTP', [
                 'phone' => $to,
                 'error' => $e->getMessage()
@@ -66,7 +65,7 @@ class TwilioService
      * @param string $message Message content
      * @return bool
      */
-    public static function sendSMS($to, $message)
+    public function sendSMS($to, $message)
     {
         try {
             $this->twilio->messages->create(
