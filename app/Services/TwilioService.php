@@ -33,11 +33,10 @@ class TwilioService
      * @param string $otp OTP code
      * @return bool
      */
-    public function sendOTP($to, $otp)
+    public static function sendOTP($to, $otp)
     {
         try {
             $message = "Your BMV verification code is: {$otp}. This code will expire in 10 minutes. Do not share this code with anyone.";
-            
             $this->twilio->messages->create(
                 $to,
                 [
