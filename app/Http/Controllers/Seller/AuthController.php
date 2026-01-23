@@ -23,6 +23,75 @@ class AuthController extends Controller
         return view('seller.auth.login', compact('setting'));
     }
 
+    public function register()
+    {
+        $setting = Setting::first();
+        return view('seller.auth.register', compact('setting'));
+    }
+
+    public function registerSubmit(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'business_name' => 'required|string|max:255',
+            'business_type' => 'nullable|string|max:255',
+            'owner_name' => 'required|string|max:255',
+            'email' => 'required|email|unique:sellers,email',
+            'phone' => 'required|string|unique:sellers,phone',
+            'gender' => 'nullable|in:male,female,other',
+            'address' => 'nullable|string',
+            'city' => 'nullable|string|max:255',
+            'state' => 'nullable|string|max:255',
+            'country' => 'nullable|string|max:255',
+            'pincode' => 'nullable|string|max:20',
+            'password' => 'required|string|min:8|confirmed',
+            'terms' => 'required|accepted',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->sendValidationError($validator->errors());
+        }
+
+        try {
+            // Generate unique username from business name
+            $username = \Str::slug($request->business_name);
+            $originalUsername = $username;
+            $counter = 1;
+            
+            while (Seller::where('username', $username)->exists()) {
+                $username = $originalUsername . '-' . $counter;
+                $counter++;
+            }
+
+            // Generate unique store link
+            $storeLink = url('/seller/store/' . $username);
+
+            // Create seller
+            $seller = Seller::create([
+                'business_name' => $request->business_name,
+                'business_type' => $request->business_type,
+                'owner_name' => $request->owner_name,
+                'username' => $username,
+                'store_link' => $storeLink,
+                'email' => $request->email,
+                'phone' => $request->phone,
+                'gender' => $request->gender,
+                'address' => $request->address,
+                'city' => $request->city,
+                'state' => $request->state,
+                'country' => $request->country,
+                'pincode' => $request->pincode,
+                'password' => $request->password,
+                'status' => 'pending',
+                'is_approved' => false,
+            ]);
+
+            return $this->sendSuccess('Registration successful! Your account is pending approval. You will be notified once approved.', 201);
+        } catch (\Exception $e) {
+            return $this->sendError('Registration failed. Please try again.', 500);
+        }
+    }
+
+
     public function authenticate(Request $request)
     {
         $validator = Validator::make($request->all(), [

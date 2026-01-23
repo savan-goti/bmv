@@ -53,7 +53,7 @@
                                         id="password" 
                                         label="Password" 
                                         placeholder="Enter Password" 
-                                        inputClass="pe-5 password-input"
+                                        inputClass="form-control pe-5 password-input"
                                     >
                                         <x-slot:suffix>
                                             <button
@@ -91,6 +91,7 @@
                                             placeholder="Enter 6-digit code or recovery code" 
                                             maxlength="10" 
                                             autocomplete="off"
+                                            inputClass="form-control"
                                             help-text="Enter the 6-digit code from your authenticator app or use a recovery code (up to 10 characters)."
                                         />
                                     </div>
@@ -110,6 +111,7 @@
                                             placeholder="Enter 6-digit code" 
                                             maxlength="6" 
                                             autocomplete="off"
+                                            inputClass="form-control"
                                             help-text="The code will expire in 10 minutes."
                                         />
                                     </div>
@@ -206,6 +208,20 @@
 <script>
 
     $(document).ready(function(){
+        // Password visibility toggle
+        $('#password-addon').on('click', function() {
+            var passwordInput = $('#password');
+            var icon = $(this).find('i');
+            
+            if (passwordInput.attr('type') === 'password') {
+                passwordInput.attr('type', 'text');
+                icon.removeClass('ri-eye-fill').addClass('ri-eye-off-fill');
+            } else {
+                passwordInput.attr('type', 'password');
+                icon.removeClass('ri-eye-off-fill').addClass('ri-eye-fill');
+            }
+        });
+
         $("#loginForm").validate({
             rules: {
                 email: {

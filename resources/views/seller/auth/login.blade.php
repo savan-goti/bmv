@@ -52,7 +52,7 @@
                                         id="password" 
                                         label="Password" 
                                         placeholder="Enter Password" 
-                                        inputClass="pe-5 password-input"
+                                        inputClass="form-control pe-5 password-input"
                                     >
                                         <x-slot:suffix>
                                             <button
@@ -90,6 +90,7 @@
                                             placeholder="Enter 6-digit code" 
                                             maxlength="6" 
                                             autocomplete="off"
+                                            inputClass="form-control"
                                             help-text="Check your email for the verification code."
                                         />
                                     </div>
@@ -109,6 +110,7 @@
                                             placeholder="Enter 6-digit code or recovery code" 
                                             maxlength="10" 
                                             autocomplete="off"
+                                            inputClass="form-control"
                                             help-text="Enter the 6-digit code from your authenticator app or use a recovery code (up to 10 characters)."
                                         />
                                     </div>
@@ -141,6 +143,10 @@
                                                 Continue with Google
                                             </a>
                                         </div>
+                                    </div>
+
+                                    <div class="mt-4 text-center">
+                                        <p class="mb-0">Don't have an account? <a href="{{route('seller.register')}}" class="fw-semibold text-primary text-decoration-underline">Sign up</a></p>
                                     </div>
                                 </form>
                             </div>
@@ -205,6 +211,20 @@
 <script>
 
     $(document).ready(function(){
+        // Password visibility toggle
+        $('#password-addon').on('click', function() {
+            var passwordInput = $('#password');
+            var icon = $(this).find('i');
+            
+            if (passwordInput.attr('type') === 'password') {
+                passwordInput.attr('type', 'text');
+                icon.removeClass('ri-eye-fill').addClass('ri-eye-off-fill');
+            } else {
+                passwordInput.attr('type', 'password');
+                icon.removeClass('ri-eye-off-fill').addClass('ri-eye-fill');
+            }
+        });
+
         $("#loginForm").validate({
             rules: {
                 email: {

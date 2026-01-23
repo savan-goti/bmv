@@ -12,6 +12,10 @@ Route::middleware(['guest:seller'])->group(function () {
     Route::get('/login', [AuthController::class, 'login'])->name('login');
     Route::post('/login', [AuthController::class, 'authenticate'])->name('authenticate');
     
+    // Registration Routes
+    Route::get('/register', [AuthController::class, 'register'])->name('register');
+    Route::post('/register', [AuthController::class, 'registerSubmit'])->name('register.submit');
+    
     // Google OAuth Routes - Using centralized GoogleAuthController
     Route::get('/auth/google', function() {
         return app(GoogleAuthController::class)->redirectToGoogle('seller');
