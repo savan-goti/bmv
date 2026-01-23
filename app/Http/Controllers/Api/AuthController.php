@@ -272,7 +272,7 @@ class AuthController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function sendOTP(Request $request)
+    public function sendOTP(Request $request, TwilioService $twilio)
     {
         // Validate request
         $validator = Validator::make($request->all(), [
@@ -313,9 +313,9 @@ class AuthController extends Controller
             // Send OTP via Twilio
             // Format phone number - ensure country code has + prefix
             $countryCode = ltrim($request->country_code, '+');
-            $phoneNumber =  $countryCode . $request->phone;
-            $sent = TwilioService::sendOTP($phoneNumber, $otp);
-            // dd($sent);
+            $phoneNumber = '+' . $countryCode . $request->phone;
+            $sent = $twilio->sendOTP($phoneNumber, "Your login OTP is {$otp}. Valid for 5 minutes.");
+            dd($sent);
             
             if (!$sent) {
                 // Log the error but still return success for development
@@ -460,8 +460,8 @@ class AuthController extends Controller
             }
 
             // Generate new OTP
-            $otp = \App\Services\TwilioService::generateOTP(6);
-            $expirationMinutes = \App\Services\TwilioService::getOTPExpirationMinutes();
+            $otp = TwilioService::generateOTP(6);
+            $expirationMinutes = TwilioService::getOTPExpirationMinutes();
 
             // Save OTP to database
             $customer->phone_otp = $otp;
@@ -469,13 +469,28 @@ class AuthController extends Controller
             $customer->save();
 
             // Send OTP via Twilio
-            $twilioService = new \App\Services\TwilioService();
+            $twilioService = new TwilioService();
             // Format phone number - ensure country code has + prefix
             $countryCode = ltrim($request->country_code, '+');
             $phoneNumber = '+' . $countryCode . $request->phone;
             $sent = $twilioService->sendOTP($phoneNumber, $otp);
 
             if (!$sent) {
+                // Log the error but still return success for development
+                Log::warning('OTP not sent via SMS, but saved to database', [
+                    'phone' => $phoneNumber,
+                    'otp' => $otp // Remove this in production
+                ]);
+                
+                // For development: return success with OTP in response
+                if (config('app.debug')) {
+                    return $this->sendResponse('OTP resent (SMS failed, check logs)', [
+                        'phone' => $request->phone,
+                        'expires_in_minutes' => $expirationMinutes,
+                        'otp_for_testing' => $otp // Only in debug mode
+                    ]);
+                }
+                
                 return $this->sendError('Failed to send OTP. Please try again.', 500);
             }
 

@@ -15,15 +15,16 @@ class TwilioService
     {
         $sid = Config::get('services.twilio.sid');
         $token = Config::get('services.twilio.token');
+        
+        $this->client = new Client(
+            config('services.twilio.sid'),
+            config('services.twilio.token')
+        );
+
         $this->from = Config::get('services.twilio.from');
 
         // Create Twilio client
         $this->twilio = new Client($sid, $token);
-        
-        // Disable SSL verification for local development (Windows WAMP issue)
-        if (config('app.env') === 'local') {
-            $this->twilio->getHttpClient()->setDefaultOption('verify', false);
-        }
     }
 
     /**
@@ -33,7 +34,7 @@ class TwilioService
      * @param string $otp OTP code
      * @return bool
      */
-    public static function sendOTP($to, $otp)
+    public function sendOTP($to, $otp)
     {
         try {
             $message = "Your BMV verification code is: {$otp}. This code will expire in 10 minutes. Do not share this code with anyone.";
@@ -64,25 +65,17 @@ class TwilioService
      * @param string $message Message content
      * @return bool
      */
-    public function sendSMS($to, $message)
+   public function sendSms(string $to, string $message): bool
     {
         try {
-            $this->twilio->messages->create(
-                $to,
-                [
-                    'from' => $this->from,
-                    'body' => $message
-                ]
-            );
-
-            Log::info('SMS sent successfully', ['phone' => $to]);
-            return true;
-
-        } catch (\Exception $e) {
-            Log::error('Failed to send SMS', [
-                'phone' => $to,
-                'error' => $e->getMessage()
+            $this->client->messages->create($to, [
+                'from' => $this->from,
+                'body' => $message,
             ]);
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error('Twilio SMS Error: '.$e->getMessage());
             return false;
         }
     }

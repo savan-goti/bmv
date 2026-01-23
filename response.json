@@ -1,0 +1,1 @@
+{"status":true,"message":"OTP generated (SMS failed, check logs)","data":{"phone":"1234567890","expires_in_minutes":10,"otp_for_testing":"942541"}}
