@@ -117,7 +117,7 @@
                                 id="oldPasswordInput" 
                                 label="Old Password" 
                                 placeholder="Enter Current Password" 
-                                inputClass="pe-5 password-input"
+                                inputClass="form-control pe-5 password-input"
                                 required
                             >
                                 <x-slot:suffix>

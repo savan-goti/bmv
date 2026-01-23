@@ -91,7 +91,7 @@
                                 label="Old Password" 
                                 placeholder="Enter Current Password" 
                                 required 
-                                inputClass="pe-5 password-input"
+                                inputClass="form-control pe-5 password-input"
                             >
                                 <x-slot:suffix>
                                     <button class="btn btn-link position-absolute end-0 top-0 text-decoration-none text-muted password-addon material-shadow-none" 
@@ -108,7 +108,7 @@
                                 label="New Password" 
                                 placeholder="Enter New Password" 
                                 required 
-                                inputClass="pe-5 password-input"
+                                inputClass="form-control pe-5 password-input"
                             >
                                 <x-slot:suffix>
                                     <button class="btn btn-link position-absolute end-0 top-0 text-decoration-none text-muted password-addon material-shadow-none" 
@@ -125,7 +125,7 @@
                                 label="Confirm Password" 
                                 placeholder="Enter Confirm Password" 
                                 required 
-                                inputClass="pe-5 password-input"
+                                inputClass="form-control pe-5 password-input"
                             >
                                 <x-slot:suffix>
                                     <button class="btn btn-link position-absolute end-0 top-0 text-decoration-none text-muted password-addon material-shadow-none" 

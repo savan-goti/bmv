@@ -16,10 +16,17 @@ Route::middleware(['guest:seller'])->group(function () {
     Route::get('/register', [AuthController::class, 'register'])->name('register');
     Route::post('/register', [AuthController::class, 'registerSubmit'])->name('register.submit');
     
-    // Google OAuth Routes - Using centralized GoogleAuthController
+    // Google OAuth Routes for Login
     Route::get('/auth/google', function() {
-        return app(GoogleAuthController::class)->redirectToGoogle('seller');
+        return app(GoogleAuthController::class)->redirectToGoogle('seller', 'login');
     })->name('auth.google');
+    
+    // Google OAuth Routes for Registration
+    Route::get('/auth/google/register', function() {
+        return app(GoogleAuthController::class)->redirectToGoogle('seller', 'register');
+    })->name('auth.google.register');
+    
+    // Google OAuth Callback (handles both login and registration)
     Route::get('/auth/google/callback', function() {
         return app(GoogleAuthController::class)->handleGoogleCallback('seller');
     })->name('auth.google.callback');
