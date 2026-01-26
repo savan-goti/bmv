@@ -51,10 +51,9 @@ class CustomerController extends Controller
 
             $validator = Validator::make($request->all(), [
                 'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-                'username' => ['nullable', 'string', 'max:255', 'regex:/^[a-zA-Z0-9_]+$/', Rule::unique('customers')->ignore($customer->id)],
+                'username' => ['required', 'string', 'max:255', 'regex:/^[a-zA-Z0-9_]+$/', Rule::unique('customers')->ignore($customer->id)],
                 'name' => 'required|string|max:255',
-                'email' => ['required', 'email', Rule::unique('customers')->ignore($customer->id)],
-                'phone' => ['nullable', 'string', Rule::unique('customers')->ignore($customer->id)],
+                'phone' => ['required', 'string', Rule::unique('customers')->ignore($customer->id)],
                 'country_code' => 'nullable|string|max:10',
                 'gender' => 'nullable|in:male,female,other',
                 'dob' => 'nullable|date|before:today',
