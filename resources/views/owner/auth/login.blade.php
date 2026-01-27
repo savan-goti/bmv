@@ -413,6 +413,24 @@
                 $('#two_factor_code').focus();
             }
         });
+
+        $('#password-addon').on('click', function() {
+            // Find the input field (it's in the same container)
+            var passwordInput = $('.password-input');
+            var icon = $(this).find('i');
+
+            if (passwordInput.attr('type') === 'password') {
+                // Show password
+                passwordInput.attr('type', 'text');
+                icon.removeClass('ri-eye-fill').addClass('ri-eye-off-fill');
+            } else {
+                // Hide password
+                passwordInput.attr('type', 'password');
+                icon.removeClass('ri-eye-off-fill').addClass('ri-eye-fill');
+            }
+        });
+
+        
     });
 </script>
 </body>

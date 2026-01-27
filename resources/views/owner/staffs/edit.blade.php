@@ -29,6 +29,21 @@
                                 <option value="{{ $admin->id }}" {{ $staff->admin_id == $admin->id ? 'selected' : '' }}>{{ $admin->name }}</option>
                             @endforeach
                         </x-input-field>
+
+                        <x-input-field 
+                            type="select" 
+                            name="position_id" 
+                            label="Branch & Job Position" 
+                            required
+                        >
+                            <option value="">-- Select Branch - Position --</option>
+                            @foreach($branch_positions as $bp)
+                                <option value="{{ $bp->id }}" 
+                                    {{ (isset($staff) && $staff->position_id == $bp->id) ? 'selected' : '' }}>
+                                    {{ $bp->branch->name ?? 'N/A' }} - {{ $bp->jobPosition->name ?? 'N/A' }}
+                                </option>
+                            @endforeach
+                        </x-input-field>
                         
                         <div class="mb-3">
                             <x-input-field 

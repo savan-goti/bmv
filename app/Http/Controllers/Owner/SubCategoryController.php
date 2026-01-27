@@ -30,28 +30,28 @@ class SubCategoryController extends Controller
         $result = SubCategory::with('category');
         return DataTables::eloquent($result)
             ->addIndexColumn()
-            ->addColumn('action', function($row){
+            ->addColumn('action', function ($row) {
                 $editUrl = route('owner.sub-categories.edit', $row->id);
                 $deleteUrl = route('owner.sub-categories.destroy', $row->id);
-                $btn = '<a href="'.$editUrl.'" class="btn btn-sm btn-info me-1"><i class="bx bx-edit"></i> Edit</a>';
-                $btn .= '<button type="button" class="btn btn-sm btn-danger delete-item" data-url="'.$deleteUrl.'"><i class="bx bx-trash"></i> Delete</button>';
+                $btn = '<a href="' . $editUrl . '" class="btn btn-sm btn-info me-1"><i class="bx bx-edit"></i> Edit</a>';
+                $btn .= '<button type="button" class="btn btn-sm btn-danger delete-item" data-url="' . $deleteUrl . '"><i class="bx bx-trash"></i> Delete</button>';
                 return $btn;
             })
-            ->editColumn('status', function($row){
+            ->editColumn('status', function ($row) {
                 $status = $row->status->label();
                 $badgeClass = $row->status->color();
                 return '<div class="form-check form-switch form-switch-md mb-3" dir="ltr">
-                            <input type="checkbox" class="form-check-input status-toggle" id="customSwitch'.$row->id.'" data-id="'.$row->id.'" data-url="'.route('owner.sub-categories.status', $row->id).'" '.($row->status === Status::Active ? 'checked' : '').'>
-                            <label class="form-check-label" for="customSwitch'.$row->id.'">'.$status.'</label>
+                            <input type="checkbox" class="form-check-input status-toggle" id="customSwitch' . $row->id . '" data-id="' . $row->id . '" data-url="' . route('owner.sub-categories.status', $row->id) . '" ' . ($row->status === Status::Active ? 'checked' : '') . '>
+                            <label class="form-check-label" for="customSwitch' . $row->id . '">' . $status . '</label>
                         </div>';
             })
-            ->editColumn('image', function($row){
-                if($row->image){
-                    return '<img src="'.asset(self::IMAGE_PATH.$row->image).'" alt="'.$row->name.'" class="img-thumbnail" width="50">';
+            ->editColumn('image', function ($row) {
+                if ($row->image) {
+                    return '<img src="' . asset(self::IMAGE_PATH . $row->image) . '" alt="' . $row->name . '" class="img-thumbnail" width="50">';
                 }
                 return 'N/A';
             })
-            ->addColumn('category_name', function($row){
+            ->addColumn('category_name', function ($row) {
                 return $row->category ? $row->category->name : 'N/A';
             })
             ->rawColumns(['action', 'status', 'image'])
@@ -68,13 +68,15 @@ class SubCategoryController extends Controller
     {
         try {
             DB::beginTransaction();
-
+            $messages = [
+                'name.unique' => 'This Sub Category already exists in records.',
+            ];
             $validator = Validator::make($request->all(), [
                 'category_id' => 'required|exists:categories,id',
-                'name' => 'required|string|max:255',
+                'name' => 'required|string|max:255|unique:sub_categories,name',
                 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
                 'status' => 'required|in:active,inactive',
-            ]);
+            ], $messages);
 
             if ($validator->fails()) {
                 return $this->sendValidationError($validator->errors());
@@ -92,7 +94,6 @@ class SubCategoryController extends Controller
 
             DB::commit();
             return $this->sendResponse('SubCategory created successfully.', $subCategory);
-
         } catch (Exception $e) {
             DB::rollBack();
             return $this->sendError($e->getMessage());
@@ -126,7 +127,7 @@ class SubCategoryController extends Controller
             $validated['slug'] = Str::slug($validated['name']);
 
             if ($request->hasFile('image')) {
-                if($subCategory->image){
+                if ($subCategory->image) {
                     deleteImgFile($subCategory->image, self::IMAGE_PATH);
                 }
                 $validated['image'] = uploadImgFile($request->image, self::IMAGE_PATH);
@@ -136,7 +137,6 @@ class SubCategoryController extends Controller
 
             DB::commit();
             return $this->sendResponse('SubCategory updated successfully.', $subCategory);
-
         } catch (Exception $e) {
             DB::rollBack();
             return $this->sendError($e->getMessage());
@@ -145,7 +145,7 @@ class SubCategoryController extends Controller
 
     public function destroy(SubCategory $subCategory)
     {
-        if($subCategory->image){
+        if ($subCategory->image) {
             deleteImgFile($subCategory->image, self::IMAGE_PATH);
         }
         $subCategory->delete();

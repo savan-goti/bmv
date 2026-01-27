@@ -25,19 +25,19 @@ class JobPositionController extends Controller
         $result = JobPosition::query();
         return DataTables::eloquent($result)
             ->addIndexColumn()
-            ->addColumn('action', function($row){
+            ->addColumn('action', function ($row) {
                 $viewUrl = route('owner.job-positions.show', $row->id);
                 $editUrl = route('owner.job-positions.edit', $row->id);
                 $deleteUrl = route('owner.job-positions.destroy', $row->id);
-                $btn = '<a href="'.$viewUrl.'" class="btn btn-sm btn-success me-1"><i class="bx bx-show"></i> View</a>';
-                $btn .= '<a href="'.$editUrl.'" class="btn btn-sm btn-info me-1"><i class="bx bx-edit"></i> Edit</a>';
-                $btn .= '<button type="button" class="btn btn-sm btn-danger delete-item" data-url="'.$deleteUrl.'"><i class="bx bx-trash"></i> Delete</button>';
+                $btn = '<a href="' . $viewUrl . '" class="btn btn-sm btn-success me-1"><i class="bx bx-show"></i> View</a>';
+                $btn .= '<a href="' . $editUrl . '" class="btn btn-sm btn-info me-1"><i class="bx bx-edit"></i> Edit</a>';
+                $btn .= '<button type="button" class="btn btn-sm btn-danger delete-item" data-url="' . $deleteUrl . '"><i class="bx bx-trash"></i> Delete</button>';
                 return $btn;
             })
-            ->editColumn('status', function($row){
+            ->editColumn('status', function ($row) {
                 $status = ucfirst($row->status);
                 $badgeClass = $row->status == 'active' ? 'success' : 'danger';
-                return '<span class="badge bg-'.$badgeClass.'">'.$status.'</span>';
+                return '<span class="badge bg-' . $badgeClass . '">' . $status . '</span>';
             })
             ->rawColumns(['action', 'status'])
             ->make(true);
@@ -68,11 +68,15 @@ class JobPositionController extends Controller
 
             // Build validation rules
             $rules = [
-                'name' => 'required|string|max:255',
+                'name' => 'required|string|max:255|unique:job_positions,name,' . $id,
                 'description' => 'nullable|string',
                 'department' => 'nullable|string|max:255',
                 'level' => 'nullable|string|max:255',
                 'status' => 'required|in:active,inactive',
+            ];
+
+            $messages = [
+                'name.unique' => 'This Job Position already exists in records.',
             ];
 
             if (!$id) {
@@ -80,7 +84,7 @@ class JobPositionController extends Controller
                 $rules['owner_id'] = 'required';
             }
 
-            $validator = Validator::make($request->all(), $rules);
+            $validator = Validator::make($request->all(), $rules, $messages);
 
             if ($validator->fails()) {
                 return $this->sendValidationError($validator->errors());
@@ -101,7 +105,6 @@ class JobPositionController extends Controller
 
             DB::commit();
             return $this->sendSuccess($message);
-
         } catch (Exception $e) {
             DB::rollBack();
             return $this->sendError($e->getMessage());

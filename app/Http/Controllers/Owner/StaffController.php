@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Owner;
 use App\Http\Controllers\Controller;
 use App\Models\Staff;
 use App\Models\Admin;
+use App\Models\BranchPosition;
 use App\Models\JobPosition;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -54,7 +55,10 @@ class StaffController extends Controller
     {
         $admins = Admin::where('status', 'active')->get();
         $jobPositions = JobPosition::where('status', 'active')->get();
-        return view('owner.staffs.create', compact('admins', 'jobPositions'));
+        $branch_positions = BranchPosition::with(['branch', 'jobPosition'])
+            ->where('is_active', true)
+            ->get();
+        return view('owner.staffs.create', compact('admins', 'jobPositions','branch_positions'));
     }
 
     public function show(Staff $staff)
@@ -115,7 +119,10 @@ class StaffController extends Controller
     {
         $admins = Admin::where('status', 'active')->get();
         $jobPositions = JobPosition::where('status', 'active')->get();
-        return view('owner.staffs.edit', compact('staff', 'admins', 'jobPositions'));
+        $branch_positions = BranchPosition::with(['branch', 'jobPosition'])
+            ->where('is_active', true)
+            ->get();
+        return view('owner.staffs.edit', compact('staff', 'admins', 'jobPositions','branch_positions'));
     }
 
     public function update(Request $request, Staff $staff)

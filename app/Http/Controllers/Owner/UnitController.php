@@ -52,10 +52,12 @@ class UnitController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:255|unique:units,name',
             'short_name' => 'required|string|max:10',
             'category' => 'required|in:product,service',
             'status' => 'required|in:active,inactive',
+        ], [
+            'name.unique' => 'This Unit name already exists in our records.',
         ]);
 
         try {

@@ -87,7 +87,7 @@ class CollectionController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:255|unique:collections,name',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'description' => 'nullable|string',
             'start_date' => 'nullable|date',
@@ -96,6 +96,8 @@ class CollectionController extends Controller
             'status' => 'required|in:active,inactive',
             'products' => 'nullable|array',
             'products.*' => 'exists:products,id',
+        ], [
+            'name.unique' => 'This Collection name already exists in our records.',
         ]);
 
         $data = $request->except('products');

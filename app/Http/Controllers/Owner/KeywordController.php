@@ -30,7 +30,7 @@ class KeywordController extends Controller
     {
         if ($request->ajax()) {
             $data = Keyword::select('keywords.*');
-            
+
             return DataTables::of($data)
                 ->addIndexColumn()
                 ->addColumn('type', function ($row) {
@@ -46,7 +46,7 @@ class KeywordController extends Controller
                 })
                 ->addColumn('action', function ($row) {
                     $editUrl = route('owner.master.keywords.edit', $row->id);
-                    
+
                     return '<div class="btn-group" role="group">
                                 <a href="' . $editUrl . '" class="btn btn-sm btn-primary">
                                     <i class="ri-edit-line"></i>
@@ -86,10 +86,12 @@ class KeywordController extends Controller
             DB::beginTransaction();
 
             $validator = Validator::make($request->all(), [
-                'name' => 'required|string|max:255',
+                'name' => 'required|string|max:255|unique:keywords,name',
                 'description' => 'nullable|string',
                 'type' => 'required|in:product,service',
                 'status' => 'required|in:active,inactive',
+            ], [
+                'name.unique' => 'This keyword already exists in our records.',
             ]);
 
             if ($validator->fails()) {
@@ -115,7 +117,7 @@ class KeywordController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->sendError($e->getMessage());
-        }   
+        }
     }
 
     /**

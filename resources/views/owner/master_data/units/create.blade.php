@@ -18,16 +18,25 @@
                     <form id="unitForm" method="POST">
                         @csrf
                         <div class="row">
-                            <div class="col-md-6"><x-input-field name="name" label="Name" placeholder="Enter name" required /></div>
-                            <div class="col-md-6"><x-input-field name="short_name" label="Short Name" placeholder="Enter short name (e.g. Kg, Pcs)" required /></div>
-                            <div class="col-md-6"><x-input-field type="select" name="category" label="Category" required>
-                                <option value="product">Product</option>
-                                <option value="service">Service</option>
-                            </x-input-field></div>
-                            <div class="col-md-6"><x-input-field type="select" name="status" label="Status" required>
-                                <option value="active">Active</option>
-                                <option value="inactive">Inactive</option>
-                            </x-input-field></div>
+                            <div class="col-md-6">
+                                <x-input-field name="name" label="Name" placeholder="Enter name" required />
+                            </div>
+                            <div class="col-md-6">
+                                <x-input-field name="short_name" label="Short Name"
+                                    placeholder="Enter short name (e.g. Kg, Pcs)" required />
+                            </div>
+                            <div class="col-md-6">
+                                <x-input-field type="select" name="category" label="Category" required>
+                                    <option value="product">Product</option>
+                                    <option value="service">Service</option>
+                                </x-input-field>
+                            </div>
+                            <div class="col-md-6">
+                                <x-input-field type="select" name="status" label="Status" required>
+                                    <option value="active">Active</option>
+                                    <option value="inactive">Inactive</option>
+                                </x-input-field>
+                            </div>
                         </div>
 
                         <button type="submit" class="btn btn-primary" id="saveButton">
@@ -70,6 +79,20 @@
                              }, 1000);
                         }else{
                              sendError(result.message);
+                        }
+                    },
+                    error: function (xhr) {
+                        let data = xhr.responseJSON;
+                        if (data && data.hasOwnProperty('error')) {
+                            // Display validation errors
+                            $.each(data.error, function(field, messages) {
+                                let errorMsg = Array.isArray(messages) ? messages[0] : messages;
+                                sendError(errorMsg);
+                            });
+                        } else if (data && data.hasOwnProperty('message')) {
+                            sendError(data.message);
+                        } else {
+                            sendError('An error occurred. Please try again.');
                         }
                     },
                     complete: function () {

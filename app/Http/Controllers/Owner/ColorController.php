@@ -58,9 +58,11 @@ class ColorController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:255|unique:colors,name',
             'color_code' => 'required|string|max:20',
             'status' => 'required|in:active,inactive',
+        ], [
+            'name.unique' => 'This Color already exists in our records.',
         ]);
 
         try {

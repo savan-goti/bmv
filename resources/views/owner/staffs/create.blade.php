@@ -28,6 +28,21 @@
                                 <option value="{{ $admin->id }}">{{ $admin->name }}</option>
                             @endforeach
                         </x-input-field>
+
+                        <x-input-field 
+                            type="select" 
+                            name="position_id" 
+                            label="Branch & Job Position" 
+                            required
+                        >
+                            <option value="">-- Select Branch - Position --</option>
+                            @foreach($branch_positions as $bp)
+                                <option value="{{ $bp->id }}" 
+                                    {{ (isset($admin) && $admin->position_id == $bp->id) ? 'selected' : '' }}>
+                                    {{ $bp->branch->name ?? 'N/A' }} - {{ $bp->jobPosition->name ?? 'N/A' }}
+                                </option>
+                            @endforeach
+                        </x-input-field>
                         
                         <x-input-field 
                             type="file" 

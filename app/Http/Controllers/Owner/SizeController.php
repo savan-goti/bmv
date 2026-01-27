@@ -52,8 +52,10 @@ class SizeController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:255|unique:sizes,name',
             'status' => 'required|in:active,inactive',
+        ], [
+            'name.unique' => 'This Size already exists in our records.',
         ]);
 
         try {

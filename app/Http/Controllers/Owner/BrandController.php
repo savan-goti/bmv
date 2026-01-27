@@ -76,11 +76,13 @@ class BrandController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:255|unique:brands,name',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'description' => 'nullable|string',
             'website' => 'nullable|url',
             'status' => 'required|in:active,inactive',
+        ], [
+            'name.unique' => 'This Brand name already exists in our records.',
         ]);
 
         $data = $request->all();

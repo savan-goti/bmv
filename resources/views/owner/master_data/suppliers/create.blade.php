@@ -68,6 +68,20 @@
                              sendToast(result.message, 'danger');
                         }
                     },
+                    error: function (xhr) {
+                        let data = xhr.responseJSON;
+                        if (data && data.hasOwnProperty('error')) {
+                            // Display validation errors
+                            $.each(data.error, function(field, messages) {
+                                let errorMsg = Array.isArray(messages) ? messages[0] : messages;
+                                sendError(errorMsg);
+                            });
+                        } else if (data && data.hasOwnProperty('message')) {
+                            sendError(data.message);
+                        } else {
+                            sendError('An error occurred. Please try again.');
+                        }
+                    },
                     complete: function () {
                         $('#saveButton').attr('disabled', false);
                         $("#btnSpinner").hide();

@@ -28,7 +28,7 @@ class ChildCategoryController extends Controller
     {
         if ($request->ajax()) {
             $data = ChildCategory::with(['category', 'subCategory'])->select('child_categories.*');
-            
+
             return DataTables::of($data)
                 ->addIndexColumn()
                 ->addColumn('category', function ($row) {
@@ -53,7 +53,7 @@ class ChildCategoryController extends Controller
                 ->addColumn('action', function ($row) {
                     $editUrl = route('owner.child-categories.edit', $row->id);
                     $deleteUrl = route('owner.child-categories.destroy', $row->id);
-                    
+
                     return '<div class="btn-group" role="group">
                                 <a href="' . $editUrl . '" class="btn btn-sm btn-primary">
                                     <i class="ri-edit-line"></i>
@@ -85,9 +85,11 @@ class ChildCategoryController extends Controller
         $request->validate([
             'category_id' => 'required|exists:categories,id',
             'sub_category_id' => 'required|exists:sub_categories,id',
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:255|unique:child_categories,name',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'status' => 'required|in:active,inactive',
+        ], [
+            'name.unique' => 'This Child Category name already exists in our records.',
         ]);
 
         $data = $request->all();
@@ -116,7 +118,7 @@ class ChildCategoryController extends Controller
         $subCategories = SubCategory::where('category_id', $childCategory->category_id)
             ->where('status', Status::Active)
             ->get();
-        
+
         return view('owner.child_categories.edit', compact('childCategory', 'categories', 'subCategories'));
     }
 

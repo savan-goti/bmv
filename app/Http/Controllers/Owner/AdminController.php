@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Yajra\DataTables\Facades\DataTables;
 use App\Http\Traits\ResponseTrait;
+use App\Models\Branch;
+use App\Models\BranchPosition;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Exception;
@@ -28,21 +30,21 @@ class AdminController extends Controller
         $result = Admin::query();
         return DataTables::eloquent($result)
             ->addIndexColumn()
-            ->addColumn('action', function($row){
+            ->addColumn('action', function ($row) {
                 $viewUrl = route('owner.admins.show', $row->id);
                 $editUrl = route('owner.admins.edit', $row->id);
                 $deleteUrl = route('owner.admins.destroy', $row->id);
-                $btn = '<a href="'.$viewUrl.'" class="btn btn-sm btn-primary me-1"><i class="bx bx-show"></i> View</a>';
-                $btn .= '<a href="'.$editUrl.'" class="btn btn-sm btn-info me-1"><i class="bx bx-edit"></i> Edit</a>';
-                $btn .= '<button type="button" class="btn btn-sm btn-danger delete-item" data-url="'.$deleteUrl.'"><i class="bx bx-trash"></i> Delete</button>';
+                $btn = '<a href="' . $viewUrl . '" class="btn btn-sm btn-primary me-1"><i class="bx bx-show"></i> View</a>';
+                $btn .= '<a href="' . $editUrl . '" class="btn btn-sm btn-info me-1"><i class="bx bx-edit"></i> Edit</a>';
+                $btn .= '<button type="button" class="btn btn-sm btn-danger delete-item" data-url="' . $deleteUrl . '"><i class="bx bx-trash"></i> Delete</button>';
                 return $btn;
             })
-            ->editColumn('status', function($row){
+            ->editColumn('status', function ($row) {
                 $status = ucfirst($row->status);
                 $badgeClass = $row->status == 'active' ? 'success' : 'danger';
-                return '<span class="badge bg-'.$badgeClass.'">'.$status.'</span>';
+                return '<span class="badge bg-' . $badgeClass . '">' . $status . '</span>';
             })
-            ->editColumn('role', function($row){
+            ->editColumn('role', function ($row) {
                 return ucfirst($row->role);
             })
             ->rawColumns(['action', 'status'])
@@ -58,13 +60,19 @@ class AdminController extends Controller
     public function create()
     {
         $jobPositions = JobPosition::where('status', 'active')->get();
-        return view('owner.admins.form', compact('jobPositions'));
+        $branch_positions = BranchPosition::with(['branch', 'jobPosition'])
+            ->where('is_active', true)
+            ->get();
+        return view('owner.admins.form', compact('jobPositions', 'branch_positions'));
     }
 
     public function edit(Admin $admin)
     {
         $jobPositions = JobPosition::where('status', 'active')->get();
-        return view('owner.admins.form', compact('admin', 'jobPositions'));
+        $branch_positions = BranchPosition::with(['branch', 'jobPosition'])
+            ->where('is_active', true)
+            ->get();
+        return view('owner.admins.form', compact('admin', 'jobPositions','branch_positions'));
     }
 
     /**
@@ -83,7 +91,7 @@ class AdminController extends Controller
                 'gender' => 'nullable|in:male,female,other',
                 'phone' => 'nullable|string|max:20',
                 'education' => 'nullable|string|max:255',
-                'position_id' => 'nullable|exists:job_positions,id',
+                'position_id' => 'nullable|exists:branch_positions,id',
                 'address' => 'nullable|string',
                 'status' => 'required|in:active,inactive',
                 'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
@@ -142,7 +150,6 @@ class AdminController extends Controller
 
             DB::commit();
             return $this->sendSuccess($message);
-
         } catch (Exception $e) {
             DB::rollBack();
             return $this->sendError($e->getMessage());
