@@ -10,6 +10,8 @@ class SupportQueue extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $table = 'support_queues';
+
     protected $fillable = [
         'name',
         'description',

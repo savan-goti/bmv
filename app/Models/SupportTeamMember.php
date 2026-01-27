@@ -12,6 +12,8 @@ class SupportTeamMember extends Authenticatable
 {
     use HasFactory, Notifiable, SoftDeletes;
 
+    protected $table = 'support_team_members';
+
     protected $fillable = [
         'created_by_id',
         'created_by_type',

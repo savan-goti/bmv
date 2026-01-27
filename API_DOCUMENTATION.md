@@ -103,29 +103,60 @@
 ### 3. Send OTP
 **Endpoint:** `POST /api/v1/auth/send-otp`
 
+**Description:** Sends an OTP to the customer's email or phone for login verification.
+
 **Parameters:**
 | Parameter | Type | Required | Validation | Description |
 |-----------|------|----------|------------|-------------|
-| phone | string | Yes | exists:customers,phone | Registered phone number |
-| country_code | string | Yes | max:5 | Country code (e.g., +91) |
+| type | string | Yes | in:email,phone | Type of OTP delivery (email or phone) |
+| identifier | string | Yes | - | Email address or phone number |
+| country_code | string | Conditional | max:5 | Required only for phone type (e.g., +91) |
+
+**Request Example (Email):**
+```json
+{
+  "type": "email",
+  "identifier": "customer@example.com"
+}
+```
+
+**Request Example (Phone):**
+```json
+{
+  "type": "phone",
+  "identifier": "9876543210",
+  "country_code": "+91"
+}
+```
 
 **Output (Success - 200):**
 ```json
 {
   "success": true,
-  "message": "OTP sent successfully to your phone",
+  "message": "OTP sent successfully to your email",
   "data": {
-    "phone": "1234567890",
-    "expires_in_minutes": 5
+    "email": "customer@example.com",
+    "expires_in_minutes": 10
   }
 }
 ```
 
-**Output (Error - 400):**
+**Output (Error - 404):**
 ```json
 {
   "success": false,
-  "message": "Phone number is already verified"
+  "message": "Email not registered"
+}
+```
+
+**Output (Error - 422):**
+```json
+{
+  "success": false,
+  "message": "Validation Error",
+  "errors": {
+    "country_code": ["Country code is required for phone OTP"]
+  }
 }
 ```
 
@@ -134,24 +165,45 @@
 ### 4. Verify OTP
 **Endpoint:** `POST /api/v1/auth/verify-otp`
 
+**Description:** Verifies the OTP and logs the customer in by returning a JWT token.
+
 **Parameters:**
 | Parameter | Type | Required | Validation | Description |
 |-----------|------|----------|------------|-------------|
-| phone | string | Yes | exists:customers,phone | Registered phone number |
+| type | string | Yes | in:email,phone | Type of OTP (email or phone) |
+| identifier | string | Yes | - | Email address or phone number |
 | otp | string | Yes | size:6 | 6-digit OTP code |
+
+**Request Example (Email):**
+```json
+{
+  "type": "email",
+  "identifier": "customer@example.com",
+  "otp": "123456"
+}
+```
+
+**Request Example (Phone):**
+```json
+{
+  "type": "phone",
+  "identifier": "9876543210",
+  "otp": "123456"
+}
+```
 
 **Output (Success - 200):**
 ```json
 {
   "success": true,
-  "message": "Phone verified successfully",
+  "message": "OTP verified successfully. You are now logged in.",
   "data": {
     "customer": {
       "id": 1,
       "name": "John Doe",
       "email": "john@example.com",
       "username": "johndoe123",
-      "phone": "1234567890",
+      "phone": "9876543210",
       "phone_validate": true,
       "status": "active"
     },
@@ -170,25 +222,61 @@
 }
 ```
 
+**Output (Error - 400 - Expired):**
+```json
+{
+  "success": false,
+  "message": "OTP has expired. Please request a new OTP."
+}
+```
+
+**Output (Error - 404):**
+```json
+{
+  "success": false,
+  "message": "Email not registered"
+}
+```
+
 ---
 
 ### 5. Resend OTP
 **Endpoint:** `POST /api/v1/auth/resend-otp`
 
+**Description:** Resends a new OTP to the customer's email or phone with rate limiting.
+
 **Parameters:**
 | Parameter | Type | Required | Validation | Description |
 |-----------|------|----------|------------|-------------|
-| phone | string | Yes | exists:customers,phone | Registered phone number |
-| country_code | string | Yes | max:5 | Country code (e.g., +91) |
+| type | string | Yes | in:email,phone | Type of OTP delivery (email or phone) |
+| identifier | string | Yes | - | Email address or phone number |
+| country_code | string | Conditional | max:5 | Required only for phone type (e.g., +91) |
+
+**Request Example (Email):**
+```json
+{
+  "type": "email",
+  "identifier": "customer@example.com"
+}
+```
+
+**Request Example (Phone):**
+```json
+{
+  "type": "phone",
+  "identifier": "9876543210",
+  "country_code": "+91"
+}
+```
 
 **Output (Success - 200):**
 ```json
 {
   "success": true,
-  "message": "OTP resent successfully to your phone",
+  "message": "OTP resent successfully to your email",
   "data": {
-    "phone": "1234567890",
-    "expires_in_minutes": 5
+    "email": "customer@example.com",
+    "expires_in_minutes": 10
   }
 }
 ```
@@ -198,6 +286,14 @@
 {
   "success": false,
   "message": "Please wait 60 seconds before requesting a new OTP"
+}
+```
+
+**Output (Error - 404):**
+```json
+{
+  "success": false,
+  "message": "Email not registered"
 }
 ```
 

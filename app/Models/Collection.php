@@ -11,6 +11,8 @@ class Collection extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $table = 'collections';
+
     protected $fillable = [
         'name',
         'slug',

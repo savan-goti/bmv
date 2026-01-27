@@ -9,6 +9,8 @@ class ProductVariantAttribute extends Model
 {
     use HasFactory;
 
+    protected $table = 'product_variant_attributes';
+
     protected $fillable = [
         'product_variant_id',
         'attribute_name',

@@ -10,6 +10,8 @@ class SupportDepartment extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $table = 'support_departments';
+
     protected $fillable = [
         'name',
         'description',

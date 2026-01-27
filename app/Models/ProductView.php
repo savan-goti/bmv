@@ -9,6 +9,8 @@ class ProductView extends Model
 {
     use HasFactory;
 
+    protected $table = 'product_views';
+
     public $timestamps = false; // Only created_at
 
     protected $fillable = [

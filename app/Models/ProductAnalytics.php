@@ -9,6 +9,8 @@ class ProductAnalytics extends Model
 {
     use HasFactory;
 
+    protected $table = 'product_analytics';
+
     protected $fillable = [
         'product_id',
         'view_count',

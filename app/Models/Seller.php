@@ -12,6 +12,8 @@ class Seller extends Authenticatable
     /** @use HasFactory<\Database\Factories\SellerFactory> */
     use HasFactory, Notifiable, SoftDeletes;
 
+    protected $table = 'sellers';
+
     protected $fillable = [
         'business_name',
         'business_logo',

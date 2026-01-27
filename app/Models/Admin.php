@@ -12,6 +12,8 @@ class Admin extends Authenticatable
     /** @use HasFactory<\Database\Factories\AdminFactory> */
     use HasFactory, Notifiable, SoftDeletes;
 
+    protected $table = 'admins';
+
     protected $fillable = [
         'owner_id',
         'profile_image',

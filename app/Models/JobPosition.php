@@ -10,6 +10,8 @@ class JobPosition extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $table = 'job_positions';
+
     protected $fillable = [
         'owner_id',
         'name',

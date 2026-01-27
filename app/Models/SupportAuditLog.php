@@ -9,6 +9,8 @@ class SupportAuditLog extends Model
 {
     use HasFactory;
 
+    protected $table = 'support_audit_logs';
+
     protected $fillable = [
         'support_team_member_id',
         'performed_by_id',

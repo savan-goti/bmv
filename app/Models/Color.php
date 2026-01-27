@@ -10,6 +10,8 @@ class Color extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $table = 'colors';
+
     protected $fillable = ['name', 'color_code', 'status'];
 
     protected $casts = [

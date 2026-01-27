@@ -10,6 +10,8 @@ class Unit extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $table = 'units';
+
     protected $fillable = ['name', 'short_name', 'category', 'status'];
 
     protected $casts = [

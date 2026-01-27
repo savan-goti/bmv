@@ -10,6 +10,8 @@ class BranchPosition extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $table = 'branch_positions';
+
     protected $fillable = [
         'branch_id',
         'positionable_type',

@@ -13,6 +13,8 @@ class Customer extends Authenticatable implements JWTSubject
     /** @use HasFactory<\Database\Factories\CustomerFactory> */
     use HasFactory, Notifiable, SoftDeletes;
 
+    protected $table = 'customers';
+
     protected $fillable = [
         'profile_image',
         'canonical',
@@ -24,6 +26,8 @@ class Customer extends Authenticatable implements JWTSubject
         'phone_otp',
         'otp_expired_at',
         'phone_validate',
+        'email_otp',
+        'email_otp_expired_at',
         'gender',
         'dob',
         'address',
@@ -42,6 +46,7 @@ class Customer extends Authenticatable implements JWTSubject
         'password',
         'remember_token',
         'phone_otp',
+        'email_otp',
     ];
 
     protected function casts(): array
@@ -50,6 +55,7 @@ class Customer extends Authenticatable implements JWTSubject
             'password' => 'hashed',
             'dob' => 'date',
             'otp_expired_at' => 'datetime',
+            'email_otp_expired_at' => 'datetime',
             'phone_validate' => 'boolean',
             'social_links' => 'array',
             'latitude' => 'decimal:8',

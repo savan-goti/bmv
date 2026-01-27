@@ -11,6 +11,8 @@ class Keyword extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $table = 'keywords';
+
     protected $fillable = [
         'name',
         'slug',
