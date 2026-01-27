@@ -566,7 +566,7 @@ class AuthController extends Controller
 
             // Generate new OTP
             $otp = TwilioService::generateOTP(6);
-            $expirationMinutes = TwilioService::getOTPExpirationMinutes();
+            $expirationMinutes = (int) TwilioService::getOTPExpirationMinutes();
 
             // Save OTP to database based on type
             if ($type === 'email') {

@@ -7,6 +7,131 @@
 
 ---
 
+## Authentication & Error Handling
+
+### Access Token Requirements
+
+Most API endpoints require authentication via JWT (JSON Web Token). Protected endpoints require an access token to be included in the request header.
+
+**Header Format:**
+```
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+```
+
+### Authentication Error Responses
+
+When an access token is missing, invalid, or expired, the API will return one of the following error responses:
+
+#### 1. Token Not Found (401)
+**When:** No access token is provided in the request header.
+
+```json
+{
+  "success": false,
+  "message": "Access token not found. Please provide a valid token.",
+  "error": "token_not_found"
+}
+```
+
+#### 2. Token Invalid (401)
+**When:** The provided access token is malformed or invalid.
+
+```json
+{
+  "success": false,
+  "message": "Access token is invalid. Please login again.",
+  "error": "token_invalid"
+}
+```
+
+#### 3. Token Expired (401)
+**When:** The access token has passed its expiration time.
+
+```json
+{
+  "success": false,
+  "message": "Access token has expired. Please refresh your token or login again.",
+  "error": "token_expired"
+}
+```
+
+**Solution:** Use the `/api/v1/auth/refresh` endpoint to get a new token.
+
+#### 4. Unauthorized (401)
+**When:** Trying to access a protected endpoint without proper authentication.
+
+```json
+{
+  "success": false,
+  "message": "Unauthorized. Access token is required for this endpoint.",
+  "error": "unauthorized"
+}
+```
+
+#### 5. Unauthenticated (401)
+**When:** General authentication failure.
+
+```json
+{
+  "success": false,
+  "message": "Authentication required. Please login to access this resource.",
+  "error": "unauthenticated"
+}
+```
+
+### How to Include Access Token
+
+**Using cURL:**
+```bash
+curl -X GET "http://your-domain.com/api/v1/auth/profile" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "Accept: application/json"
+```
+
+**Using JavaScript (Fetch):**
+```javascript
+fetch('http://your-domain.com/api/v1/auth/profile', {
+    headers: {
+        'Authorization': 'Bearer YOUR_ACCESS_TOKEN',
+        'Accept': 'application/json'
+    }
+})
+```
+
+**Using Axios:**
+```javascript
+axios.get('/api/v1/auth/profile', {
+    headers: {
+        'Authorization': 'Bearer YOUR_ACCESS_TOKEN'
+    }
+})
+```
+
+### Token Refresh Flow
+
+When you receive a `token_expired` error, refresh your token using:
+
+**Request:**
+```http
+POST /api/v1/auth/refresh
+Authorization: Bearer YOUR_EXPIRED_TOKEN
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Login successful",
+  "data": {
+    "access_token": "NEW_ACCESS_TOKEN",
+    "token_type": "bearer",
+    "expires_in": 3600
+  }
+}
+```
+
+---
+
 ## Authentication APIs
 
 ### 1. Register Customer

@@ -42,5 +42,54 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        // Handle JWT authentication exceptions for API
+        $exceptions->render(function (\Tymon\JWTAuth\Exceptions\TokenInvalidException $e, $request) {
+            if ($request->is('api/*')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Access token is invalid. Please login again.',
+                    'error' => 'token_invalid'
+                ], 401);
+            }
+        });
+
+        $exceptions->render(function (\Tymon\JWTAuth\Exceptions\TokenExpiredException $e, $request) {
+            if ($request->is('api/*')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Access token has expired. Please refresh your token or login again.',
+                    'error' => 'token_expired'
+                ], 401);
+            }
+        });
+
+        $exceptions->render(function (\Tymon\JWTAuth\Exceptions\JWTException $e, $request) {
+            if ($request->is('api/*')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Access token not found. Please provide a valid token.',
+                    'error' => 'token_not_found'
+                ], 401);
+            }
+        });
+
+        $exceptions->render(function (\Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException $e, $request) {
+            if ($request->is('api/*')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized. Access token is required for this endpoint.',
+                    'error' => 'unauthorized'
+                ], 401);
+            }
+        });
+
+        $exceptions->render(function (\Illuminate\Auth\AuthenticationException $e, $request) {
+            if ($request->is('api/*')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Authentication required. Please login to access this resource.',
+                    'error' => 'unauthenticated'
+                ], 401);
+            }
+        });
     })->create();
