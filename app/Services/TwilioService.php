@@ -10,21 +10,18 @@ class TwilioService
 {
     protected $twilio;
     protected $from;
+    protected $client;
 
     public function __construct()
     {
         $sid = Config::get('services.twilio.sid');
         $token = Config::get('services.twilio.token');
-        
-        $this->client = new Client(
-            config('services.twilio.sid'),
-            config('services.twilio.token')
-        );
-
         $this->from = Config::get('services.twilio.from');
-
+        
         // Create Twilio client
-        $this->twilio = new Client($sid, $token);
+        // Note: SSL verification issues in local development are handled by Guzzle defaults
+        $this->client = new Client($sid, $token);
+        $this->twilio = $this->client; // For backward compatibility
     }
 
     /**
