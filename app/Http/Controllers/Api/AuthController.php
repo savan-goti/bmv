@@ -19,34 +19,22 @@ class AuthController extends Controller
 {
     use ResponseTrait;
     /**
-     * Customer Registration
+     * Send OTP for Registration (Step 1)
+     * Customer enters mobile number and receives OTP
      *
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function register(Request $request)
+    public function register(Request $request, TwilioService $twilio)
     {
         // Validate request
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|min:2|max:255',
-            'email' => 'required|string|email|max:255|unique:customers,email',
-            'password' => 'required|string|min:8|confirmed',
-            'phone' => 'required|string|min:10|max:20|unique:customers,phone',
+            'phone' => 'required|string|min:10|max:20',
             'country_code' => 'required|string|max:5',
-            'gender' => 'nullable|in:male,female,other',
-            'dob' => 'nullable|date|before:today',
         ], [
-            'name.required' => 'Name is required',
-            'name.min' => 'Name must be at least 2 characters',
-            'email.required' => 'Email is required',
-            'email.email' => 'Please provide a valid email address',
-            'email.unique' => 'This email is already registered',
-            'password.required' => 'Password is required',
-            'password.min' => 'Password must be at least 8 characters',
-            'password.confirmed' => 'Password confirmation does not match',
-            'phone.unique' => 'This phone number is already registered',
+            'phone.required' => 'Phone number is required',
             'phone.min' => 'Phone number must be at least 10 digits',
-            'dob.before' => 'Date of birth must be in the past',
+            'country_code.required' => 'Country code is required',
         ]);
 
         if ($validator->fails()) {
@@ -54,45 +42,280 @@ class AuthController extends Controller
         }
 
         try {
-            // Generate username if not provided
-            $username = $this->generateUniqueUsername($request->name);
+            $phone = preg_replace('/[^0-9+]/', '', $request->phone);
+            
+            // Check if phone is already registered
+            $existingCustomer = Customer::where('phone', $phone)->first();
+            if ($existingCustomer) {
+                return $this->sendError('This phone number is already registered. Please login instead.', 422);
+            }
 
-            // Generate canonical (unique identifier)
-            $canonical = $this->generateCanonical($request->email);
-
-            // Create customer
+            // Generate OTP
+            $otp = TwilioService::generateOTP(6);
+            $expirationMinutes = (int) TwilioService::getOTPExpirationMinutes();
+            
+            // Create a temporary customer record with OTP
             $customer = Customer::create([
-                'name' => trim($request->name),
-                'email' => strtolower(trim($request->email)),
-                'username' => $username,
-                'canonical' => $canonical,
-                'password' => $request->password, // Will be hashed by model cast
-                'phone' => $request->phone,
-                'country_code' => $request->country_code ?? '+91',
-                'gender' => $request->gender,
-                'dob' => $request->dob,
-                'status' => 1, // Active by default
+                'phone' => $phone,
+                'country_code' => $request->country_code,
+                'phone_otp' => $otp,
+                'otp_expired_at' => Carbon::now()->addMinutes($expirationMinutes),
                 'phone_validate' => false,
+                'status' => 'inactive', // Will be activated after OTP verification
+                'password' => Hash::make(uniqid()), // Temporary password
+            ]);
+            
+            // Send OTP via SMS
+            $countryCode = ltrim($request->country_code, '+');
+            $phoneNumber = '+' . $countryCode . $request->phone;
+            $sent = $twilio->sendOTP($phoneNumber, "Your BMV registration OTP is {$otp}. Valid for {$expirationMinutes} minutes.");
+            
+            if (!$sent) {
+                // Log the error but still return success for development
+                Log::warning('OTP not sent via SMS, but saved to database', [
+                    'phone' => $phoneNumber,
+                    'otp' => $otp // Remove this in production
+                ]);
+                
+                // For development: return success with OTP in response
+                if (config('app.debug')) {
+                    return $this->sendResponse('Registration initiated (SMS failed, check logs)', [
+                        'phone' => $request->phone,
+                        'expires_in_minutes' => $expirationMinutes,
+                        'otp_for_testing' => $otp, // Only in debug mode
+                        'message' => 'Please verify OTP to complete registration'
+                    ]);
+                }
+                
+                // Clean up the temporary customer record
+                $customer->delete();
+                return $this->sendError('Failed to send OTP. Please try again.', 500);
+            }
+
+            return $this->sendResponse('OTP sent successfully to your phone', [
+                'phone' => $request->phone,
+                'expires_in_minutes' => $expirationMinutes,
+                'message' => 'Please verify OTP to complete registration'
             ]);
 
-            // Generate JWT token
+        } catch (\Exception $e) {
+            return $this->sendError('Registration failed: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Verify OTP and Complete Registration (Step 2)
+     * Verifies OTP and creates customer account with auto-generated username
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function verifyRegistrationOTP(Request $request)
+    {
+        // Validate request
+        $validator = Validator::make($request->all(), [
+            'phone' => 'required|string',
+            'otp' => 'required|string|size:6',
+        ], [
+            'phone.required' => 'Phone number is required',
+            'otp.required' => 'OTP is required',
+            'otp.size' => 'OTP must be 6 digits',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->sendValidationError($validator->errors());
+        }
+
+        try {
+            $phone = preg_replace('/[^0-9+]/', '', $request->phone);
+            
+            // Find customer by phone
+            $customer = Customer::where('phone', $phone)->first();
+
+            if (!$customer) {
+                return $this->sendError('Phone number not found. Please register first.', 404);
+            }
+
+            // Check if already verified
+            if ($customer->phone_validate && $customer->status === 'active') {
+                return $this->sendError('This phone number is already registered. Please login instead.', 422);
+            }
+
+            // Check if OTP exists
+            if (!$customer->phone_otp) {
+                return $this->sendError('No OTP found. Please request a new OTP.', 400);
+            }
+
+            // Check if OTP is expired
+            if (Carbon::now()->isAfter($customer->otp_expired_at)) {
+                return $this->sendError('OTP has expired. Please request a new OTP.', 400);
+            }
+
+            // Verify OTP
+            if ($customer->phone_otp !== $request->otp) {
+                return $this->sendError('Invalid OTP. Please try again.', 400);
+            }
+
+            // Generate unique username from phone number
+            $username = $this->generateUniqueUsernameFromPhone($customer->phone);
+            
+            // Generate canonical identifier
+            $canonical = $this->generateCanonicalFromPhone($customer->phone);
+
+            // Update customer record - complete registration
+            $customer->username = $username;
+            $customer->canonical = $canonical;
+            $customer->name = $username; // Use username as default name
+            $customer->phone_validate = true;
+            $customer->status = 'active';
+            $customer->phone_otp = null;
+            $customer->otp_expired_at = null;
+            $customer->save();
+
+            // Generate JWT token for auto-login
             $token = JWTAuth::fromUser($customer);
 
-            // Prepare response data (hide sensitive fields)
-            $customerData = $customer->fresh();
-            $customerData->makeHidden(['password', 'phone_otp', 'remember_token']);
-
             return $this->sendResponse('Registration successful! Welcome to BMV.', [
-                'customer' => $customerData,
+                'customer' => $customer->makeHidden(['password', 'phone_otp', 'email_otp', 'remember_token']),
                 'access_token' => $token,
                 'token_type' => 'bearer',
-                'expires_in' => auth('api')->factory()->getTTL() * 60,
-                'refresh_expires_in' => config('jwt.refresh_ttl', 20160) * 60
+                'expires_in' => auth('api')->factory()->getTTL() * 60
             ], 201);
 
         } catch (\Exception $e) {
-            return $this->sendError('Registration failed. Please try again.'. $e->getMessage(), 500);
+            return $this->sendError('Failed to verify OTP: ' . $e->getMessage(), 500);
         }
+    }
+
+    /**
+     * Resend OTP for Registration
+     * Resends OTP to customer's phone during registration process
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function resendRegistrationOTP(Request $request, TwilioService $twilio)
+    {
+        // Validate request
+        $validator = Validator::make($request->all(), [
+            'phone' => 'required|string',
+            'country_code' => 'required|string|max:5',
+        ], [
+            'phone.required' => 'Phone number is required',
+            'country_code.required' => 'Country code is required',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->sendValidationError($validator->errors());
+        }
+
+        try {
+            $phone = preg_replace('/[^0-9+]/', '', $request->phone);
+            
+            // Find customer by phone
+            $customer = Customer::where('phone', $phone)->first();
+
+            if (!$customer) {
+                return $this->sendError('Phone number not found. Please register first.', 404);
+            }
+
+            // Check if already verified
+            if ($customer->phone_validate && $customer->status === 'active') {
+                return $this->sendError('This phone number is already registered. Please login instead.', 422);
+            }
+
+            // Check rate limiting (prevent spam) - 1 minute cooldown
+            if ($customer->otp_expired_at && Carbon::now()->isBefore($customer->otp_expired_at->subMinutes(9))) {
+                $waitTime = Carbon::now()->diffInSeconds($customer->otp_expired_at->subMinutes(9));
+                return $this->sendError("Please wait {$waitTime} seconds before requesting a new OTP", 429);
+            }
+
+            // Generate new OTP
+            $otp = TwilioService::generateOTP(6);
+            $expirationMinutes = (int) TwilioService::getOTPExpirationMinutes();
+
+            // Update OTP in database
+            $customer->phone_otp = $otp;
+            $customer->otp_expired_at = Carbon::now()->addMinutes($expirationMinutes);
+            $customer->save();
+
+            // Send OTP via SMS
+            $countryCode = ltrim($request->country_code, '+');
+            $phoneNumber = '+' . $countryCode . $request->phone;
+            $sent = $twilio->sendOTP($phoneNumber, "Your BMV registration OTP is {$otp}. Valid for {$expirationMinutes} minutes.");
+
+            if (!$sent) {
+                // Log the error but still return success for development
+                Log::warning('OTP not sent via SMS, but saved to database', [
+                    'phone' => $phoneNumber,
+                    'otp' => $otp // Remove this in production
+                ]);
+                
+                // For development: return success with OTP in response
+                if (config('app.debug')) {
+                    return $this->sendResponse('OTP resent (SMS failed, check logs)', [
+                        'phone' => $request->phone,
+                        'expires_in_minutes' => $expirationMinutes,
+                        'otp_for_testing' => $otp, // Only in debug mode
+                        'message' => 'Please verify OTP to complete registration'
+                    ]);
+                }
+                
+                return $this->sendError('Failed to send OTP. Please try again.', 500);
+            }
+
+            return $this->sendResponse('OTP resent successfully to your phone', [
+                'phone' => $request->phone,
+                'expires_in_minutes' => $expirationMinutes,
+                'message' => 'Please verify OTP to complete registration'
+            ]);
+
+        } catch (\Exception $e) {
+            return $this->sendError('Failed to resend OTP: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Generate unique username from phone number
+     *
+     * @param string $phone
+     * @return string
+     */
+    private function generateUniqueUsernameFromPhone($phone)
+    {
+        // Clean phone number (remove non-numeric characters)
+        $cleanPhone = preg_replace('/[^0-9]/', '', $phone);
+        
+        // Create base username from phone (last 8 digits)
+        $baseUsername = 'user_' . substr($cleanPhone, -8);
+        
+        // Check if username exists
+        $username = $baseUsername;
+        $counter = 1;
+
+        while (Customer::where('username', $username)->exists()) {
+            $username = $baseUsername . '_' . $counter;
+            $counter++;
+        }
+
+        return $username;
+    }
+
+    /**
+     * Generate canonical identifier from phone number
+     *
+     * @param string $phone
+     * @return string
+     */
+    private function generateCanonicalFromPhone($phone)
+    {
+        // Clean phone number
+        $cleanPhone = preg_replace('/[^0-9]/', '', $phone);
+        
+        // Create canonical with phone and random suffix
+        $canonical = 'ph_' . substr($cleanPhone, -10) . '_' . substr(md5(uniqid()), 0, 6);
+        
+        return $canonical;
     }
 
     /**
@@ -142,6 +365,7 @@ class AuthController extends Controller
         
         return $canonical;
     }
+
 
     /**
      * Customer Login
