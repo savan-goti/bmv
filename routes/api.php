@@ -22,16 +22,15 @@ Route::prefix('v1')->group(function () {
     
     // Authentication routes
     Route::prefix('auth')->group(function () {
+        // Registration Flow
         Route::post('register', [AuthController::class, 'register']);
         Route::post('verify-registration-otp', [AuthController::class, 'verifyRegistrationOTP']);
         Route::post('resend-registration-otp', [AuthController::class, 'resendRegistrationOTP']);
-        Route::post('login', [AuthController::class, 'login']);
         
-        // OTP Verification Routes
-        Route::post('send-otp', [AuthController::class, 'sendOTP']);
-        Route::post('verify-otp', [AuthController::class, 'verifyOTP']);
-        Route::post('resend-otp', [AuthController::class, 'resendOTP']);
-
+        // Login Flow (OTP-based)
+        Route::post('login', [AuthController::class, 'login']); // Send OTP to email/phone
+        Route::post('verify-login-otp', [AuthController::class, 'verifyLoginOTP']); // Verify OTP and login
+        Route::post('resend-login-otp', [AuthController::class, 'resendLoginOTP']); // Resend OTP
         
         // Protected routes (require JWT token)
         Route::middleware('auth:api')->group(function () {

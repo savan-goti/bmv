@@ -68,15 +68,16 @@ Accept: application/json
 
 ---
 
-### 1.2 Login Customer
+### 1.2 Login - Send OTP (Step 1)
 **POST** `/auth/login`
+
+Sends OTP to customer's email or phone for login verification.
 
 **Request Body (Email Login):**
 ```json
 {
   "type": "email",
-  "email": "john@example.com",
-  "password": "password123"
+  "identifier": "john@example.com"
 }
 ```
 
@@ -84,9 +85,8 @@ Accept: application/json
 ```json
 {
   "type": "phone",
-  "phone": "1234567890",
-  "country_code": "+91",
-  "password": "password123"
+  "identifier": "1234567890",
+  "country_code": "+91"
 }
 ```
 
@@ -94,14 +94,54 @@ Accept: application/json
 ```json
 {
   "success": true,
-  "message": "Login successful",
+  "message": "OTP sent successfully to your email",
+  "data": {
+    "email": "john@example.com",
+    "expires_in_minutes": 10,
+    "message": "Please verify OTP to login"
+  }
+}
+```
+
+---
+
+### 1.3 Verify Login OTP (Step 2)
+**POST** `/auth/verify-login-otp`
+
+Verifies OTP and logs in the customer.
+
+**Request Body (Email):**
+```json
+{
+  "type": "email",
+  "identifier": "john@example.com",
+  "otp": "123456"
+}
+```
+
+**Request Body (Phone):**
+```json
+{
+  "type": "phone",
+  "identifier": "1234567890",
+  "otp": "123456"
+}
+```
+
+**Response (200):**
+```json
+{
+  "success": true,
+  "message": "Login successful! Welcome back.",
   "data": {
     "customer": {
       "id": 1,
       "username": "johndoe",
       "name": "John Doe",
       "email": "john@example.com",
-      "phone": "1234567890"
+      "phone": "1234567890",
+      "phone_validate": true,
+      "status": "active"
     },
     "access_token": "eyJ0eXAiOiJKV1QiLCJhbGc...",
     "token_type": "bearer",
@@ -112,8 +152,55 @@ Accept: application/json
 
 ---
 
-### 1.3 Send OTP
-**POST** `/auth/send-otp`
+### 1.4 Resend Login OTP
+**POST** `/auth/resend-login-otp`
+
+Resends OTP to customer's email or phone for login.
+
+**Request Body (Email):**
+```json
+{
+  "type": "email",
+  "identifier": "john@example.com"
+}
+```
+
+**Request Body (Phone):**
+```json
+{
+  "type": "phone",
+  "identifier": "1234567890",
+  "country_code": "+91"
+}
+```
+
+**Response (200):**
+```json
+{
+  "success": true,
+  "message": "OTP resent successfully to your phone",
+  "data": {
+    "phone": "1234567890",
+    "expires_in_minutes": 10,
+    "message": "Please verify OTP to login"
+  }
+}
+```
+
+**Error Response (429 - Rate Limited):**
+```json
+{
+  "success": false,
+  "message": "Please wait 45 seconds before requesting a new OTP"
+}
+```
+
+---
+
+### 1.5 Register Customer (Step 1)
+**POST** `/auth/register`
+
+Sends OTP to customer's phone for registration.
 
 **Request Body:**
 ```json
@@ -127,46 +214,60 @@ Accept: application/json
 ```json
 {
   "success": true,
-  "message": "OTP sent successfully",
+  "message": "OTP sent successfully to your phone",
   "data": {
-    "phone": "+911234567890",
-    "otp_expires_at": "2026-01-20T10:10:00.000000Z"
+    "phone": "1234567890",
+    "expires_in_minutes": 10,
+    "message": "Please verify OTP to complete registration"
   }
 }
 ```
 
 ---
 
-### 1.4 Verify OTP
-**POST** `/auth/verify-otp`
+### 1.6 Verify Registration OTP (Step 2)
+**POST** `/auth/verify-registration-otp`
+
+Verifies OTP and completes customer registration.
 
 **Request Body:**
 ```json
 {
   "phone": "1234567890",
-  "country_code": "+91",
   "otp": "123456"
 }
 ```
 
-**Response (200):**
+**Response (201):**
 ```json
 {
   "success": true,
-  "message": "Phone number verified successfully",
+  "message": "Registration successful! Welcome to BMV.",
   "data": {
     "customer": {
       "id": 1,
-      "phone_validate": true
-    }
+      "username": "user_34567890",
+      "canonical": "ph_1234567890_abc123",
+      "name": "user_34567890",
+      "phone": "1234567890",
+      "country_code": "+91",
+      "phone_validate": true,
+      "status": "active",
+      "created_at": "2026-01-30T10:00:00.000000Z"
+    },
+    "access_token": "eyJ0eXAiOiJKV1QiLCJhbGc...",
+    "token_type": "bearer",
+    "expires_in": 3600
   }
 }
 ```
 
 ---
 
-### 1.5 Resend OTP
-**POST** `/auth/resend-otp`
+### 1.7 Resend Registration OTP
+**POST** `/auth/resend-registration-otp`
+
+Resends OTP to customer's phone during registration.
 
 **Request Body:**
 ```json
@@ -180,17 +281,18 @@ Accept: application/json
 ```json
 {
   "success": true,
-  "message": "OTP resent successfully",
+  "message": "OTP resent successfully to your phone",
   "data": {
-    "phone": "+911234567890",
-    "otp_expires_at": "2026-01-20T10:20:00.000000Z"
+    "phone": "1234567890",
+    "expires_in_minutes": 10,
+    "message": "Please verify OTP to complete registration"
   }
 }
 ```
 
 ---
 
-### 1.6 Logout
+### 1.8 Logout
 **POST** `/auth/logout`  
 **Auth Required:** Yes
 
@@ -204,7 +306,7 @@ Accept: application/json
 
 ---
 
-### 1.7 Refresh Token
+### 1.9 Refresh Token
 **POST** `/auth/refresh`  
 **Auth Required:** Yes
 
@@ -223,7 +325,7 @@ Accept: application/json
 
 ---
 
-### 1.8 Get Profile
+### 1.10 Get Profile
 **GET** `/auth/profile`  
 **Auth Required:** Yes
 
@@ -260,6 +362,7 @@ Accept: application/json
   }
 }
 ```
+
 
 ---
 

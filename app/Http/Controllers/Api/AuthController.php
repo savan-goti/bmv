@@ -368,70 +368,143 @@ class AuthController extends Controller
 
 
     /**
-     * Customer Login
+     * Customer Login - Send OTP (Step 1)
+     * Sends OTP to customer's email or phone for login verification
      *
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function login(Request $request)
+    public function login(Request $request, TwilioService $twilio)
     {
-        // Validate type field
+        // Validate request
         $validator = Validator::make($request->all(), [
             'type' => 'required|in:email,phone',
             'identifier' => 'required|string',
-            'password' => 'required|string|min:8',
         ], [
             'type.required' => 'Login type is required',
             'type.in' => 'Login type must be either email or phone',
             'identifier.required' => 'Email or phone number is required',
-            'password.required' => 'Password is required',
-            'password.min' => 'Password must be at least 8 characters',
         ]);
 
         if ($validator->fails()) {
             return $this->sendValidationError($validator->errors());
         }
 
-        // Additional validation based on type
-        $type = $request->type;
-        $identifier = $request->identifier;
-
-        if ($type === 'email') {
-            // Validate email format
-            if (!filter_var($identifier, FILTER_VALIDATE_EMAIL)) {
-                return $this->sendError('Please provide a valid email address', 422);
-            }
-            $credentials = [
-                'email' => strtolower(trim($identifier)),
-                'password' => $request->password
-            ];
-        } else {
-            // Phone login
-            // Remove any spaces or special characters from phone
-            $phone = preg_replace('/[^0-9+]/', '', $identifier);
-            $credentials = [
-                'phone' => $phone,
-                'password' => $request->password
-            ];
-        }
-
         try {
-            if (!$token = auth('api')->attempt($credentials)) {
-                return $this->sendError('Invalid credentials. Please check your ' . $type . ' and password.', 401);
+            $type = $request->type;
+            $identifier = $request->identifier;
+
+            // Find customer based on type
+            if ($type === 'email') {
+                // Validate email format
+                if (!filter_var($identifier, FILTER_VALIDATE_EMAIL)) {
+                    return $this->sendError('Please provide a valid email address', 422);
+                }
+                $customer = Customer::where('email', strtolower(trim($identifier)))->first();
+            } else {
+                // Phone - validate country code is provided
+                $validator = Validator::make($request->all(), [
+                    'country_code' => 'required|string|max:5',
+                ], [
+                    'country_code.required' => 'Country code is required for phone login',
+                ]);
+
+                if ($validator->fails()) {
+                    return $this->sendValidationError($validator->errors());
+                }
+
+                $phone = preg_replace('/[^0-9+]/', '', $identifier);
+                $customer = Customer::where('phone', $phone)->first();
+            }
+
+            if (!$customer) {
+                return $this->sendError(ucfirst($type) . ' not registered. Please register first.', 404);
             }
 
             // Check if customer is active
-            $customer = auth('api')->user();
-            if ($customer->status != 'active') {
-                auth('api')->logout();
+            if ($customer->status !== 'active') {
                 return $this->sendError('Your account is inactive. Please contact support.', 403);
             }
 
-        } catch (JWTException $e) {
-            return $this->sendError('Could not create token', 500);
-        }
+            // Generate OTP
+            $otp = TwilioService::generateOTP(6);
+            $expirationMinutes = (int) TwilioService::getOTPExpirationMinutes();
+            
+            // Save OTP to database based on type
+            if ($type === 'email') {
+                $customer->email_otp = $otp;
+                $customer->email_otp_expired_at = Carbon::now()->addMinutes($expirationMinutes);
+            } else {
+                $customer->phone_otp = $otp;
+                $customer->otp_expired_at = Carbon::now()->addMinutes($expirationMinutes);
+            }
+            $customer->save();
+            
+            // Send OTP based on type
+            if ($type === 'email') {
+                // Send OTP via Email
+                try {
+                    \Mail::to($customer->email)->send(new \App\Mail\CustomerOTPMail($customer, $otp, $expirationMinutes));
+                    
+                    return $this->sendResponse('OTP sent successfully to your email', [
+                        'email' => $customer->email,
+                        'expires_in_minutes' => $expirationMinutes,
+                        'message' => 'Please verify OTP to login'
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error('Failed to send login OTP email', [
+                        'email' => $customer->email,
+                        'error' => $e->getMessage()
+                    ]);
+                    
+                    // For development: return success with OTP in response
+                    if (config('app.debug')) {
+                        return $this->sendResponse('OTP generated (Email failed, check logs)', [
+                            'email' => $customer->email,
+                            'expires_in_minutes' => $expirationMinutes,
+                            'otp_for_testing' => $otp, // Only in debug mode
+                            'message' => 'Please verify OTP to login'
+                        ]);
+                    }
+                    
+                    return $this->sendError('Failed to send OTP email. Please try again.', 500);
+                }
+            } else {
+                // Send OTP via SMS (Twilio)
+                $countryCode = ltrim($request->country_code, '+');
+                $phoneNumber = '+' . $countryCode . $request->identifier;
+                $sent = $twilio->sendOTP($phoneNumber, "Your BMV login OTP is {$otp}. Valid for {$expirationMinutes} minutes.");
+                
+                if (!$sent) {
+                    // Log the error but still return success for development
+                    Log::warning('Login OTP not sent via SMS, but saved to database', [
+                        'phone' => $phoneNumber,
+                        'otp' => $otp // Remove this in production
+                    ]);
+                    
+                    // For development: return success with OTP in response
+                    if (config('app.debug')) {
+                        return $this->sendResponse('OTP generated (SMS failed, check logs)', [
+                            'phone' => $request->identifier,
+                            'expires_in_minutes' => $expirationMinutes,
+                            'otp_for_testing' => $otp, // Only in debug mode
+                            'message' => 'Please verify OTP to login'
+                        ]);
+                    }
+                    
+                    return $this->sendError('Failed to send OTP. Please try again.', 500);
+                }
 
-        return $this->respondWithToken($token);
+                return $this->sendResponse('OTP sent successfully to your phone', [
+                    'phone' => $request->identifier,
+                    'expires_in_minutes' => $expirationMinutes,
+                    'message' => 'Please verify OTP to login'
+                ]);
+            }
+
+        } catch (\Exception $e) {
+            return $this->sendError('Failed to send login OTP: ' . $e->getMessage(), 500);
+        }
     }
 
     /**
@@ -491,142 +564,13 @@ class AuthController extends Controller
     }
 
     /**
-     * Send OTP to customer's email or phone
+     * Verify Login OTP (Step 2)
+     * Verifies OTP and logs in the customer
      *
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function sendOTP(Request $request, TwilioService $twilio)
-    {
-        // Validate request
-        $validator = Validator::make($request->all(), [
-            'type' => 'required|in:email,phone',
-            'identifier' => 'required|string',
-        ], [
-            'type.required' => 'Type is required',
-            'type.in' => 'Type must be either email or phone',
-            'identifier.required' => 'Email or phone number is required',
-        ]);
-
-        if ($validator->fails()) {
-            return $this->sendValidationError($validator->errors());
-        }
-
-        try {
-            $type = $request->type;
-            $identifier = $request->identifier;
-
-            // Find customer based on type
-            if ($type === 'email') {
-                // Validate email format
-                if (!filter_var($identifier, FILTER_VALIDATE_EMAIL)) {
-                    return $this->sendError('Please provide a valid email address', 422);
-                }
-                $customer = Customer::where('email', strtolower(trim($identifier)))->first();
-            } else {
-                // Phone - validate country code is provided
-                $validator = Validator::make($request->all(), [
-                    'country_code' => 'required|string|max:5',
-                ], [
-                    'country_code.required' => 'Country code is required for phone OTP',
-                ]);
-
-                if ($validator->fails()) {
-                    return $this->sendValidationError($validator->errors());
-                }
-
-                $phone = preg_replace('/[^0-9+]/', '', $identifier);
-                $customer = Customer::where('phone', $phone)->first();
-            }
-
-            if (!$customer) {
-                return $this->sendError(ucfirst($type) . ' not registered', 404);
-            }
-
-            // Generate OTP
-            $otp = TwilioService::generateOTP(6);
-            $expirationMinutes = (int) TwilioService::getOTPExpirationMinutes();
-            
-            // Save OTP to database based on type
-            if ($type === 'email') {
-                $customer->email_otp = $otp;
-                $customer->email_otp_expired_at = Carbon::now()->addMinutes($expirationMinutes);
-            } else {
-                $customer->phone_otp = $otp;
-                $customer->otp_expired_at = Carbon::now()->addMinutes($expirationMinutes);
-            }
-            $customer->save();
-            
-            // Send OTP based on type
-            if ($type === 'email') {
-                // Send OTP via Email
-                try {
-                    \Mail::to($customer->email)->send(new \App\Mail\CustomerOTPMail($customer, $otp, $expirationMinutes));
-                    
-                    return $this->sendResponse('OTP sent successfully to your email', [
-                        'email' => $customer->email,
-                        'expires_in_minutes' => $expirationMinutes
-                    ]);
-                } catch (\Exception $e) {
-                    Log::error('Failed to send OTP email', [
-                        'email' => $customer->email,
-                        'error' => $e->getMessage()
-                    ]);
-                    
-                    // For development: return success with OTP in response
-                    if (config('app.debug')) {
-                        return $this->sendResponse('OTP generated (Email failed, check logs)', [
-                            'email' => $customer->email,
-                            'expires_in_minutes' => $expirationMinutes,
-                            'otp_for_testing' => $otp // Only in debug mode
-                        ]);
-                    }
-                    
-                    return $this->sendError('Failed to send OTP email. Please try again.', 500);
-                }
-            } else {
-                // Send OTP via SMS (Twilio)
-                $countryCode = ltrim($request->country_code, '+');
-                $phoneNumber = '+' . $countryCode . $request->identifier;
-                $sent = $twilio->sendOTP($phoneNumber, "Your BMV login OTP is {$otp}. Valid for {$expirationMinutes} minutes.");
-                
-                if (!$sent) {
-                    // Log the error but still return success for development
-                    Log::warning('OTP not sent via SMS, but saved to database', [
-                        'phone' => $phoneNumber,
-                        'otp' => $otp // Remove this in production
-                    ]);
-                    
-                    // For development: return success with OTP in response
-                    if (config('app.debug')) {
-                        return $this->sendResponse('OTP generated (SMS failed, check logs)', [
-                            'phone' => $request->identifier,
-                            'expires_in_minutes' => $expirationMinutes,
-                            'otp_for_testing' => $otp // Only in debug mode
-                        ]);
-                    }
-                    
-                    return $this->sendError('Failed to send OTP. Please try again.', 500);
-                }
-
-                return $this->sendResponse('OTP sent successfully to your phone', [
-                    'phone' => $request->identifier,
-                    'expires_in_minutes' => $expirationMinutes
-                ]);
-            }
-
-        } catch (\Exception $e) {
-            return $this->sendError('Failed to send OTP: ' . $e->getMessage(), 500);
-        }
-    }
-
-    /**
-     * Verify OTP for email or phone
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function verifyOTP(Request $request)
+    public function verifyLoginOTP(Request $request)
     {
         // Validate request
         $validator = Validator::make($request->all(), [
@@ -662,6 +606,11 @@ class AuthController extends Controller
 
             if (!$customer) {
                 return $this->sendError(ucfirst($type) . ' not registered', 404);
+            }
+
+            // Check if customer is active
+            if ($customer->status !== 'active') {
+                return $this->sendError('Your account is inactive. Please contact support.', 403);
             }
 
             // Check OTP based on type
@@ -700,8 +649,7 @@ class AuthController extends Controller
                     return $this->sendError('Invalid OTP. Please try again.', 400);
                 }
 
-                // Mark phone as verified and clear OTP
-                $customer->phone_validate = true;
+                // Clear phone OTP
                 $customer->phone_otp = null;
                 $customer->otp_expired_at = null;
             }
@@ -711,7 +659,7 @@ class AuthController extends Controller
             // Generate JWT token for login
             $token = JWTAuth::fromUser($customer);
 
-            return $this->sendResponse('OTP verified successfully. You are now logged in.', [
+            return $this->sendResponse('Login successful! Welcome back.', [
                 'customer' => $customer->makeHidden(['password', 'phone_otp', 'email_otp', 'remember_token']),
                 'access_token' => $token,
                 'token_type' => 'bearer',
@@ -724,12 +672,13 @@ class AuthController extends Controller
     }
 
     /**
-     * Resend OTP to email or phone
+     * Resend Login OTP
+     * Resends OTP to customer's email or phone for login
      *
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function resendOTP(Request $request)
+    public function resendLoginOTP(Request $request, TwilioService $twilio)
     {
         // Validate request
         $validator = Validator::make($request->all(), [
@@ -775,6 +724,11 @@ class AuthController extends Controller
                 return $this->sendError(ucfirst($type) . ' not registered', 404);
             }
 
+            // Check if customer is active
+            if ($customer->status !== 'active') {
+                return $this->sendError('Your account is inactive. Please contact support.', 403);
+            }
+
             // Check rate limiting (prevent spam) based on type
             if ($type === 'email') {
                 if ($customer->email_otp_expired_at && Carbon::now()->isBefore($customer->email_otp_expired_at->subMinutes(9))) {
@@ -810,10 +764,11 @@ class AuthController extends Controller
                     
                     return $this->sendResponse('OTP resent successfully to your email', [
                         'email' => $customer->email,
-                        'expires_in_minutes' => $expirationMinutes
+                        'expires_in_minutes' => $expirationMinutes,
+                        'message' => 'Please verify OTP to login'
                     ]);
                 } catch (\Exception $e) {
-                    Log::error('Failed to resend OTP email', [
+                    Log::error('Failed to resend login OTP email', [
                         'email' => $customer->email,
                         'error' => $e->getMessage()
                     ]);
@@ -823,7 +778,8 @@ class AuthController extends Controller
                         return $this->sendResponse('OTP resent (Email failed, check logs)', [
                             'email' => $customer->email,
                             'expires_in_minutes' => $expirationMinutes,
-                            'otp_for_testing' => $otp // Only in debug mode
+                            'otp_for_testing' => $otp, // Only in debug mode
+                            'message' => 'Please verify OTP to login'
                         ]);
                     }
                     
@@ -831,14 +787,13 @@ class AuthController extends Controller
                 }
             } else {
                 // Send OTP via SMS
-                $twilioService = new TwilioService();
                 $countryCode = ltrim($request->country_code, '+');
                 $phoneNumber = '+' . $countryCode . $request->identifier;
-                $sent = $twilioService->sendOTP($phoneNumber, "Your BMV login OTP is {$otp}. Valid for {$expirationMinutes} minutes.");
+                $sent = $twilio->sendOTP($phoneNumber, "Your BMV login OTP is {$otp}. Valid for {$expirationMinutes} minutes.");
 
                 if (!$sent) {
                     // Log the error but still return success for development
-                    Log::warning('OTP not sent via SMS, but saved to database', [
+                    Log::warning('Login OTP not sent via SMS, but saved to database', [
                         'phone' => $phoneNumber,
                         'otp' => $otp // Remove this in production
                     ]);
@@ -848,7 +803,8 @@ class AuthController extends Controller
                         return $this->sendResponse('OTP resent (SMS failed, check logs)', [
                             'phone' => $request->identifier,
                             'expires_in_minutes' => $expirationMinutes,
-                            'otp_for_testing' => $otp // Only in debug mode
+                            'otp_for_testing' => $otp, // Only in debug mode
+                            'message' => 'Please verify OTP to login'
                         ]);
                     }
                     
@@ -857,12 +813,13 @@ class AuthController extends Controller
 
                 return $this->sendResponse('OTP resent successfully to your phone', [
                     'phone' => $request->identifier,
-                    'expires_in_minutes' => $expirationMinutes
+                    'expires_in_minutes' => $expirationMinutes,
+                    'message' => 'Please verify OTP to login'
                 ]);
             }
 
         } catch (\Exception $e) {
-            return $this->sendError('Failed to resend OTP: ' . $e->getMessage(), 500);
+            return $this->sendError('Failed to resend login OTP: ' . $e->getMessage(), 500);
         }
     }
 
