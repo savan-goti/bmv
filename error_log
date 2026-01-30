@@ -1,0 +1,2 @@
+[30-Jan-2026 15:14:13 UTC] PHP Warning:  copy(): https:// wrapper is disabled in the server configuration by allow_url_fopen=0 in Command line code on line 1
+[30-Jan-2026 15:14:13 UTC] PHP Warning:  copy(https://getcomposer.org/installer): Failed to open stream: no suitable wrapper could be found in Command line code on line 1
