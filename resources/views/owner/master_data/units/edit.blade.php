@@ -24,6 +24,7 @@
                             <div class="col-md-6"><x-input-field type="select" name="category" label="Category" required>
                                 <option value="product" {{ $unit->category == 'product' ? 'selected' : '' }}>Product</option>
                                 <option value="service" {{ $unit->category == 'service' ? 'selected' : '' }}>Service</option>
+                                <option value="both" {{ $unit->category == 'both' ? 'selected' : '' }}>Both</option>
                             </x-input-field></div>
                             <div class="col-md-6"><x-input-field type="select" name="status" label="Status" required>
                                 <option value="active" {{ $unit->status->value == 'active' ? 'selected' : '' }}>Active</option>

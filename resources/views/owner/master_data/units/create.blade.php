@@ -29,6 +29,7 @@
                                 <x-input-field type="select" name="category" label="Category" required>
                                     <option value="product">Product</option>
                                     <option value="service">Service</option>
+                                    <option value="both">Both</option>
                                 </x-input-field>
                             </div>
                             <div class="col-md-6">
