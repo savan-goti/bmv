@@ -47,7 +47,7 @@ class CustomerController extends Controller
 
     public function create()
     {
-        return view('owner.customers.create');
+        return view('owner.customers.form');
     }
 
     public function show(Customer $customer)
@@ -136,7 +136,7 @@ class CustomerController extends Controller
 
     public function edit(Customer $customer)
     {
-        return view('owner.customers.edit', compact('customer'));
+        return view('owner.customers.form', compact('customer'));
     }
 
     public function update(Request $request, Customer $customer)
@@ -240,6 +240,6 @@ class CustomerController extends Controller
     public function status(Request $request, Customer $customer)
     {
         $customer->update(['status' => $request->status]);
-        return response()->json(['success' => true, 'message' => 'Status updated successfully.']);
+        return $this->sendSuccess('Status updated successfully.');
     }
 }

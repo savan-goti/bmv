@@ -1,4 +1,4 @@
-@extends('owner.master')
+0.@extends('owner.master')
 @section('title','Brands')
 
 @section('main')
@@ -72,14 +72,15 @@
                     _token: '{{ csrf_token() }}'
                 },
                 success: function(response) {
-                    if (response.success) {
-                        toastr.success(response.message);
+                    if (response.status) {
+                        sendSuccess(response.message);
                     } else {
-                        toastr.error('Something went wrong.');
+                        sendError(response.message || 'Something went wrong.');
                     }
                 },
                 error: function(xhr) {
-                    toastr.error('Something went wrong.');
+                    let data = xhr.responseJSON;
+                    sendError(data.message || 'Something went wrong.');
                 }
             });
         });
@@ -106,29 +107,16 @@
                             _token: '{{ csrf_token() }}'
                         },
                         success: function(response) {
-                            if (response.success) {
-                                Swal.fire(
-                                    'Deleted!',
-                                    response.message,
-                                    'success'
-                                ).then(() => {
-                                    table.draw();
-                                });
+                            if (response.status) {
+                                sendSuccess(response.message);
+                                setTimeout(function() { table.draw(); }, 1000);
                             } else {
-                                Swal.fire(
-                                    'Error!',
-                                    response.message,
-                                    'error'
-                                );
+                                sendError(response.message || 'Something went wrong.');
                             }
                         },
                         error: function(xhr) {
-                            var message = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Something went wrong.';
-                            Swal.fire(
-                                'Error!',
-                                message,
-                                'error'
-                            );
+                            let data = xhr.responseJSON;
+                            sendError(data.message || 'Something went wrong.');
                         }
                     });
                 }

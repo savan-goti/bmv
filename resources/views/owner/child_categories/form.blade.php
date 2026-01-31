@@ -1,12 +1,12 @@
 @extends('owner.master')
-@section('title','Edit Child Category')
+@section('title', isset($childCategory) ? 'Edit Child Category' : 'Create Child Category')
 
 @section('main')
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
             <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                <h4 class="mb-sm-0">Edit Child Category</h4>
+                <h4 class="mb-sm-0">{{ isset($childCategory) ? 'Edit Child Category' : 'Create Child Category' }}</h4>
                 <div class="page-title-right">
                     <a href="{{ route('owner.child-categories.index') }}" class="btn btn-secondary">Back to List</a>
                 </div>
@@ -18,9 +18,13 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-body">
-                    <form action="{{ route('owner.child-categories.update', $childCategory->id) }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ isset($childCategory) ? route('owner.child-categories.update', $childCategory->id) : route('owner.child-categories.store') }}" 
+                          method="POST" 
+                          enctype="multipart/form-data">
                         @csrf
-                        @method('PUT')
+                        @if(isset($childCategory))
+                            @method('PUT')
+                        @endif
 
                         <div class="row">
                             <div class="col-md-6">
@@ -32,8 +36,7 @@
                                     required
                                 >
                                     @foreach($categories as $category)
-                                        <option value="{{ $category->id }}" 
-                                            {{ old('category_id', $childCategory->category_id) == $category->id ? 'selected' : '' }}>
+                                        <option value="{{ $category->id }}" {{ old('category_id', isset($childCategory) ? $childCategory->category_id : '') == $category->id ? 'selected' : '' }}>
                                             {{ $category->name }}
                                         </option>
                                     @endforeach
@@ -48,12 +51,13 @@
                                     placeholder="Select Sub Category"
                                     required
                                 >
-                                    @foreach($subCategories as $subCategory)
-                                        <option value="{{ $subCategory->id }}" 
-                                            {{ old('sub_category_id', $childCategory->sub_category_id) == $subCategory->id ? 'selected' : '' }}>
-                                            {{ $subCategory->name }}
-                                        </option>
-                                    @endforeach
+                                    @if(isset($subCategories))
+                                        @foreach($subCategories as $subCategory)
+                                            <option value="{{ $subCategory->id }}" {{ old('sub_category_id', isset($childCategory) ? $childCategory->sub_category_id : '') == $subCategory->id ? 'selected' : '' }}>
+                                                {{ $subCategory->name }}
+                                            </option>
+                                        @endforeach
+                                    @endif
                                 </x-input-field>
                             </div>
 
@@ -62,7 +66,7 @@
                                     name="name" 
                                     label="Name" 
                                     placeholder="Enter child category name"
-                                    value="{{ old('name', $childCategory->name) }}"
+                                    value="{{ old('name', $childCategory->name ?? '') }}"
                                     required 
                                 />
                             </div>
@@ -74,8 +78,8 @@
                                     label="Status" 
                                     required
                                 >
-                                    <option value="active" {{ old('status', $childCategory->status->value) == 'active' ? 'selected' : '' }}>Active</option>
-                                    <option value="inactive" {{ old('status', $childCategory->status->value) == 'inactive' ? 'selected' : '' }}>Inactive</option>
+                                    <option value="active" {{ old('status', isset($childCategory) ? $childCategory->status->value : 'active') == 'active' ? 'selected' : '' }}>Active</option>
+                                    <option value="inactive" {{ old('status', isset($childCategory) ? $childCategory->status->value : 'active') == 'inactive' ? 'selected' : '' }}>Inactive</option>
                                 </x-input-field>
                             </div>
 
@@ -86,22 +90,23 @@
                                     label="Image" 
                                     accept="image/*"
                                 />
-                                
-                                @if($childCategory->image)
-                                    <div class="mt-2">
-                                        <p class="mb-1">Current Image:</p>
+                                <small class="text-muted">Accepted formats: JPEG, PNG, JPG, GIF (Max: 2MB)</small>
+                                <div id="image-preview" class="mt-2">
+                                    @if(isset($childCategory) && $childCategory->image)
                                         <img src="{{ asset('uploads/child_categories/' . $childCategory->image) }}" 
-                                            alt="{{ $childCategory->name }}" class="img-thumbnail" style="max-width: 200px;">
-                                    </div>
-                                @endif
-                                
-                                <div id="image-preview" class="mt-2"></div>
+                                             class="img-thumbnail" 
+                                             style="max-width: 200px;"
+                                             alt="Current Image">
+                                    @endif
+                                </div>
                             </div>
                         </div>
 
                         <div class="row">
                             <div class="col-12">
-                                <button type="submit" class="btn btn-primary">Update Child Category</button>
+                                <button type="submit" class="btn btn-primary">
+                                    {{ isset($childCategory) ? 'Update Child Category' : 'Create Child Category' }}
+                                </button>
                                 <a href="{{ route('owner.child-categories.index') }}" class="btn btn-secondary">Cancel</a>
                             </div>
                         </div>
@@ -117,10 +122,10 @@
 <script>
     $(document).ready(function() {
         // Load sub-categories when category changes
-        $('#category_id').change(function() {
+        $('select[name="category_id"]').change(function() {
             var categoryId = $(this).val();
-            var currentSubCategoryId = "{{ old('sub_category_id', $childCategory->sub_category_id) }}";
-            $('#sub_category_id').html('<option value="">Loading...</option>');
+            var subCategorySelect = $('select[name="sub_category_id"]');
+            subCategorySelect.html('<option value="">Loading...</option>');
             
             if (categoryId) {
                 $.ajax({
@@ -130,31 +135,34 @@
                     success: function(data) {
                         var options = '<option value="">Select Sub Category</option>';
                         $.each(data, function(key, value) {
-                            var selected = value.id == currentSubCategoryId ? 'selected' : '';
-                            options += '<option value="' + value.id + '" ' + selected + '>' + value.name + '</option>';
+                            options += '<option value="' + value.id + '">' + value.name + '</option>';
                         });
-                        $('#sub_category_id').html(options);
+                        subCategorySelect.html(options);
                     },
                     error: function() {
-                        $('#sub_category_id').html('<option value="">Error loading sub-categories</option>');
+                        subCategorySelect.html('<option value="">Error loading sub-categories</option>');
                     }
                 });
             } else {
-                $('#sub_category_id').html('<option value="">Select Sub Category</option>');
+                subCategorySelect.html('<option value="">Select Sub Category</option>');
             }
         });
 
         // Image preview
-        $('#image').change(function() {
+        $('input[name="image"]').change(function() {
             var file = this.files[0];
             if (file) {
                 var reader = new FileReader();
                 reader.onload = function(e) {
-                    $('#image-preview').html('<p class="mb-1">New Image Preview:</p><img src="' + e.target.result + '" class="img-thumbnail" style="max-width: 200px;">');
+                    $('#image-preview').html('<img src="' + e.target.result + '" class="img-thumbnail" style="max-width: 200px;" alt="Image Preview">');
                 }
                 reader.readAsDataURL(file);
             } else {
-                $('#image-preview').html('');
+                @if(isset($childCategory) && $childCategory->image)
+                    $('#image-preview').html('<img src="{{ asset('uploads/child_categories/' . $childCategory->image) }}" class="img-thumbnail" style="max-width: 200px;" alt="Current Image">');
+                @else
+                    $('#image-preview').html('');
+                @endif
             }
         });
     });

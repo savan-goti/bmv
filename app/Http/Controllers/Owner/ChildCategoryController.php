@@ -10,9 +10,12 @@ use App\Enums\Status;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Yajra\DataTables\Facades\DataTables;
+use App\Http\Traits\ResponseTrait;
+use Exception;
 
 class ChildCategoryController extends Controller
 {
+    use ResponseTrait;
     /**
      * Display a listing of the resource.
      */
@@ -74,7 +77,7 @@ class ChildCategoryController extends Controller
     public function create()
     {
         $categories = Category::where('status', Status::Active)->get();
-        return view('owner.child_categories.create', compact('categories'));
+        return view('owner.child_categories.form', compact('categories'));
     }
 
     /**
@@ -119,7 +122,7 @@ class ChildCategoryController extends Controller
             ->where('status', Status::Active)
             ->get();
 
-        return view('owner.child_categories.edit', compact('childCategory', 'categories', 'subCategories'));
+        return view('owner.child_categories.form', compact('childCategory', 'categories', 'subCategories'));
     }
 
     /**
@@ -130,9 +133,11 @@ class ChildCategoryController extends Controller
         $request->validate([
             'category_id' => 'required|exists:categories,id',
             'sub_category_id' => 'required|exists:sub_categories,id',
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:255|unique:child_categories,name,' . $childCategory->id,
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'status' => 'required|in:active,inactive',
+        ], [
+            'name.unique' => 'This Child Category name already exists in our records.',
         ]);
 
         $data = $request->all();
@@ -165,7 +170,7 @@ class ChildCategoryController extends Controller
         // Check if child category has products
         if ($childCategory->products()->count() > 0) {
             return response()->json([
-                'success' => false,
+                'status' => false,
                 'message' => 'Cannot delete child category with associated products.'
             ], 400);
         }
@@ -178,7 +183,7 @@ class ChildCategoryController extends Controller
         $childCategory->delete();
 
         return response()->json([
-            'success' => true,
+            'status' => true,
             'message' => 'Child Category deleted successfully.'
         ]);
     }
@@ -192,7 +197,7 @@ class ChildCategoryController extends Controller
         $childCategory->save();
 
         return response()->json([
-            'success' => true,
+            'status' => true,
             'message' => 'Status updated successfully.'
         ]);
     }

@@ -61,7 +61,7 @@ class SubCategoryController extends Controller
     public function create()
     {
         $categories = Category::where('status', Status::Active)->get();
-        return view('owner.sub_categories.create', compact('categories'));
+        return view('owner.sub_categories.form', compact('categories'));
     }
 
     public function store(Request $request)
@@ -103,7 +103,7 @@ class SubCategoryController extends Controller
     public function edit(SubCategory $subCategory)
     {
         $categories = Category::where('status', Status::Active)->get();
-        return view('owner.sub_categories.edit', compact('subCategory', 'categories'));
+        return view('owner.sub_categories.form', compact('subCategory', 'categories'));
     }
 
     public function update(Request $request, SubCategory $subCategory)
@@ -113,9 +113,11 @@ class SubCategoryController extends Controller
 
             $validator = Validator::make($request->all(), [
                 'category_id' => 'required|exists:categories,id',
-                'name' => 'required|string|max:255',
+                'name' => 'required|string|max:255|unique:sub_categories,name,' . $subCategory->id,
                 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
                 'status' => 'required|in:active,inactive',
+            ], [
+                'name.unique' => 'This Sub Category already exists in records.',
             ]);
 
             if ($validator->fails()) {
@@ -155,7 +157,7 @@ class SubCategoryController extends Controller
     public function status(Request $request, SubCategory $subCategory)
     {
         $subCategory->update(['status' => $request->status == 'true' ? Status::Active : Status::Inactive]);
-        return response()->json(['success' => true, 'message' => 'Status updated successfully.']);
+        return $this->sendSuccess('Status updated successfully.');
     }
 
     public function getByCategory(Request $request)

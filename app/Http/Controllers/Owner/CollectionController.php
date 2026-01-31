@@ -9,9 +9,12 @@ use App\Enums\Status;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Yajra\DataTables\Facades\DataTables;
+use App\Http\Traits\ResponseTrait;
+use Exception;
 
 class CollectionController extends Controller
 {
+    use ResponseTrait;
     /**
      * Display a listing of the resource.
      */
@@ -78,7 +81,7 @@ class CollectionController extends Controller
     public function create()
     {
         $products = Product::where('is_active', Status::Active)->get();
-        return view('owner.collections.create', compact('products'));
+        return view('owner.collections.form', compact('products'));
     }
 
     /**
@@ -119,8 +122,7 @@ class CollectionController extends Controller
             $collection->products()->attach($request->products);
         }
 
-        return redirect()->route('owner.collections.index')
-            ->with('success', 'Collection created successfully.');
+        return $this->sendResponse('Collection created successfully.', $collection);
     }
 
     /**
@@ -131,7 +133,7 @@ class CollectionController extends Controller
         $products = Product::where('is_active', Status::Active)->get();
         $selectedProducts = $collection->products->pluck('id')->toArray();
         
-        return view('owner.collections.edit', compact('collection', 'products', 'selectedProducts'));
+        return view('owner.collections.form', compact('collection', 'products', 'selectedProducts'));
     }
 
     /**
@@ -140,7 +142,7 @@ class CollectionController extends Controller
     public function update(Request $request, Collection $collection)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:255|unique:collections,name,' . $collection->id,
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'description' => 'nullable|string',
             'start_date' => 'nullable|date',
@@ -149,6 +151,8 @@ class CollectionController extends Controller
             'status' => 'required|in:active,inactive',
             'products' => 'nullable|array',
             'products.*' => 'exists:products,id',
+        ], [
+            'name.unique' => 'This Collection name already exists in our records.',
         ]);
 
         $data = $request->except('products');
@@ -177,8 +181,7 @@ class CollectionController extends Controller
             $collection->products()->detach();
         }
 
-        return redirect()->route('owner.collections.index')
-            ->with('success', 'Collection updated successfully.');
+        return $this->sendResponse('Collection updated successfully.', $collection);
     }
 
     /**
@@ -197,7 +200,7 @@ class CollectionController extends Controller
         $collection->delete();
 
         return response()->json([
-            'success' => true,
+            'status' => true,
             'message' => 'Collection deleted successfully.'
         ]);
     }
@@ -211,7 +214,7 @@ class CollectionController extends Controller
         $collection->save();
 
         return response()->json([
-            'success' => true,
+            'status' => true,
             'message' => 'Status updated successfully.'
         ]);
     }

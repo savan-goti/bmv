@@ -67,7 +67,7 @@ class CategoryController extends Controller
     public function create()
     {
         $categoryTypes = CategoryType::options();
-        return view('owner.categories.create', compact('categoryTypes'));
+        return view('owner.categories.form', compact('categoryTypes'));
     }
 
     public function store(Request $request)
@@ -111,7 +111,7 @@ class CategoryController extends Controller
     public function edit(Category $category)
     {
         $categoryTypes = CategoryType::options();
-        return view('owner.categories.edit', compact('category', 'categoryTypes'));
+        return view('owner.categories.form', compact('category', 'categoryTypes'));
     }
 
     public function update(Request $request, Category $category)
@@ -165,6 +165,6 @@ class CategoryController extends Controller
     public function status(Request $request, Category $category)
     {
         $category->update(['status' => $request->status == 'true' ? Status::Active : Status::Inactive]);
-        return response()->json(['success' => true, 'message' => 'Status updated successfully.']);
+        return $this->sendSuccess('Status updated successfully.');
     }
 }

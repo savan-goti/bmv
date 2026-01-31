@@ -8,9 +8,12 @@ use App\Enums\Status;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Yajra\DataTables\Facades\DataTables;
+use App\Http\Traits\ResponseTrait;
+use Exception;
 
 class BrandController extends Controller
 {
+    use ResponseTrait;
     /**
      * Display a listing of the resource.
      */
@@ -67,7 +70,7 @@ class BrandController extends Controller
      */
     public function create()
     {
-        return view('owner.brands.create');
+        return view('owner.brands.form');
     }
 
     /**
@@ -96,10 +99,9 @@ class BrandController extends Controller
             $data['logo'] = $logoName;
         }
 
-        Brand::create($data);
+        $brand = Brand::create($data);
 
-        return redirect()->route('owner.brands.index')
-            ->with('success', 'Brand created successfully.');
+        return $this->sendResponse('Brand created successfully.', $brand);
     }
 
     /**
@@ -107,7 +109,7 @@ class BrandController extends Controller
      */
     public function edit(Brand $brand)
     {
-        return view('owner.brands.edit', compact('brand'));
+        return view('owner.brands.form', compact('brand'));
     }
 
     /**
@@ -116,11 +118,13 @@ class BrandController extends Controller
     public function update(Request $request, Brand $brand)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:255|unique:brands,name,' . $brand->id,
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'description' => 'nullable|string',
             'website' => 'nullable|url',
             'status' => 'required|in:active,inactive',
+        ], [
+            'name.unique' => 'This Brand name already exists in our records.',
         ]);
 
         $data = $request->all();
@@ -141,8 +145,7 @@ class BrandController extends Controller
 
         $brand->update($data);
 
-        return redirect()->route('owner.brands.index')
-            ->with('success', 'Brand updated successfully.');
+        return $this->sendResponse('Brand updated successfully.', $brand);
     }
 
     /**
@@ -165,10 +168,7 @@ class BrandController extends Controller
 
         $brand->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Brand deleted successfully.'
-        ]);
+        return $this->sendResponse('Brand deleted successfully.', $brand);
     }
 
     /**
@@ -179,9 +179,6 @@ class BrandController extends Controller
         $brand->status = $brand->status == Status::Active ? Status::Inactive : Status::Active;
         $brand->save();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Status updated successfully.'
-        ]);
+        return $this->sendResponse('Status updated successfully.', $brand);
     }
 }

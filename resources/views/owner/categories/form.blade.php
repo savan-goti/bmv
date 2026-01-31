@@ -1,12 +1,15 @@
 @extends('owner.master')
-@section('title','Create Category')
+@section('title', isset($category) ? 'Edit Category' : 'Create Category')
 
 @section('main')
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
             <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                <h4 class="mb-sm-0">Create Category</h4>
+                <h4 class="mb-sm-0">{{ isset($category) ? 'Edit Category' : 'Create Category' }}</h4>
+                <div class="page-title-right">
+                    <a href="{{ route('owner.categories.index') }}" class="btn btn-secondary">Back to List</a>
+                </div>
             </div>
         </div>
     </div>
@@ -15,12 +18,17 @@
         <div class="col-md-8 offset-md-2">
             <div class="card">
                 <div class="card-body">
-                    <form id="categoryCreateForm" method="POST" enctype="multipart/form-data">
+                    <form id="category-form" method="POST" enctype="multipart/form-data">
                         @csrf
+                        @if(isset($category))
+                            @method('PUT')
+                        @endif
+
                         <x-input-field 
                             name="name" 
                             label="Name" 
                             placeholder="Enter category name"
+                            value="{{ old('name', $category->name ?? '') }}"
                             required 
                         />
 
@@ -32,7 +40,9 @@
                             required
                         >
                             @foreach($categoryTypes as $value => $label)
-                                <option value="{{ $value }}">{{ $label }}</option>
+                                <option value="{{ $value }}" {{ old('category_type', isset($category) ? $category->category_type->value : '') == $value ? 'selected' : '' }}>
+                                    {{ $label }}
+                                </option>
                             @endforeach
                         </x-input-field>
 
@@ -42,6 +52,15 @@
                             label="Image" 
                             accept="image/*"
                         />
+                        <small class="text-muted">Accepted formats: JPEG, PNG, JPG, GIF, WEBP (Max: 2MB)</small>
+                        @if(isset($category) && $category->image)
+                            <div class="mt-2">
+                                <img src="{{ asset('uploads/categories/' . $category->image) }}" 
+                                     class="img-thumbnail" 
+                                     style="max-width: 150px;"
+                                     alt="Current Image">
+                            </div>
+                        @endif
 
                         <x-input-field 
                             type="select" 
@@ -49,12 +68,13 @@
                             label="Status" 
                             required
                         >
-                            <option value="active" selected>Active</option>
-                            <option value="inactive">Inactive</option>
+                            <option value="active" {{ old('status', isset($category) ? $category->status->value : 'active') == 'active' ? 'selected' : '' }}>Active</option>
+                            <option value="inactive" {{ old('status', isset($category) ? $category->status->value : 'active') == 'inactive' ? 'selected' : '' }}>Inactive</option>
                         </x-input-field>
 
-                        <button type="submit" class="btn btn-primary" id="categoryCreateButton">
-                            <i class="bx bx-loader spinner me-2" style="display: none" id="categoryCreateBtnSpinner"></i>Create Category
+                        <button type="submit" class="btn btn-primary" id="submit-btn">
+                            {{ isset($category) ? 'Update Category' : 'Create Category' }}
+                            <span class="spinner-border spinner-border-sm d-none" id="submit-btn-spinner" role="status" aria-hidden="true"></span>
                         </button>
                         <a href="{{ route('owner.categories.index') }}" class="btn btn-secondary">Cancel</a>
                     </form>
@@ -68,7 +88,7 @@
 @section('script')
 <script>
     $(document).ready(function() {
-        $("#categoryCreateForm").validate({
+        $("#category-form").validate({
             rules: {
                 name: { required: true },
                 category_type: { required: true },
@@ -85,17 +105,24 @@
             errorClass: "text-danger",
             submitHandler: function (form, e) {
                 e.preventDefault();
+                
+                @if(isset($category))
+                    var url = "{{ route('owner.categories.update', $category->id) }}";
+                @else
+                    var url = "{{ route('owner.categories.store') }}";
+                @endif
+                
                 $.ajax({
-                    url: "{{ route('owner.categories.store') }}",
-                    method: "post",
+                    url: url,
+                    method: "POST",
                     dataType: "json",
                     data: new FormData(form),
                     processData: false,
                     contentType: false,
                     cache: false,
                     beforeSend: function () {
-                        $('#categoryCreateButton').attr('disabled', true);
-                        $("#categoryCreateBtnSpinner").show();
+                        $('#submit-btn').attr('disabled', true);
+                        $("#submit-btn-spinner").removeClass('d-none');
                     },
                     success: function (result) {
                         if(result.status){
@@ -103,26 +130,27 @@
                             setTimeout(function() {
                                 window.location.href = "{{ route('owner.categories.index') }}";
                             }, 1000);
-                        }else{
+                        } else {
                             sendError(result.message);
                         }
                     },
                     error: function (xhr) {
                         let data = xhr.responseJSON;
-                        if (data.hasOwnProperty('error')) {
-                             if (data.error.hasOwnProperty('name')) $("#name-error").html(data.error.name).show();
-                             if (data.error.hasOwnProperty('category_type')) $("#category_type-error").html(data.error.category_type).show();
-                             if (data.error.hasOwnProperty('image')) $("#image-error").html(data.error.image).show();
-                             if (data.error.hasOwnProperty('status')) $("#status-error").html(data.error.status).show();
-                        } else if (data.hasOwnProperty('message')) {
-                            actionError(xhr, data.message)
+                        if (data && data.hasOwnProperty('error')) {
+                            // Display validation errors
+                            $.each(data.error, function(field, messages) {
+                                let errorMsg = Array.isArray(messages) ? messages[0] : messages;
+                                sendError(errorMsg);
+                            });
+                        } else if (data && data.hasOwnProperty('message')) {
+                            sendError(data.message);
                         } else {
-                            actionError(xhr);
+                            sendError('An error occurred. Please try again.');
                         }
                     },
                     complete: function () {
-                        $('#categoryCreateButton').attr('disabled', false);
-                        $("#categoryCreateBtnSpinner").hide();
+                        $('#submit-btn').attr('disabled', false);
+                        $("#submit-btn-spinner").addClass('d-none');
                     },
                 });
             }
