@@ -49,7 +49,7 @@ class HsnSacController extends Controller
 
     public function create()
     {
-        return view('owner.master_data.hsn_sacs.create');
+        return view('owner.master_data.hsn_sacs.form');
     }
 
     public function store(Request $request)
@@ -57,9 +57,11 @@ class HsnSacController extends Controller
         $request->validate([
             'code' => 'required|string|max:20|unique:hsn_sacs,code',
             'description' => 'required|string',
-            'type' => 'required|in:hsn,sac',
+            'type' => 'required|in:hsn,sac,both',
             'gst' => 'required|numeric|min:0|max:100',
             'status' => 'required|in:active,inactive',
+        ], [
+            'code.unique' => 'This HSN/SAC code already exists in our records.',
         ]);
 
         try {
@@ -72,7 +74,7 @@ class HsnSacController extends Controller
 
     public function edit(HsnSac $hsnSac)
     {
-        return view('owner.master_data.hsn_sacs.edit', compact('hsnSac'));
+        return view('owner.master_data.hsn_sacs.form', compact('hsnSac'));
     }
 
     public function update(Request $request, HsnSac $hsnSac)
@@ -80,9 +82,11 @@ class HsnSacController extends Controller
         $request->validate([
             'code' => 'required|string|max:20|unique:hsn_sacs,code,'.$hsnSac->id,
             'description' => 'required|string',
-            'type' => 'required|in:hsn,sac',
+            'type' => 'required|in:hsn,sac,both',
             'gst' => 'required|numeric|min:0|max:100',
             'status' => 'required|in:active,inactive',
+        ], [
+            'code.unique' => 'This HSN/SAC code already exists in our records.',
         ]);
 
         try {
@@ -102,6 +106,6 @@ class HsnSacController extends Controller
     public function status(Request $request, HsnSac $hsnSac)
     {
         $hsnSac->update(['status' => $request->status == 'true' ? Status::Active : Status::Inactive]);
-        return response()->json(['success' => true, 'message' => 'Status updated successfully.']);
+        return $this->sendSuccess('Status updated successfully.');
     }
 }

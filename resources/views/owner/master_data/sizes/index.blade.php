@@ -56,6 +56,10 @@
                 success: function(response) {
                     if (response.status) sendSuccess(response.message);
                     else sendError(response.message);
+                },
+                error: function(response) {
+                    let data = response.responseJSON;
+                    sendError(data.message);
                 }
             });
         });
@@ -81,6 +85,10 @@
                                 sendSuccess(response.message);
                                 setTimeout(function() { table.draw(); }, 1000);
                             } else { sendError(response.message); }
+                        },
+                        error: function(response) {
+                            let data = response.responseJSON;
+                            sendError(data.message);
                         }
                     });
                 }

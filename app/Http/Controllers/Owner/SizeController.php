@@ -46,7 +46,7 @@ class SizeController extends Controller
 
     public function create()
     {
-        return view('owner.master_data.sizes.create');
+        return view('owner.master_data.sizes.form');
     }
 
     public function store(Request $request)
@@ -60,7 +60,7 @@ class SizeController extends Controller
 
         try {
             Size::create($request->all());
-            return $this->sendResponse('Size created successfully.');
+            return $this->sendSuccess('Size created successfully.');
         } catch (Exception $e) {
             return $this->sendError($e->getMessage());
         }
@@ -68,19 +68,21 @@ class SizeController extends Controller
 
     public function edit(Size $size)
     {
-        return view('owner.master_data.sizes.edit', compact('size'));
+        return view('owner.master_data.sizes.form', compact('size'));
     }
 
     public function update(Request $request, Size $size)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:255|unique:sizes,name,' . $size->id,
             'status' => 'required|in:active,inactive',
+        ], [
+            'name.unique' => 'This Size already exists in our records.',
         ]);
 
         try {
             $size->update($request->all());
-            return $this->sendResponse('Size updated successfully.');
+            return $this->sendSuccess('Size updated successfully.');
         } catch (Exception $e) {
             return $this->sendError($e->getMessage());
         }
@@ -95,6 +97,6 @@ class SizeController extends Controller
     public function status(Request $request, Size $size)
     {
         $size->update(['status' => $request->status == 'true' ? Status::Active : Status::Inactive]);
-        return response()->json(['success' => true, 'message' => 'Status updated successfully.']);
+        return $this->sendSuccess('Status updated successfully.');
     }
 }

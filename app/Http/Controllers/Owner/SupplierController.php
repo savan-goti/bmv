@@ -46,7 +46,7 @@ class SupplierController extends Controller
 
     public function create()
     {
-        return view('owner.master_data.suppliers.create');
+        return view('owner.master_data.suppliers.form');
     }
 
     public function store(Request $request)
@@ -63,7 +63,7 @@ class SupplierController extends Controller
 
         try {
             Supplier::create($request->all());
-            return $this->sendResponse('Supplier created successfully.');
+            return $this->sendSuccess('Supplier created successfully.');
         } catch (Exception $e) {
             return $this->sendError($e->getMessage());
         }
@@ -71,22 +71,24 @@ class SupplierController extends Controller
 
     public function edit(Supplier $supplier)
     {
-        return view('owner.master_data.suppliers.edit', compact('supplier'));
+        return view('owner.master_data.suppliers.form', compact('supplier'));
     }
 
     public function update(Request $request, Supplier $supplier)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:255|unique:suppliers,name,' . $supplier->id,
             'email' => 'nullable|email|max:255',
             'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string',
             'status' => 'required|in:active,inactive',
+        ], [
+            'name.unique' => 'This Supplier name already exists in our records.',
         ]);
 
         try {
             $supplier->update($request->all());
-            return $this->sendResponse('Supplier updated successfully.');
+            return $this->sendSuccess('Supplier updated successfully.');
         } catch (Exception $e) {
             return $this->sendError($e->getMessage());
         }
@@ -101,6 +103,6 @@ class SupplierController extends Controller
     public function status(Request $request, Supplier $supplier)
     {
         $supplier->update(['status' => $request->status == 'true' ? Status::Active : Status::Inactive]);
-        return response()->json(['success' => true, 'message' => 'Status updated successfully.']);
+        return $this->sendSuccess('Status updated successfully.');
     }
 }

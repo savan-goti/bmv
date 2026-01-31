@@ -62,10 +62,14 @@
                 },
                 success: function(response) {
                     if (response.status) {
-                        sendToast(response.message, 'success');
+                        sendSuccess(response.message);
                     } else {
-                        sendToast(response.message, 'danger');
+                        sendError(response.message);
                     }
+                },
+                error: function(response) {
+                    let data = response.responseJSON;
+                    sendError(data.message);
                 }
             });
         });
@@ -93,6 +97,10 @@
                                 sendSuccess(response.message);
                                 setTimeout(function() { table.draw(); }, 1000);
                             } else { sendError(response.message); }
+                        },
+                        error: function(response) {
+                            let data = response.responseJSON;
+                            sendError(data.message);
                         }
                     });
                 }

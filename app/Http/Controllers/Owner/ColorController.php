@@ -52,7 +52,7 @@ class ColorController extends Controller
 
     public function create()
     {
-        return view('owner.master_data.colors.create');
+        return view('owner.master_data.colors.form');
     }
 
     public function store(Request $request)
@@ -67,7 +67,7 @@ class ColorController extends Controller
 
         try {
             Color::create($request->all());
-            return $this->sendResponse('Color created successfully.');
+            return $this->sendSuccess('Color created successfully.');
         } catch (Exception $e) {
             return $this->sendError($e->getMessage());
         }
@@ -75,20 +75,22 @@ class ColorController extends Controller
 
     public function edit(Color $color)
     {
-        return view('owner.master_data.colors.edit', compact('color'));
+        return view('owner.master_data.colors.form', compact('color'));
     }
 
     public function update(Request $request, Color $color)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:255|unique:colors,name,' . $color->id,
             'color_code' => 'required|string|max:20',
             'status' => 'required|in:active,inactive',
+        ], [
+            'name.unique' => 'This Color already exists in our records.',
         ]);
 
         try {
             $color->update($request->all());
-            return $this->sendResponse('Color updated successfully.');
+            return $this->sendSuccess('Color updated successfully.');
         } catch (Exception $e) {
             return $this->sendError($e->getMessage());
         }
@@ -103,6 +105,6 @@ class ColorController extends Controller
     public function status(Request $request, Color $color)
     {
         $color->update(['status' => $request->status == 'true' ? Status::Active : Status::Inactive]);
-        return response()->json(['success' => true, 'message' => 'Status updated successfully.']);
+        return $this->sendSuccess('Status updated successfully.');
     }
 }

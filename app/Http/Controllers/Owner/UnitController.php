@@ -46,7 +46,7 @@ class UnitController extends Controller
 
     public function create()
     {
-        return view('owner.master_data.units.create');
+        return view('owner.master_data.units.form');
     }
 
     public function store(Request $request)
@@ -54,7 +54,7 @@ class UnitController extends Controller
         $request->validate([
             'name' => 'required|string|max:255|unique:units,name',
             'short_name' => 'required|string|max:10',
-            'category' => 'required|in:product,service',
+            'category' => 'required|in:product,service,both',
             'status' => 'required|in:active,inactive',
         ], [
             'name.unique' => 'This Unit name already exists in our records.',
@@ -70,16 +70,18 @@ class UnitController extends Controller
 
     public function edit(Unit $unit)
     {
-        return view('owner.master_data.units.edit', compact('unit'));
+        return view('owner.master_data.units.form', compact('unit'));
     }
 
     public function update(Request $request, Unit $unit)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:255|unique:units,name,' . $unit->id,
             'short_name' => 'required|string|max:10',
-            'category' => 'required|in:product,service',
+            'category' => 'required|in:product,service,both',
             'status' => 'required|in:active,inactive',
+        ], [
+            'name.unique' => 'This Unit name already exists in our records.',
         ]);
 
         try {
@@ -99,6 +101,6 @@ class UnitController extends Controller
     public function status(Request $request, Unit $unit)
     {
         $unit->update(['status' => $request->status == 'true' ? Status::Active : Status::Inactive]);
-        return response()->json(['success' => true, 'message' => 'Status updated successfully.']);
+        return $this->sendSuccess('Status updated successfully.');
     }
 }
